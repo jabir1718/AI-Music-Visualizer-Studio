@@ -10,6 +10,9 @@ class FakeSoundTouchNode {
   connect(target){this.connections.push(target);}
   disconnect(){this.connections=[];}
 }
+class FakeFormantNode extends FakeSoundTouchNode {
+  constructor(){super();this.formantStrength={value:1,setTargetAtTime(v){this.value=v;}};}
+}
 class FakeAudioContext {
   constructor() { this.currentTime = 0; this.sampleRate = 48000; this.state = 'running'; this.destination = node(); }
   createAnalyser() { return node({ fftSize: 2048, smoothingTimeConstant: 0, frequencyBinCount: 1024, getByteFrequencyData(a) { a.fill(0); }, getByteTimeDomainData(a) { a.fill(128); } }); }
@@ -36,6 +39,7 @@ const mainAudio = { volume: .85, currentTime: 2, duration: 30, playbackRate: 1 }
   await engine.connect();
   assert.ok(engine.mainSoloGain, 'main solo gain node must be initialized');
   await assert.rejects(engine.loadSoundTouch(),/AudioWorklet support/,'unsupported browsers must receive a clear pitch-preserving error');
+  await assert.rejects(engine.loadFormantCorrection(),/AudioWorklet support/,'unsupported browsers must receive a clear formant-correction error');
   assert.ok(engine.mainPanner.connections.includes(engine.mainSoloGain), 'main effects chain must route through solo gain');
   assert.ok(engine.gain.connections.includes(engine.mainLow), 'master gain must feed the main EQ chain');
   assert.equal(mainAudio.volume, 1, 'element volume must not double-attenuate master gain');
@@ -55,7 +59,7 @@ const mainAudio = { volume: .85, currentTime: 2, duration: 30, playbackRate: 1 }
   engine.setMainDistortion(0);assert.equal(engine.mainShaper.curve,null,'zero distortion should bypass waveshaper');
   const layerAudio = { playbackRate: 1, pause() {} };
   engine.addLayer('voice', layerAudio, .7, {});
-  engine.SoundTouchNode=FakeSoundTouchNode;engine.soundTouchRegistered=true;
+  engine.SoundTouchNode=FakeSoundTouchNode;engine.soundTouchRegistered=true;engine.FormantCorrectionNode=FakeFormantNode;engine.formantRegistered=true;
   await engine.enableLayerPitchPreserving('voice',5,1.1);
   assert.equal(engine.layers.get('voice').pitchNode.pitchSemitones.value,5,'pitch preserving node should receive semitone value');
   assert.equal(engine.layers.get('voice').pitchNode.playbackRate.value,1.1,'worklet playback rate must mirror source speed');
@@ -66,6 +70,12 @@ const mainAudio = { volume: .85, currentTime: 2, duration: 30, playbackRate: 1 }
   assert.equal(engine.layers.get('voice').pitchNode.pitchSemitones.value,-3);
   assert.equal(engine.layers.get('voice').pitchNode.pitchSemitones.value,-3);
   assert.equal(engine.layers.get('voice').pitchNode.playbackRate.value,.9);
+  await engine.enableLayerFormantCorrection('voice',4,1.1,.85);
+  assert.equal(engine.layers.get('voice').pitchNodeType,'formant','voice layer should switch to formant-correction processor');
+  assert.equal(engine.layers.get('voice').pitchNode.formantStrength.value,.85,'formant strength should be applied');
+  engine.setLayerFormantStrength('voice',.5);assert.equal(engine.layers.get('voice').pitchNode.formantStrength.value,.5);
+  await engine.enableLayerPitchPreserving('voice',-2,.9);
+  assert.equal(engine.layers.get('voice').pitchNodeType,'soundtouch','formant processor should switch back to standard pitch processor');
   engine.disableLayerPitchPreserving('voice',1.25);
   assert.equal(engine.layers.get('voice').pitchNode,null,'disable should remove pitch processor');
   assert.ok(engine.layers.get('voice').high.connections.includes(engine.layers.get('voice').pan),'disable should restore direct mixer route');
