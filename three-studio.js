@@ -69,7 +69,7 @@ function mount(host,options={}){
   const shapeName=SHAPES.includes(shape)?shape:DEFAULTS.shape;config.shape=shapeName;
   let geom;
   if(shapeName==='text'){
-   await loadTextTools();geom=new TextGeometryClass(config.text||'WAVEFORGE',{font:loadedFont,size:.72,height:config.textDepth,curveSegments:10,bevelEnabled:true,bevelThickness:.018,bevelSize:.012,bevelSegments:3});geom.computeBoundingBox();geom.center();
+   await loadTextTools();geom=new TextGeometryClass(config.text||'WAVEFORGE',{font:loadedFont,size:.72,depth:config.textDepth,curveSegments:10,bevelEnabled:true,bevelThickness:.018,bevelSize:.012,bevelSegments:3});geom.computeBoundingBox();geom.center();
   }else geom=geometry(THREE,shapeName);
   if(config.shape!==shapeName){geom.dispose();return;}
   if(mesh){scene.remove(mesh);mesh.geometry.dispose();mesh.material.dispose();}
