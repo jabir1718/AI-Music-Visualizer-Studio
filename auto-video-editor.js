@@ -87,16 +87,16 @@
   if(photos.length){const target=musicDuration>0?musicDuration:Math.max(photos.length*3,3);photos.forEach(p=>p.virtualDuration=target/photos.length);}
   const sources=[...videos,...photos];if(preset.mode==='round')sources.sort((a,b)=>a.id.localeCompare(b.id));
   const cursors=sources.map(()=>0),out=[];let active=0,guard=0;
-  const totalSource=sources.reduce((n,a)=>n+durationOf(a),0),targetDuration=musicDuration>0?Math.max(musicDuration,videos.length?Math.min(totalSource,musicDuration):musicDuration):totalSource;
-  while(guard++<1800&&out.length<MAX_SEGMENTS){
+  const totalSource=sources.reduce((n,a)=>n+durationOf(a),0),videoDuration=videos.reduce((n,a)=>n+durationOf(a),0),targetDuration=musicDuration>0?(photos.length?musicDuration:Math.min(musicDuration,videoDuration)):totalSource;
+  while(guard++<1800&&out.length<MAX_SEGMENTS&&totalDurationFor(out)<targetDuration-.1){
    let found=-1;for(let k=0;k<sources.length;k++){const ix=(active+k)%sources.length;if(cursors[ix]<durationOf(sources[ix])-.12){found=ix;break;}}
    if(found<0)break;
-   const source=sources[found],start=cursors[found],remaining=durationOf(source)-start,end=Math.min(durationOf(source),start+cutLength);
+   const source=sources[found],start=cursors[found],remaining=durationOf(source)-start,remainingTimeline=targetDuration-totalDurationFor(out),end=Math.min(durationOf(source),start+cutLength,start+remainingTimeline);
    if(end-start>=.2){out.push({id:id(),assetId:source.id,sourceStart:start,sourceEnd:end,timelineStart:0,rate:1});cursors[found]=end;}else cursors[found]=durationOf(source);
    active=preset.mode==='sequence'?(found+1)%sources.length:(found+1)%sources.length;
   }
   if(!out.length)throw new Error('No usable media segments were found.');
-  if(photos.length&&musicDuration>0&&totalSource<musicDuration){let i=0;while(totalDurationFor(out)<musicDuration-.15&&out.length<MAX_SEGMENTS){const p=photos[i++%photos.length],start=0,end=Math.min(durationOf(p),cutLength);out.push({id:id(),assetId:p.id,sourceStart:start,sourceEnd:end,timelineStart:0,rate:1});}}
+  if(photos.length&&musicDuration>0&&totalDurationFor(out)<targetDuration-.15){let i=0;while(totalDurationFor(out)<targetDuration-.15&&out.length<MAX_SEGMENTS){const p=photos[i++%photos.length],start=0,end=Math.min(durationOf(p),cutLength,targetDuration-totalDurationFor(out));out.push({id:id(),assetId:p.id,sourceStart:start,sourceEnd:end,timelineStart:0,rate:1});}}
   segments=out;relayout();selected=segments[0].id;render();
   updateStatus(preset.label+' draft · '+bpm+' BPM · '+out.length+' editable cuts. Review before export.');
   persist();return{count:segments.length,duration:totalDuration(),cutLength,bpm,style,photoCount:photos.length,videoCount:videos.length};
@@ -104,7 +104,7 @@
  function totalDurationFor(list){return list.reduce((n,s)=>n+(s.sourceEnd-s.sourceStart)/Math.max(.1,s.rate||1),0);}
  function sync(time,isPlaying){
   const active=segments.find(s=>time>=s.timelineStart&&time<s.timelineStart+(s.sourceEnd-s.sourceStart)/Math.max(.1,s.rate||1));
-  assets.forEach(asset=>{if(asset.kind==='video'&&(!active||asset.id!==active.id)&&!asset.media.paused)asset.media.pause();});
+  assets.forEach(asset=>{if(asset.kind==='video'&&(!active||asset.id!==active.assetId)&&!asset.media.paused)asset.media.pause();});
   if(!active)return null;const asset=assets.get(active.assetId);if(!asset)return null;
   if(isPhoto(asset))return asset.media;
   const video=asset.media,expected=active.sourceStart+(time-active.timelineStart)*(active.rate||1);
