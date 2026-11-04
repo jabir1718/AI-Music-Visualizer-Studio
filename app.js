@@ -182,7 +182,8 @@ function initMixerUI(){
  '<button type="button" class="music-category" data-category="Character">Character sounds</button>'+
  '<button type="button" class="music-category" data-category="Voice FX">Voice FX</button>'+
  '<button type="button" class="music-category" data-category="Separation">AI separation</button>'+
- '<button type="button" class="music-category" data-category="Cleanup">Noise cleanup</button></div>'+
+ '<button type="button" class="music-category" data-category="Cleanup">Noise cleanup</button>'+
+ '<button type="button" class="music-category" data-category="Background music">Background music</button></div>'+
  '<div class="music-category-detail" id="musicCategoryDetail" aria-live="polite"></div>'+
  '<div class="bpm-tool"><div><b>Tempo / BPM analyser</b><small>Detect or tap tempo, then fine-tune the visualizer beat grid and subdivisions.</small></div><div class="bpm-tool-actions"><button class="btn small" id="bpmAnalyzeBtn" type="button">Detect BPM</button><button class="btn small" id="tapTempoBtn" type="button">Tap tempo · 0</button><button class="btn small" id="clearTapTempoBtn" type="button">Clear</button></div><div class="bpm-grid-controls"><label>Grid BPM<input id="gridBpmInput" type="number" min="30" max="240" step=".1" placeholder="Auto / tap"></label><label>Beat offset (seconds)<input id="gridOffsetInput" type="number" min="0" max="3600" step=".01" value="0"></label><label>Pulse division<select id="gridSubdivision"><option value="1">Quarter notes · 1×</option><option value="2">Eighth notes · 2×</option><option value="4">Sixteenth notes · 4×</option><option value="8">Thirty-second notes · 8×</option></select></label><button class="btn small" id="applyBeatGridBtn" type="button">Apply beat grid</button></div><output id="bpmStatus" aria-live="polite">No analysis yet</output></div>'+
  '<div class="mixer-add"><label>Layer source<select id="mixerRole"><option>Voice</option><option>Background vocal</option><option>Ad-lib</option><option>Humming</option><option>Harmony</option><option>Bass stem</option><option>Drums</option><option>Piano</option><option>Guitar</option><option>Instrumental</option><option>Sound effect</option><option>Voice FX</option><option>Other</option></select></label><label class="mixer-file">＋ Import audio<input id="mixerFile" type="file" accept="audio/*" hidden></label><button class="btn small" id="mixerAddBtn" type="button">Add to track</button></div>'+
@@ -242,14 +243,29 @@ function selectMusicCategory(category){
   'Character':{role:'Voice FX',title:'Character sound library',desc:'Search open character-style laughs and vocal clips. These are source recordings, not generated voice transformations.',available:true},
   'Voice FX':{role:'Voice FX',title:'Voice changer & character effects',desc:'Each imported layer now has Natural, Telephone, Radio, Monster, Chipmunk, Robot and Alien styles with independent EQ, echo, reverb and distortion. Pitch-based styles also change speed; formant-preserving voice conversion is not included.',available:true},
   'Separation':{role:'Instrumental',title:'AI vocal & instrument separation',desc:'This operation is planned but not implemented yet. The current app cannot extract vocals or instruments from a mixed MP3 automatically.',available:false},
-  'Cleanup':{role:'Voice',title:'Noise cleanup',desc:'Run local spectral noise reduction on an imported voice clip using a noise-only sample. The original stays untouched; AI source separation is still separate and not implemented.',available:true}
+  'Cleanup':{role:'Voice',title:'Noise cleanup',desc:'Run local spectral noise reduction on an imported voice clip using a noise-only sample. The original stays untouched; AI source separation is still separate and not implemented.',available:true},
+  'Background music':{role:'Other',title:'Background music master',desc:'Adjust the original song independently from imported voice and instrument layers. Use the dedicated master volume, pitch, EQ, pan and effects controls below.',available:false}
  };
  const item=config[category]||config.Voice;
  role.value=item.role;
- detail.innerHTML='<div class="music-detail-title"><div><span class="eyebrow">SELECTED WORKSPACE</span><h3>'+item.title+'</h3></div><span class="music-detail-state">'+(item.available?'IMPORT READY':'NOT IMPLEMENTED')+'</span></div><p>'+item.desc+'</p>';
+ detail.innerHTML='<div class="music-detail-title"><div><span class="eyebrow">SELECTED WORKSPACE</span><h3>'+item.title+'</h3></div><span class="music-detail-state">'+(item.available?'IMPORT READY':category==='Background music'?'MASTER CONTROLS':'NOT IMPLEMENTED')+'</span></div><p class="music-detail-desc">'+item.desc+'</p>';
  add.disabled=!item.available;file.disabled=!item.available;
  if(item.available&&window.WaveForgeSoundLibrary&&['Sound effect','Engine','Character'].includes(category)){const query=category==='Engine'?'race car engine':category==='Character'?'evil laugh cartoon':'sound effect';window.WaveForgeSoundLibrary.mount(detail,query,file=>addMixerLayer(file,item.role));}
  if(category==='Cleanup'&&window.WaveForgeCleanup)window.WaveForgeCleanup.mount(detail,{onLayer:file=>addMixerLayer(file,'Voice')});
+ if(category==='Instruments'){
+  const quick=document.createElement('div');quick.className='instrument-source-picker';
+  const heading=document.createElement('b');heading.textContent='Choose an instrument stem';quick.append(heading);
+  [['Bass stem','Bass'],['Drums','Drums'],['Piano','Piano'],['Guitar','Guitar'],['Instrumental','Full instrumental']].forEach(([value,label])=>{
+   const button=document.createElement('button');button.type='button';button.className='btn small';button.textContent=label;button.setAttribute('aria-pressed',String(role.value===value));
+   button.addEventListener('click',()=>{role.value=value;quick.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));detail.querySelector('.music-detail-desc')?.setAttribute('data-selected',label);});
+   quick.append(button);
+  });
+  detail.append(quick);
+ }
+ if(category==='Background music'){
+  const note=document.createElement('p');note.className='music-master-link';note.textContent='Master controls are in the Background music effects section below.';detail.append(note);
+  document.getElementById('mainEffectsReset')?.scrollIntoView({block:'center',behavior:'smooth'});
+ }
  const recordRoles={'Voice':'Voice','Ad-lib':'Ad-lib','Humming':'Humming','Harmony':'Harmony','Voice FX':'Voice FX'};if(recordRoles[category]&&window.WaveForgeRecorder)voiceRecorder=window.WaveForgeRecorder.mount(detail,recordRoles[category],file=>addMixerLayer(file,recordRoles[category]));
  renderMixerLayers();
 }
