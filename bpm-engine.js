@@ -29,4 +29,5 @@ function fromTaps(times){if(!Array.isArray(times)||times.length<3)throw new Erro
 function gridStepSeconds(bpm,subdivision=1){const value=Number(bpm),division=Number(subdivision);if(!Number.isFinite(value)||value<30||value>240||![1,2,4,8].includes(division))return null;return 60/(value*division);}
 function gridIndexAt(time,bpm,offset=0,subdivision=1){const step=gridStepSeconds(bpm,subdivision),t=Number(time),start=Number(offset);if(step===null||!Number.isFinite(t)||!Number.isFinite(start)||t<start)return-1;return Math.floor((t-start)/step+1e-9);}
 window.WaveForgeBPM={detect,fromTaps,gridStepSeconds,gridIndexAt};
+if(typeof module!=='undefined'&&module.exports)module.exports=window.WaveForgeBPM;
 })();
