@@ -48,31 +48,33 @@
       sampling_rate:16000,
       chunk_length_s:30,
       stride_length_s:5,
-      return_timestamps:true
+      return_timestamps:'word'
     });
-    let chunks=(result&&result.chunks)||[];
-    const lines=[];
+    const chunks=(result&&result.chunks)||[];
+    const tokens=[];
     if(chunks.length){
-      chunks.forEach((chunk)=>{
-        const text=(chunk.text||'').trim();
+      chunks.forEach((chunk,index)=>{
+        const parts=(chunk.text||'').trim().split(' ').filter(Boolean);
         const ts=chunk.timestamp||[];
-        if(!text)return;
-        const start=Number.isFinite(ts[0])?ts[0]:0;
-        const end=Number.isFinite(ts[1])?ts[1]:Math.min(decoded.duration,start+5);
-        const words=text.split(' ').filter(Boolean);
-        const groupSize=6;
-        const groups=[];
-        for(let i=0;i<words.length;i+=groupSize)groups.push(words.slice(i,i+groupSize).join(' '));
-        const span=Math.max(.8,end-start);
-        groups.forEach((piece,i)=>{
-          const a=start+span*i/groups.length,b=start+span*(i+1)/groups.length;
-          lines.push({start:a,end:Math.max(a+.55,b),text:piece});
+        const fallbackStart=decoded.duration*index/chunks.length;
+        const fallbackEnd=decoded.duration*(index+1)/chunks.length;
+        const start=Number.isFinite(ts[0])?ts[0]:fallbackStart;
+        const end=Number.isFinite(ts[1])?ts[1]:fallbackEnd;
+        parts.forEach((word,i)=>{
+          const a=start+(end-start)*i/Math.max(1,parts.length);
+          const b=start+(end-start)*(i+1)/Math.max(1,parts.length);
+          tokens.push({text:word,start:a,end:Math.max(a+.08,b)});
         });
       });
     }else if(result&&result.text){
-      const words=result.text.trim().split(' ').filter(Boolean),groups=[];
-      for(let i=0;i<words.length;i+=6)groups.push(words.slice(i,i+6).join(' '));
-      groups.forEach((piece,i)=>lines.push({start:decoded.duration*i/groups.length,end:decoded.duration*(i+1)/groups.length,text:piece}));
+      const words=result.text.trim().split(' ').filter(Boolean);
+      words.forEach((word,i)=>tokens.push({text:word,start:decoded.duration*i/words.length,end:decoded.duration*(i+1)/words.length}));
+    }
+    for(let i=0;i<tokens.length;i+=5){
+      const group=tokens.slice(i,i+5);
+      if(!group.length)continue;
+      const start=group[0].start,end=group[group.length-1].end;
+      lines.push({start,end:Math.max(start+.5,end),text:group.map(x=>x.text).join(' '),words:group});
     }
     if(onProgress)onProgress({status:'Lyrics ready — review the words and timing',progress:100});
     return lines;
