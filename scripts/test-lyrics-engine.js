@@ -13,8 +13,8 @@ assert.deepStrictEqual(tokens.slice(0,2).map(x=>[x.text,x.start,x.end]),[
  ['Hello',0.12,0.48],['world!',0.51,0.94]
 ]);
 assert.strictEqual(tokens[2].start,1.1);
-assert.strictEqual(tokens[2].end,1.45);
-assert.strictEqual(tokens[3].start,1.45);
+assert(Math.abs(tokens[2].end-1.45)<1e-9);
+assert(Math.abs(tokens[3].start-1.45)<1e-9);
 assert.strictEqual(tokens[3].end,1.8);
 assert.strictEqual(tokens[0].source,'whisper-word-timestamp');
 const lines=lyrics.groupTokens(tokens,3);
