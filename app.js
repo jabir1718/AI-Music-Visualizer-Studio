@@ -99,7 +99,7 @@ function draw(){
  raf=requestAnimationFrame(draw);
 }
 function startDraw(){if(!raf)draw();}
-async function ensureEngine(){if(!engine)engine=new AudioEngine(audio);await engine.connect();await engine.resume();engine.setVolume(Number($('volume').value));mixerLayers.forEach(layer=>{if(!layer.connected){const soloActive=mixerLayers.some(x=>x.solo);engine.addLayer(layer.id,layer.audio,(!layer.muted&&(!soloActive||layer.solo))?layer.volume:0,layer);layer.connected=true;}});engine.setMainSoloMute(mixerLayers.some(x=>x.solo));return engine;}
+async function ensureEngine(){if(!engine)engine=new AudioEngine(audio);await engine.connect();await engine.resume();engine.setVolume(Number($('volume').value));applyMainEffects();mixerLayers.forEach(layer=>{if(!layer.connected){const soloActive=mixerLayers.some(x=>x.solo);engine.addLayer(layer.id,layer.audio,(!layer.muted&&(!soloActive||layer.solo))?layer.volume:0,layer);layer.connected=true;}});engine.setMainSoloMute(mixerLayers.some(x=>x.solo));return engine;}
 
 let mixerLayers=[],mixerPanel=null,mixerCategory='Voice',savedProjectData={},mediaDbPromise=null;
 function syncMixerLayers(){
@@ -115,6 +115,8 @@ function syncMixerLayers(){
   if(layer.audio.paused)layer.audio.play().catch(()=>{});
  });
 }
+function readMainEffects(){const value=(id,fallback=0)=>$(id)?Number($(id).value):fallback;return{bass:value('mainBass'),treble:value('mainTreble'),pan:value('mainPan'),echo:value('mainEcho'),reverb:value('mainReverb'),distortion:value('mainDistortion')};}
+function applyMainEffects(){if(!engine||!engine.ready)return;const f=readMainEffects();engine.setMainEQ(f.bass,f.treble);engine.setMainPan(f.pan/100);engine.setMainDelay(f.echo);engine.setMainReverb(f.reverb);engine.setMainDistortion(f.distortion);}
 function initMixerUI(){
  const host=$('audioPanel'),audioEl=$('audio');
  mixerPanel=document.createElement('section');mixerPanel.className='mixer-panel music-studio';
@@ -133,13 +135,24 @@ function initMixerUI(){
  '<div class="bpm-tool"><div><b>Tempo / BPM analyser</b><small>Offline estimate from your imported song. Results are approximate.</small></div><button class="btn small" id="bpmAnalyzeBtn" type="button">Detect BPM</button><output id="bpmStatus" aria-live="polite">No analysis yet</output></div>'+
  '<div class="mixer-add"><label>Layer source<select id="mixerRole"><option>Voice</option><option>Background vocal</option><option>Ad-lib</option><option>Humming</option><option>Harmony</option><option>Bass stem</option><option>Drums</option><option>Piano</option><option>Guitar</option><option>Instrumental</option><option>Sound effect</option><option>Voice FX</option><option>Other</option></select></label><label class="mixer-file">＋ Import audio<input id="mixerFile" type="file" accept="audio/*" hidden></label><button class="btn small" id="mixerAddBtn" type="button">Add to track</button></div>'+
  '<div class="mixer-main-pitch"><label>Background music pitch <input id="mainPitch" type="range" min="-12" max="12" step="1" value="0"></label><span id="mainPitchValue">0 semitones</span></div>'+
+ '<section class="main-effects-panel"><div class="mixer-heading"><div><b>Background music effects</b><small>These controls affect only the original song, not imported voice/instrument layers.</small></div></div><div class="main-effects-grid">'+
+ '<label>Bass <output id="mainBassValue">0 dB</output><input id="mainBass" type="range" min="-12" max="12" value="0"></label>'+
+ '<label>Treble <output id="mainTrebleValue">0 dB</output><input id="mainTreble" type="range" min="-12" max="12" value="0"></label>'+
+ '<label>Pan <output id="mainPanValue">Center</output><input id="mainPan" type="range" min="-100" max="100" value="0"></label>'+
+ '<label>Echo <output id="mainEchoValue">0%</output><input id="mainEcho" type="range" min="0" max="100" value="0"></label>'+
+ '<label>Reverb <output id="mainReverbValue">0%</output><input id="mainReverb" type="range" min="0" max="100" value="0"></label>'+
+ '<label>Distortion <output id="mainDistortionValue">0%</output><input id="mainDistortion" type="range" min="0" max="100" value="0"></label></div><button type="button" class="btn small" id="mainEffectsReset">Reset music effects</button></section>'+
  '<div id="mixerList" class="mixer-list"><p class="hint">No extra layers yet. Your original song remains the background music.</p></div>'+
  '<p class="hint mixer-footnote">Imported layers are independently adjustable. A mixed MP3 does not contain separately editable stems automatically. AI separation and generated vocal effects are not connected yet.</p>';
  host.insertBefore(mixerPanel,audioEl);
- try{const saved=JSON.parse(localStorage.getItem('waveforge-v1')||'{}');if(saved.mainPitch!==undefined){$('mainPitch').value=saved.mainPitch;audio.playbackRate=Math.pow(2,Number(saved.mainPitch)/12);audio.preservesPitch=false;$('mainPitchValue').textContent=(Number(saved.mainPitch)>0?'+':'')+saved.mainPitch+' semitones';}}catch(e){}
+ try{const saved=JSON.parse(localStorage.getItem('waveforge-v1')||'{}');if(saved.mainPitch!==undefined){$('mainPitch').value=saved.mainPitch;audio.playbackRate=Math.pow(2,Number(saved.mainPitch)/12);audio.preservesPitch=false;$('mainPitchValue').textContent=(Number(saved.mainPitch)>0?'+':'')+saved.mainPitch+' semitones';}const fx=saved.mainEffects||{};Object.keys(fx).forEach(key=>{const input=$('main'+key.charAt(0).toUpperCase()+key.slice(1));if(input)input.value=fx[key];});}catch(e){}
  const file=$('mixerFile');
  $('mixerAddBtn').onclick=()=>file.click();
  file.onchange=e=>{const f=e.target.files&&e.target.files[0];if(f)addMixerLayer(f,$('mixerRole').value);file.value='';};
+ const effectNames=['bass','treble','pan','echo','reverb','distortion'];
+ const updateMainEffectLabels=()=>{const f=readMainEffects();$('mainBassValue').textContent=f.bass+' dB';$('mainTrebleValue').textContent=f.treble+' dB';$('mainPanValue').textContent=f.pan===0?'Center':(f.pan<0?'L ':'R ')+Math.abs(f.pan);$('mainEchoValue').textContent=f.echo+'%';$('mainReverbValue').textContent=f.reverb+'%';$('mainDistortionValue').textContent=f.distortion+'%';};
+ effectNames.forEach(key=>$('main'+key.charAt(0).toUpperCase()+key.slice(1)).addEventListener('input',()=>{updateMainEffectLabels();applyMainEffects();saveSettings();}));
+ $('mainEffectsReset').onclick=()=>{effectNames.forEach(key=>$('main'+key.charAt(0).toUpperCase()+key.slice(1)).value=0);updateMainEffectLabels();applyMainEffects();saveSettings();};updateMainEffectLabels();
  $('mainPitch').oninput=e=>{
   const semitones=Number(e.target.value),rate=Math.pow(2,semitones/12);
   audio.playbackRate=rate;audio.preservesPitch=false;
@@ -301,7 +314,7 @@ async function restoreSavedMedia(){
 }
 
 function saveSettings(){
- const data={mainPitch:$('mainPitch')?$('mainPitch').value:0,layers:mixerLayers.map(l=>({id:l.id,role:l.role,volume:l.volume,rate:l.rate,pitch:l.pitch,offset:l.offset,muted:l.muted,solo:l.solo,pan:l.pan,bass:l.bass,treble:l.treble,delay:l.delay,reverb:l.reverb,preset:l.preset||'clean'})),title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,lyricPosition:$('lyricPosition').value,positions,objectSettings,filterPreset:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterPreset:'f01',filterIntensity:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterIntensity:100,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
+ const data={mainPitch:$('mainPitch')?$('mainPitch').value:0,mainEffects:readMainEffects(),layers:mixerLayers.map(l=>({id:l.id,role:l.role,volume:l.volume,rate:l.rate,pitch:l.pitch,offset:l.offset,muted:l.muted,solo:l.solo,pan:l.pan,bass:l.bass,treble:l.treble,delay:l.delay,reverb:l.reverb,preset:l.preset||'clean'})),title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,lyricPosition:$('lyricPosition').value,positions,objectSettings,filterPreset:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterPreset:'f01',filterIntensity:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterIntensity:100,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
  try{localStorage.setItem('waveforge-v1',JSON.stringify(data));setStatus('Saved locally');}catch(e){setStatus('Ready');}
 }
 function loadSettings(){
