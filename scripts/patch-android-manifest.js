@@ -12,5 +12,5 @@ function patchManifest(filePath=path.join(process.cwd(),'android','app','src','m
  if(updated!==original)fs.writeFileSync(filePath,updated,'utf8');
  return updated;
 }
-if(require.main===module){try{patchManifest();process.stdout.write('Android microphone permission is present.\\n');}catch(error){process.stderr.write(error.message+'\\n');process.exitCode=1;}}
+if(require.main===module){try{patchManifest();process.stdout.write('Android microphone permission is present.\n');}catch(error){process.stderr.write(error.message+'\n');process.exitCode=1;}}
 module.exports={addMicrophonePermission,patchManifest};
