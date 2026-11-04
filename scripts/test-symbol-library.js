@@ -8,5 +8,5 @@ assert.strictEqual(symbols.normalizeEntry({hexcode:'not-hex',annotation:'Bad'}),
 assert.strictEqual(symbols.filterEntries([item], 'music').length,1);
 assert.strictEqual(symbols.filterEntries([item], 'camera').length,0);
 assert.strictEqual(symbols.filterEntries([item], '', 'Activities').length,1);
-assert.match(symbols.svgUrl('1F3B5'),/openmoji@17\\.0\\.0\\/color\\/svg\\/1F3B5\\.svg$/);
+assert(symbols.svgUrl('1F3B5').includes('openmoji@17.0.0/color/svg/1F3B5.svg'));
 console.log('OpenMoji symbol library tests passed.');
