@@ -126,7 +126,7 @@ Last source audit: 2026-11-05 (after connecting image-search and OpenMoji import
 
 - Connected the image-search result actions to a shared editor import bridge. A selected image can be applied as the background, used as the logo, placed as an artwork overlay, or placed alongside the title as a text-decoration overlay.
 - Added the same four destinations to the on-demand OpenMoji picker. Selected SVG symbols can be imported as a background, logo, artwork overlay or text-decoration overlay.
-- Artwork and text-decoration currently use the existing independently transformable logo-image object; they are not yet a multi-image layer stack. A later layer-stack implementation is needed to keep multiple artwork assets independently editable at the same time.
+- Artwork and text-decoration now support an independent 12-image layer stack with separate position, scale, opacity, rotation, visibility and removal controls. Layer metadata and media are saved locally and included in portable project packaging. Automated layer tests passed in GitHub Actions run #211; latest app build is tracked separately.
 - Added scripts/test-asset-routing.js and included it in npm test. GitHub Actions run #204 passed JavaScript syntax validation, all npm tests and web-asset packaging; Android Gradle build was in progress at the time of this source update. APK artifact upload and physical-device testing must be confirmed separately.
 
 
