@@ -24,6 +24,7 @@ class FakeAudioContext {
   createDelay() { return node({ delayTime: { value: 0 } }); }
   createConvolver() { return node({ buffer: null }); }
   createWaveShaper() { return node({ curve: null, oversample: 'none' }); }
+  createDynamicsCompressor() { const param=()=>({value:0,setTargetAtTime(v){this.value=v;}});return node({threshold:param(),knee:param(),ratio:param(),attack:param(),release:param()}); }
   createBuffer(channels, length) { return { getChannelData: () => new Float32Array(length) }; }
   async resume() {}
   async close() { this.state = 'closed'; }
@@ -38,6 +39,7 @@ const mainAudio = { volume: .85, currentTime: 2, duration: 30, playbackRate: 1 }
   const engine = new Engine(mainAudio);
   await engine.connect();
   assert.ok(engine.mainSoloGain, 'main solo gain node must be initialized');
+  assert.ok(engine.mainCompressor,'main dynamics compressor must be initialized');
   await assert.rejects(engine.loadSoundTouch(),/AudioWorklet support/,'unsupported browsers must receive a clear pitch-preserving error');
   await assert.rejects(engine.loadFormantCorrection(),/AudioWorklet support/,'unsupported browsers must receive a clear formant-correction error');
   assert.ok(engine.mainPanner.connections.includes(engine.mainSoloGain), 'main effects chain must route through solo gain');
@@ -49,7 +51,7 @@ const mainAudio = { volume: .85, currentTime: 2, duration: 30, playbackRate: 1 }
   assert.equal(engine.mainSoloGain.gain.value, 1, 'solo off must restore background track');
   engine.setVolume(.6);
   assert.equal(engine.gain.gain.value, .6);
-  engine.setMainEQ(4,-3);engine.setMainPan(.35);engine.setMainDelay(50);engine.setMainReverb(25);engine.setMainDistortion(40);
+  engine.setMainEQ(4,-3);engine.setMainCompression(50);assert.equal(engine.mainCompressor.ratio.value,6.5,'main compression ratio should respond to amount');engine.setMainPan(.35);engine.setMainDelay(50);engine.setMainReverb(25);engine.setMainDistortion(40);
   assert.equal(engine.mainLow.gain.value,4,'main bass EQ should be independent');
   assert.equal(engine.mainHigh.gain.value,-3,'main treble EQ should be independent');
   assert.equal(engine.mainPanner.pan.value,.35,'main pan should update');
@@ -64,7 +66,7 @@ const mainAudio = { volume: .85, currentTime: 2, duration: 30, playbackRate: 1 }
   assert.equal(engine.layers.get('voice').pitchNode.pitchSemitones.value,5,'pitch preserving node should receive semitone value');
   assert.equal(engine.layers.get('voice').pitchNode.playbackRate.value,1.1,'worklet playback rate must mirror source speed');
   assert.equal(layerAudio.playbackRate,1.1,'source playback rate should remain the timeline speed');
-  assert.ok(engine.layers.get('voice').high.connections.includes(engine.layers.get('voice').pitchNode),'EQ should feed pitch-preserving processor');
+  assert.ok(engine.layers.get('voice').compressor.connections.includes(engine.layers.get('voice').pitchNode),'compressor should feed pitch-preserving processor');
   assert.ok(engine.layers.get('voice').pitchNode.connections.includes(engine.layers.get('voice').pan),'pitch processor should feed mixer effects');
   engine.setLayerPitch('voice',-3);engine.setLayerRate('voice',.9);
   assert.equal(engine.layers.get('voice').pitchNode.pitchSemitones.value,-3);
@@ -78,10 +80,11 @@ const mainAudio = { volume: .85, currentTime: 2, duration: 30, playbackRate: 1 }
   assert.equal(engine.layers.get('voice').pitchNodeType,'soundtouch','formant processor should switch back to standard pitch processor');
   engine.disableLayerPitchPreserving('voice',1.25);
   assert.equal(engine.layers.get('voice').pitchNode,null,'disable should remove pitch processor');
-  assert.ok(engine.layers.get('voice').high.connections.includes(engine.layers.get('voice').pan),'disable should restore direct mixer route');
+  assert.ok(engine.layers.get('voice').compressor.connections.includes(engine.layers.get('voice').pan),'disable should restore compressor-to-mixer route');
   engine.setLayerVolume('voice', .4);
   engine.setLayerRate('voice', 1.2);
   engine.setLayerEQ('voice', 3, -2);
+  engine.setLayerCompression('voice',40);assert.equal(engine.layers.get('voice').compressor.ratio.value,5.4,'per-layer compression should update independently');
   engine.setLayerPan('voice', .25);
   engine.setLayerDelay('voice', .5);
   engine.setLayerReverb('voice', .5);
