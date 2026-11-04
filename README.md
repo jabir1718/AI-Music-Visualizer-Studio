@@ -33,7 +33,7 @@ A browser-based, local-first music visualizer editor. Version 1.0 foundation.
 Open `index.html` in a modern browser. For best results, serve the folder from a local static web server (for example, `python -m http.server 8000`) and open `http://localhost:8000`.
 
 ## Independent audio mixer (Phase 1)
-- The mixer accepts additional local audio files as separate Voice, Ad-lib, Sound effect, Bass stem, Drums, Piano, Guitar, Instrumental or Other layers.
+- The mixer accepts additional local audio files as separate Voice, Ad-lib, Sound effect, Bass stem, Drums, Piano, Guitar, Instrumental or Other layers. Voice, Ad-lib, Humming, Harmony and Voice FX workspaces also support local microphone recording, preview, download and add-as-layer.
 - Each added layer has independent volume, pitch/rate, start offset, stereo pan, bass/treble EQ, echo and reverb controls, plus mute, solo and remove.
 - The original background music also has its own bass/treble EQ, stereo pan, echo, convolution reverb and distortion controls. These effects are separate from imported mixer layers and are included in the audio/video export path.
 - Search Wikimedia Commons audio from the Sound Effects, Engine Sounds and Character Sounds Music Studio workspaces, preview results, review licence/source metadata and import them as independent mixer layers.
