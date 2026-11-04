@@ -136,7 +136,7 @@
  }
  function getMotion(time){
   const active=segments.find(s=>time>=s.timelineStart&&time<s.timelineStart+segmentDuration(s));
-  if(!active)return{scale:1,x:0,y:0};const asset=assets.get(active.assetId);if(!isPhoto(asset))return{scale:1,x:0,y:0};
+  if(!active)return{scale:1,x:0,y:0};const asset=assets.get(active.assetId),effect=getVisualEffect(time);if(!isPhoto(asset))return{scale:effect.scale,x:0,y:0,flash:0};
   const progress=clamp((time-active.timelineStart)/Math.max(.2,segmentDuration(active)),0,1),motion=(PRESETS[style]||PRESETS.social).motion;
   const scale=motion==='slow'?1.08+progress*.10:motion==='pulse'?1.04+Math.sin(progress*Math.PI)*.10:motion==='pan'?1.04+progress*.04:motion==='flash'?1.01+progress*.02:1.06+progress*.12;
   const effect=getVisualEffect(time);return{scale:scale*effect.scale,x:(progress-.5)*(motion==='pan'?.06:.018),y:(.5-progress)*(motion==='pan'?.04:.012),flash:motion==='flash'&&progress<.12?(1-progress/.12)*.22:0};
@@ -160,7 +160,7 @@
  async function detectScenes(assetId,onProgress){
   const asset=assets.get(assetId);if(!asset||asset.kind!=='video')throw new Error('Choose an imported video clip first.');
   const video=asset.media,oldTime=video.currentTime,wasPlaying=!video.paused,canvas=document.createElement('canvas');canvas.width=32;canvas.height=18;const c=canvas.getContext('2d',{willReadFrequently:true});if(!c)throw new Error('Scene detection is unavailable on this device.');
-  const sampleStep=1,previous=null,cuts=[];let prev=null;
+  const sampleStep=1,cuts=[];let prev=null;
   try{video.pause();for(let t=0;t<video.duration-.2;t+=sampleStep){await seekVideo(video,t);c.drawImage(video,0,0,32,18);const pixels=c.getImageData(0,0,32,18).data;let diff=0;if(prev){for(let i=0;i<pixels.length;i+=4)diff+=(Math.abs(pixels[i]-prev[i])+Math.abs(pixels[i+1]-prev[i+1])+Math.abs(pixels[i+2]-prev[i+2]))/(3*255);diff/=32*18;if(diff>.24&&t>1)cuts.push(Number(t.toFixed(2)));}prev=new Uint8ClampedArray(pixels);if(onProgress)onProgress(Math.min(100,Math.round(t/video.duration*100)));}}
   finally{try{await seekVideo(video,oldTime);}catch(e){}if(wasPlaying)video.play().catch(()=>{});}
   asset.sceneCuts=cuts;persist();return cuts;
