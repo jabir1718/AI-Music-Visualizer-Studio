@@ -433,3 +433,8 @@ This is an order for development, not a reduction of the full scope:
 
 ### Offline helper video-edit commands
 - The English/Roman Urdu Quick Edit Assistant can now set the selected Auto Cut segment's transition and start/end speed ramp after the user selects a segment and previews the commands. It remains a limited local parser and does not claim general AI understanding.
+
+
+## 37. Shared multi-track timeline video lane
+- Added the Auto Cut montage as a visible video lane alongside the main music and independent audio mixer tracks in the shared multi-track timeline. Each segment block shows its timeline position/duration and can be selected from the timeline to edit it in Auto Cut.
+- This is one sequential montage video lane plus the existing independent audio lanes. It is not yet a full multi-layer video compositor with simultaneous overlay tracks or overlapping crossfade clips.
