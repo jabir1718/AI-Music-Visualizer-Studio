@@ -239,7 +239,7 @@ function selectMusicCategory(category){
  }
  mixerCategory=category;
  document.querySelectorAll('.music-category').forEach(btn=>btn.classList.toggle('active',btn.dataset.category===category));
- const detail=$('musicCategoryDetail'),role=$('mixerRole'),add=$('mixerAddBtn'),file=$('mixerFile');
+ const detail=$('musicCategoryDetail'),role=$('mixerRole'),add=$('mixerAddBtn'),file=$('mixerFile');if(add)add.textContent='Add to track';
  const config={
   'Voice':{role:'Voice',title:'Main vocals',desc:'Import an isolated vocal stem to adjust its volume, pitch, speed and timing without changing the background track.',available:true},
   'Ad-lib':{role:'Ad-lib',title:'Ad-libs & doubles',desc:'Add a separate ad-lib or doubled-vocal recording, then position it and control it independently.',available:true},
@@ -265,7 +265,7 @@ function selectMusicCategory(category){
   const heading=document.createElement('b');heading.textContent='Choose an instrument stem';quick.append(heading);
   [['Bass stem','Bass'],['Drums','Drums'],['Piano','Piano'],['Guitar','Guitar'],['Instrumental','Full instrumental']].forEach(([value,label])=>{
    const button=document.createElement('button');button.type='button';button.className='btn small';button.textContent=label;button.setAttribute('aria-pressed',String(role.value===value));
-   button.addEventListener('click',()=>{role.value=value;quick.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));detail.querySelector('.music-detail-desc')?.setAttribute('data-selected',label);const addButton=$('mixerAddBtn');if(addButton)addButton.textContent='Add '+label+' stem';const sourceLabel=$('mixerRole');if(sourceLabel)sourceLabel.setAttribute('aria-label','Selected instrument source: '+label);});
+   button.addEventListener('click',()=>{role.value=value;quick.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));detail.querySelector('.music-detail-desc')?.setAttribute('data-selected',label);const sourceText=detail.querySelector('.music-selected-source');if(sourceText)sourceText.textContent='Selected source: '+label;const addButton=$('mixerAddBtn');if(addButton)addButton.textContent='Add '+label+' stem';const sourceLabel=$('mixerRole');if(sourceLabel)sourceLabel.setAttribute('aria-label','Selected instrument source: '+label);});
    quick.append(button);
   });
   detail.append(quick);
