@@ -27,17 +27,17 @@ async function getSvgFile(item){
 function mount(host,options={}){
  if(!host||root.document.getElementById('openMojiLibrary'))return;
  const panel=root.document.createElement('section');panel.id='openMojiLibrary';panel.className='openmoji-library';
- panel.innerHTML='<div class="openmoji-head"><div><span class="eyebrow">OPEN SYMBOL COLLECTION</span><h3>4,000+ searchable symbols</h3><p>Load the OpenMoji catalogue only when you need it. Search by name, tag or group; only selected symbols are added to your project.</p></div><span id="openmojiCount" class="font-count">…</span></div><button type="button" class="btn small" id="openmojiLoad">Load symbol catalogue</button><div class="openmoji-search"><input id="openmojiSearch" type="search" placeholder="Search symbols: music, heart, camera…" disabled><select id="openmojiGroup" disabled><option>All</option></select></div><div id="openmojiGrid" class="openmoji-grid"></div><div class="openmoji-actions"><button type="button" class="btn small primary" id="openmojiUse" disabled>Use selected as logo</button><span id="openmojiStatus" class="hint" aria-live="polite">Loading symbol catalogue…</span></div><small class="openmoji-license">OpenMoji graphics are CC BY-SA 4.0. Read the <a href="https://openmoji.org/" target="_blank" rel="noopener">OpenMoji source</a> and <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">licence terms</a>; attribution and ShareAlike apply.</small>';
+ panel.innerHTML='<div class="openmoji-head"><div><span class="eyebrow">OPEN SYMBOL COLLECTION</span><h3>4,000+ searchable symbols</h3><p>Load the OpenMoji catalogue only when you need it. Search by name, tag or group; only selected symbols are added to your project.</p></div><span id="openmojiCount" class="font-count">…</span></div><button type="button" class="btn small" id="openmojiLoad">Load symbol catalogue</button><div class="openmoji-search"><input id="openmojiSearch" type="search" placeholder="Search symbols: music, heart, camera…" disabled><select id="openmojiGroup" disabled><option>All</option></select></div><div id="openmojiGrid" class="openmoji-grid"></div><div class="openmoji-actions"><button type="button" class="btn small primary" id="openmojiUse" disabled>Use as logo</button><button type="button" class="btn small" id="openmojiBackground" disabled>Use as background</button><button type="button" class="btn small" id="openmojiArtwork" disabled>Add as artwork</button><button type="button" class="btn small" id="openmojiText" disabled>Use with text</button><span id="openmojiStatus" class="hint" aria-live="polite">Loading symbol catalogue…</span></div><small class="openmoji-license">OpenMoji graphics are CC BY-SA 4.0. Read the <a href="https://openmoji.org/" target="_blank" rel="noopener">OpenMoji source</a> and <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">licence terms</a>; attribution and ShareAlike apply.</small>';
  host.appendChild(panel);
  const $=id=>panel.querySelector('#'+id),grid=$('openmojiGrid');let filtered=[];
  function render(){
   filtered=filterEntries(entries,$('openmojiSearch').value,$('openmojiGroup').value).slice(0,72);
-  grid.replaceChildren();selected=null;$('openmojiUse').disabled=true;
+  grid.replaceChildren();selected=null;['openmojiUse','openmojiBackground','openmojiArtwork','openmojiText'].forEach(id=>$(id).disabled=true);
   filtered.forEach(item=>{
    const button=root.document.createElement('button');button.type='button';button.className='openmoji-item';button.title=item.annotation;
    const img=root.document.createElement('img');img.src=svgUrl(item.hexcode);img.alt=item.annotation;img.loading='lazy';
    const label=root.document.createElement('span');label.textContent=item.annotation;
-   button.append(img,label);button.onclick=()=>{grid.querySelectorAll('.openmoji-item').forEach(x=>x.classList.remove('selected'));button.classList.add('selected');selected=item;$('openmojiUse').disabled=false;$('openmojiStatus').textContent=item.annotation+' · '+item.hexcode;};
+   button.append(img,label);button.onclick=()=>{grid.querySelectorAll('.openmoji-item').forEach(x=>x.classList.remove('selected'));button.classList.add('selected');selected=item;['openmojiUse','openmojiBackground','openmojiArtwork','openmojiText'].forEach(id=>$(id).disabled=false);$('openmojiStatus').textContent=item.annotation+' · '+item.hexcode;};
    grid.append(button);
   });
   $('openmojiCount').textContent=entries.length.toLocaleString();
@@ -46,12 +46,21 @@ function mount(host,options={}){
  }
  $('openmojiSearch').oninput=render;$('openmojiGroup').onchange=render;
  $('openmojiLoad').onclick=async()=>{ $('openmojiLoad').disabled=true;$('openmojiStatus').textContent='Downloading catalogue metadata…';try{entries=await loadData();const groups=[...new Set(entries.map(x=>x.group).filter(Boolean))].sort();groups.forEach(group=>{const option=root.document.createElement('option');option.value=group;option.textContent=group;$('openmojiGroup').append(option);});$('openmojiSearch').disabled=false;$('openmojiGroup').disabled=false;$('openmojiLoad').textContent='Catalogue ready';$('openmojiCount').textContent=entries.length.toLocaleString();render();}catch(error){$('openmojiStatus').textContent='Symbol catalogue unavailable: '+error.message+' — check internet access.';$('openmojiLoad').disabled=false;}};
- $('openmojiUse').onclick=async()=>{
-  if(!selected)return;$('openmojiUse').disabled=true;
-  try{const file=await getSvgFile(selected);const stored=typeof options.onLogo==='function'?await options.onLogo(file):true;$('openmojiStatus').textContent=stored===false?'Loaded '+selected.annotation+' for this session, but media storage is unavailable.':'Added '+selected.annotation+' as an editable SVG logo.';}
-  catch(error){$('openmojiStatus').textContent='Could not add symbol: '+error.message;}
-  finally{$('openmojiUse').disabled=!selected;}
- };
+ async function useSelected(target,button){
+  if(!selected)return;const item=selected;button.disabled=true;
+  try{
+   const file=await getSvgFile(item);let stored=true;
+   if(typeof options.onImport==='function')stored=await options.onImport(file,target);
+   else if(target==='logo'&&typeof options.onLogo==='function')stored=await options.onLogo(file);
+   else throw new Error('This editor import target is not connected.');
+   $('openmojiStatus').textContent=stored===false?'Loaded '+item.annotation+' for this session, but media storage is unavailable.':'Added '+item.annotation+' to the '+target+' editor.';
+  }catch(error){$('openmojiStatus').textContent='Could not add symbol: '+error.message;}
+  finally{button.disabled=!selected;}
+ }
+ $('openmojiUse').onclick=()=>useSelected('logo',$('openmojiUse'));
+ $('openmojiBackground').onclick=()=>useSelected('background',$('openmojiBackground'));
+ $('openmojiArtwork').onclick=()=>useSelected('artwork',$('openmojiArtwork'));
+ $('openmojiText').onclick=()=>useSelected('text-decoration',$('openmojiText'));
  $('openmojiStatus').textContent='Tap “Load symbol catalogue” to fetch the searchable collection.';
 }
 const api={normalizeEntry,filterEntries,svgUrl,loadData,getSvgFile,mount};
