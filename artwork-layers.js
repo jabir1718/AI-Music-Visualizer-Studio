@@ -49,7 +49,7 @@
   });
  }
  async function restore(){
-  let metadata=[];try{const stored=localStorage.getItem(KEY);metadata=stored?JSON.parse(stored):(JSON.parse(localStorage.getItem('waveforge-v1')||'{}').artworkLayers||[]);}catch(e){}
+  let metadata=[];try{const project=JSON.parse(localStorage.getItem('waveforge-v1')||'{}');const stored=localStorage.getItem(KEY);metadata=Array.isArray(project.artworkLayers)?project.artworkLayers:(stored?JSON.parse(stored):[]);}catch(e){}
   for(const meta of metadata.slice(0,MAX_LAYERS)){
    const stored=await bridge.getMediaAsset(meta.id);if(!stored||!stored.blob)continue;
    const url=URL.createObjectURL(stored.blob),img=new Image();
