@@ -424,3 +424,8 @@ This is an order for development, not a reduction of the full scope:
 - Each segment now has independent start/end playback-speed controls (0.5×–2×), interpolated as a speed ramp. Segment timing and video seek mapping account for the ramp.
 - Each segment can choose hard cut, fade-through-black, white flash, wipe reveal or zoom reveal. These are canvas-rendered transition treatments, not true overlapping crossfades or a full compositing graph.
 - Speech-pause detection, automatic speech transcription, multi-layer video tracks and a full non-linear video compositor remain unimplemented; do not mark them complete.
+
+
+## 36. Local quiet-gap suggestions
+- Added an optional local audio-track analysis for imported videos using Web Audio decoding. It detects sustained low-energy gaps (not speech recognition) and stores their midpoint times alongside detected visual scene boundaries.
+- Auto Cut can use both visual scene-change and quiet-gap points as boundaries when generating the next draft. Background music or noisy recordings can mask speech pauses; the UI explicitly warns about this limitation.
