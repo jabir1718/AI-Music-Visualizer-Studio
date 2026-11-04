@@ -17,7 +17,7 @@ A browser-based, local-first music visualizer editor. Version 1.0 foundation.
 - Local spectral noise reduction for short voice/audio clips using a selected noise-only sample; cleaned audio is exported as a separate WAV layer.
 - Mixer clip in/out trimming, looping and split-at-playhead controls.
 - Searchable OpenMoji symbol collection (4,000+ upstream symbols) with SVG logo import. OpenMoji graphics are CC BY-SA 4.0; follow attribution and ShareAlike requirements.
-- Interactive Three.js 3D object studio with primitive meshes and extruded 3D text, XYZ positioning/rotation, material/light controls, touch drag and transparent 1024 × 1024 PNG logo export. 3D text currently uses one Helvetiker font loaded from Three.js examples; the 100-family 2D typography studio remains separate. The 3D engine loads on demand from CDN; WebGL and internet are required.
+- Interactive Three.js 3D object studio with primitive meshes and extruded 3D text, XYZ positioning/rotation, material/light controls, touch drag and transparent 1024 × 1024 PNG logo export. 3D text offers eight selectable typefaces loaded on demand from Three.js examples; the 100-family 2D typography studio remains separate. The 3D engine loads on demand from CDN; WebGL and internet are required.
 - Bounded undo/redo for text, lyrics, object transforms, typography, visual filters, chroma key, AI cutout toggle and master effects.
 - Local audio playback, seeking and volume.
 - Text, subtitle, color, font and PNG logo overlays.
