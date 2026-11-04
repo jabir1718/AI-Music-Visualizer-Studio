@@ -1,6 +1,6 @@
 (function(){
   class AudioEngine {
-    constructor(audio){this.audio=audio;this.context=null;this.analyser=null;this.source=null;this.gain=null;this.mainSoloGain=null;this.exportDestination=null;this.monitorGain=null;this.masterVolume=.85;this.data=null;this.lastBeat=0;this.energy=0;this.ready=false;this.layers=new Map();this.reverbBuffer=null;this.mainLow=null;this.mainHigh=null;this.mainPanner=null;this.mainDelay=null;this.mainFeedback=null;this.mainDelaySend=null;this.mainConvolver=null;this.mainReverbSend=null;this.mainShaper=null;this.SoundTouchNode=null;this.soundTouchLoadPromise=null;this.soundTouchRegistered=false;}
+    constructor(audio){this.audio=audio;this.context=null;this.analyser=null;this.source=null;this.gain=null;this.mainSoloGain=null;this.exportDestination=null;this.monitorGain=null;this.masterVolume=.85;this.data=null;this.lastBeat=0;this.energy=0;this.ready=false;this.layers=new Map();this.reverbBuffer=null;this.mainLow=null;this.mainHigh=null;this.mainPanner=null;this.mainDelay=null;this.mainFeedback=null;this.mainDelaySend=null;this.mainConvolver=null;this.mainReverbSend=null;this.mainShaper=null;this.SoundTouchNode=null;this.soundTouchLoadPromise=null;this.soundTouchRegistered=false;this.FormantCorrectionNode=null;this.formantLoadPromise=null;this.formantRegistered=false;}
     async connect(){
       if(this.ready)return;const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)throw new Error('Web Audio is not supported in this browser.');
       this.context=new Ctx();this.analyser=this.context.createAnalyser();this.analyser.fftSize=2048;this.analyser.smoothingTimeConstant=.78;
@@ -26,22 +26,57 @@
       }
       return this.soundTouchLoadPromise;
     }
+    async loadFormantCorrection(){
+      if(this.formantRegistered)return true;
+      if(!this.context||!this.context.audioWorklet)throw new Error('Formant preservation requires AudioWorklet support in a secure browser context.');
+      if(!this.formantLoadPromise){
+        this.formantLoadPromise=(async()=>{
+          const mod=await import('https://cdn.jsdelivr.net/npm/@soundtouchjs/formant-correction-worklet@2.1.1/+esm');
+          const Node=mod.FormantCorrectionNode||(mod.default&&mod.default.FormantCorrectionNode);
+          if(!Node)throw new Error('Formant processor module did not expose FormantCorrectionNode.');
+          await Node.register(this.context,'https://cdn.jsdelivr.net/npm/@soundtouchjs/formant-correction-worklet@2.1.1/.dist/formant-correction-processor.js');
+          this.FormantCorrectionNode=Node;this.formantRegistered=true;return true;
+        })().catch(error=>{this.formantLoadPromise=null;throw error;});
+      }
+      return this.formantLoadPromise;
+    }
+    routeLayerPitchNode(layer,node,type){
+      if(layer.pitchNode){try{layer.high.disconnect(layer.pitchNode);}catch(e){}try{layer.pitchNode.disconnect();}catch(e){}}
+      else{layer.high.disconnect(layer.pan);layer.high.disconnect(layer.delay);layer.high.disconnect(layer.convolver);}
+      layer.high.connect(node);node.connect(layer.pan);node.connect(layer.delay);node.connect(layer.convolver);
+      layer.pitchNode=node;layer.pitchNodeType=type;
+    }
     async enableLayerPitchPreserving(id,semitones=0,rate=1){
+
       const layer=this.layers.get(id);if(!layer)throw new Error('Mixer layer not found.');
       await this.loadSoundTouch();
       if(this.layers.get(id)!==layer)throw new Error('Mixer layer was removed before pitch processing finished.');
-      if(layer.pitchNode){this.setLayerPitch(id,semitones);this.setLayerRate(id,rate);return true;}
-      const node=new this.SoundTouchNode({context:this.context});
-      layer.high.disconnect(layer.pan);layer.high.disconnect(layer.delay);layer.high.disconnect(layer.convolver);layer.high.connect(node);node.connect(layer.pan);node.connect(layer.delay);node.connect(layer.convolver);layer.pitchNode=node;
+      if(layer.pitchNode&&layer.pitchNodeType==='soundtouch'){this.setLayerPitch(id,semitones);this.setLayerRate(id,rate);return true;}
+      const node=new this.SoundTouchNode({context:this.context});this.routeLayerPitchNode(layer,node,'soundtouch');
       layer.pitchSemitones=Math.max(-12,Math.min(12,Number(semitones)||0));
       const playbackRate=Math.max(.5,Math.min(2,Number(rate)||1));
       node.pitchSemitones.value=layer.pitchSemitones;
       node.playbackRate.value=playbackRate;
       layer.audio.preservesPitch=false;layer.audio.playbackRate=playbackRate;return true;
     }
+    async enableLayerFormantCorrection(id,semitones=0,rate=1,strength=1){
+      const layer=this.layers.get(id);if(!layer)throw new Error('Mixer layer not found.');
+      await this.loadFormantCorrection();
+      if(this.layers.get(id)!==layer)throw new Error('Mixer layer was removed before formant processing finished.');
+      const amount=Math.max(0,Math.min(1,Number(strength)||0));
+      if(layer.pitchNode&&layer.pitchNodeType==='formant'){
+        this.setLayerPitch(id,semitones);this.setLayerRate(id,rate);this.setLayerFormantStrength(id,amount);return true;
+      }
+      const node=new this.FormantCorrectionNode({context:this.context});this.routeLayerPitchNode(layer,node,'formant');
+      layer.pitchSemitones=Math.max(-12,Math.min(12,Number(semitones)||0));
+      const playbackRate=Math.max(.5,Math.min(2,Number(rate)||1));
+      node.pitchSemitones.value=layer.pitchSemitones;node.playbackRate.value=playbackRate;node.formantStrength.value=amount;
+      layer.audio.preservesPitch=false;layer.audio.playbackRate=playbackRate;return true;
+    }
+    setLayerFormantStrength(id,strength){const layer=this.layers.get(id);if(layer&&layer.pitchNode&&layer.pitchNodeType==='formant')layer.pitchNode.formantStrength.setTargetAtTime(Math.max(0,Math.min(1,Number(strength)||0)),this.context.currentTime,.025);}
     disableLayerPitchPreserving(id,rate=1){
       const layer=this.layers.get(id);if(!layer)return;
-      if(layer.pitchNode){try{layer.high.disconnect(layer.pitchNode);}catch(e){}try{layer.pitchNode.disconnect();}catch(e){}layer.pitchNode=null;layer.high.connect(layer.pan);layer.high.connect(layer.delay);layer.high.connect(layer.convolver);}
+      if(layer.pitchNode){try{layer.high.disconnect(layer.pitchNode);}catch(e){}try{layer.pitchNode.disconnect();}catch(e){}layer.pitchNode=null;layer.pitchNodeType=null;layer.high.connect(layer.pan);layer.high.connect(layer.delay);layer.high.connect(layer.convolver);}
       layer.audio.preservesPitch=false;layer.audio.playbackRate=rate;
     }
     setLayerPitch(id,semitones){const layer=this.layers.get(id);if(!layer)return;layer.pitchSemitones=Math.max(-12,Math.min(12,Number(semitones)||0));if(layer.pitchNode)layer.pitchNode.pitchSemitones.setTargetAtTime(layer.pitchSemitones,this.context.currentTime,.025);}
@@ -81,7 +116,7 @@
     getWaveform(){const a=new Uint8Array(this.analyser?this.analyser.fftSize:128);if(this.analyser)this.analyser.getByteTimeDomainData(a);return a;}
     detectBeat(sensitivity){const f=this.getFrequency();let sum=0;for(let i=2;i<Math.min(18,f.length);i++)sum+=f[i];const low=sum/16,now=performance.now(),threshold=90-(sensitivity*.55);const hit=low>threshold&&low>this.energy*1.23&&now-this.lastBeat>220;if(hit)this.lastBeat=now;this.energy=this.energy*.82+low*.18;return{hit,energy:low/255};}
     get duration(){return this.audio.duration||0;}
-    destroy(){this.layers.forEach(l=>{l.audio.pause();['source','gain','low','high','pan','delay','feedback','delaySend','convolver','reverbSend','shaper','pitchNode'].forEach(k=>{try{if(l[k])l[k].disconnect();}catch(e){}});});this.layers.clear();if(this.context)this.context.close();this.ready=false;this.soundTouchRegistered=false;this.soundTouchLoadPromise=null;}
+    destroy(){this.layers.forEach(l=>{l.audio.pause();['source','gain','low','high','pan','delay','feedback','delaySend','convolver','reverbSend','shaper','pitchNode'].forEach(k=>{try{if(l[k])l[k].disconnect();}catch(e){}});});this.layers.clear();if(this.context)this.context.close();this.ready=false;this.soundTouchRegistered=false;this.soundTouchLoadPromise=null;this.formantRegistered=false;this.formantLoadPromise=null;}
   }
   window.AudioEngine=AudioEngine;
 })();
