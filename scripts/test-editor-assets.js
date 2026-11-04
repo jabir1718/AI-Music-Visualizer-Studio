@@ -54,6 +54,8 @@ assert(/chromaKey:window\.WaveForgeChromaKey/.test(app),'Chroma key settings are
 assert(/chroma-key\.js/.test(index)&&/processPixels/.test(chroma),'Chroma key module or UI is missing');
 assert(/WaveForgeSoundLibrary\.mount/.test(app)&&/addMixerLayer\(file,item\.role\)/.test(app),'Open audio library is not connected to the mixer');
 assert(/WaveForgeTimeline\.resolveLayerTime/.test(app)&&/Split at playhead/.test(app),'Mixer timeline trim/split controls are missing');
+assert(/historyUndo/.test(app)&&/historyRedo/.test(app)&&/captureUndoState/.test(app),'Visual editor undo/redo controls are missing');
+assert(/history-engine\.js/.test(index)&&/WaveForgeHistory\.create/.test(app),'History engine is not loaded and initialized');
 assert(/timeline-engine\.js/.test(index),'Timeline engine is not loaded');
 assert(/trimStart:l\.trimStart/.test(app)&&/trimEnd:l\.trimEnd/.test(app),'Timeline clip trim settings are not saved');
 assert(/sound-library\.js/.test(index)&&/Wikimedia Commons/.test(sounds),'Open sound library module is missing');
