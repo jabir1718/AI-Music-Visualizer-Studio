@@ -67,6 +67,7 @@ function draw(){
   else if(keySettings.enabled&&window.WaveForgeChromaKey){try{const keyed=window.WaveForgeChromaKey.process(source,x,y,dw,dh,w,h);if(window.WaveForgeFilters)window.WaveForgeFilters.draw(ctx,keyed,0,0,w,h);else ctx.drawImage(keyed,0,0,w,h);}catch(error){ctx.drawImage(source,x,y,dw,dh);}}
   else if(window.WaveForgeFilters)window.WaveForgeFilters.draw(ctx,source,x,y,dw,dh);else ctx.drawImage(source,x,y,dw,dh);
  }
+ if(window.WaveForgeAutoVideo){const effect=window.WaveForgeAutoVideo.getVisualEffect(audio.currentTime||0);if(effect.type==='fade'&&effect.opacity>0){ctx.fillStyle='rgba(0,0,0,'+effect.opacity+')';ctx.fillRect(0,0,w,h);}else if(effect.type==='flash'&&effect.opacity>0){ctx.fillStyle='rgba(255,255,255,'+effect.opacity+')';ctx.fillRect(0,0,w,h);}else if(effect.type==='wipe'&&effect.progress<1){ctx.fillStyle='#05070d';ctx.fillRect(0,0,w*(1-effect.progress),h);}}
  if(mediaMotion.flash>0){ctx.fillStyle='rgba(255,255,255,'+mediaMotion.flash+')';ctx.fillRect(0,0,w,h);}
  const shade=ctx.createLinearGradient(0,0,0,h);shade.addColorStop(0,'#080d2420');shade.addColorStop(1,'#080d24bb');ctx.fillStyle=shade;ctx.fillRect(0,0,w,h);
  const colors=palette[$('visualColor').value]||palette.aurora;
