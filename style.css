@@ -218,3 +218,7 @@ button[data-action-icon]:disabled{opacity:.45;cursor:not-allowed}
 .openmoji-actions .hint{font-size:.72rem}
 .openmoji-license{color:var(--muted);font-size:.68rem;line-height:1.5}
 @media(max-width:560px){.openmoji-grid{grid-template-columns:repeat(4,minmax(0,1fr));max-height:360px}.openmoji-search{grid-template-columns:1fr}}
+
+.mixer-pitch-preserve{display:flex!important;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:.78rem;color:var(--muted)}
+.mixer-pitch-preserve input{width:auto!important;flex:0 0 auto}
+.mixer-track-controls [hidden]{display:none!important}

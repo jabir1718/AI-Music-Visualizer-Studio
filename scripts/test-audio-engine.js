@@ -3,7 +3,12 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 
 function node(extra = {}) {
-  return { connections: [], connect(target) { this.connections.push(target); }, disconnect() {}, ...extra };
+  return { connections: [], connect(target) { this.connections.push(target); }, disconnect(target) { this.connections = target ? this.connections.filter(x => x !== target) : []; }, ...extra };
+}
+class FakeSoundTouchNode {
+  constructor() { this.connections=[];this.pitchSemitones={value:0,setTargetAtTime(v){this.value=v;}};this.playbackRate={value:1,setTargetAtTime(v){this.value=v;}}; }
+  connect(target){this.connections.push(target);}
+  disconnect(){this.connections=[];}
 }
 class FakeAudioContext {
   constructor() { this.currentTime = 0; this.sampleRate = 48000; this.state = 'running'; this.destination = node(); }
@@ -30,6 +35,7 @@ const mainAudio = { volume: .85, currentTime: 2, duration: 30, playbackRate: 1 }
   const engine = new Engine(mainAudio);
   await engine.connect();
   assert.ok(engine.mainSoloGain, 'main solo gain node must be initialized');
+  await assert.rejects(engine.loadSoundTouch(),/AudioWorklet support/,'unsupported browsers must receive a clear pitch-preserving error');
   assert.ok(engine.mainPanner.connections.includes(engine.mainSoloGain), 'main effects chain must route through solo gain');
   assert.ok(engine.gain.connections.includes(engine.mainLow), 'master gain must feed the main EQ chain');
   assert.equal(mainAudio.volume, 1, 'element volume must not double-attenuate master gain');
@@ -49,6 +55,20 @@ const mainAudio = { volume: .85, currentTime: 2, duration: 30, playbackRate: 1 }
   engine.setMainDistortion(0);assert.equal(engine.mainShaper.curve,null,'zero distortion should bypass waveshaper');
   const layerAudio = { playbackRate: 1, pause() {} };
   engine.addLayer('voice', layerAudio, .7, {});
+  engine.SoundTouchNode=FakeSoundTouchNode;engine.soundTouchRegistered=true;
+  await engine.enableLayerPitchPreserving('voice',5,1.1);
+  assert.equal(engine.layers.get('voice').pitchNode.pitchSemitones.value,5,'pitch preserving node should receive semitone value');
+  assert.equal(engine.layers.get('voice').pitchNode.playbackRate.value,1.1,'worklet playback rate must mirror source speed');
+  assert.equal(layerAudio.playbackRate,1.1,'source playback rate should remain the timeline speed');
+  assert.ok(engine.layers.get('voice').high.connections.includes(engine.layers.get('voice').pitchNode),'EQ should feed pitch-preserving processor');
+  assert.ok(engine.layers.get('voice').pitchNode.connections.includes(engine.layers.get('voice').pan),'pitch processor should feed mixer effects');
+  engine.setLayerPitch('voice',-3);engine.setLayerRate('voice',.9);
+  assert.equal(engine.layers.get('voice').pitchNode.pitchSemitones.value,-3);
+  assert.equal(engine.layers.get('voice').pitchNode.pitchSemitones.value,-3);
+  assert.equal(engine.layers.get('voice').pitchNode.playbackRate.value,.9);
+  engine.disableLayerPitchPreserving('voice',1.25);
+  assert.equal(engine.layers.get('voice').pitchNode,null,'disable should remove pitch processor');
+  assert.ok(engine.layers.get('voice').high.connections.includes(engine.layers.get('voice').pan),'disable should restore direct mixer route');
   engine.setLayerVolume('voice', .4);
   engine.setLayerRate('voice', 1.2);
   engine.setLayerEQ('voice', 3, -2);

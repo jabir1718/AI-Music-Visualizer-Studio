@@ -17,8 +17,8 @@ for(const object of ['title','subtitle','lyric','logo']){
 }
 assert(/objectSettings,objectKeyframes,manualBpm,tapBeatOffset,filterPreset:/.test(app),'Object settings are not persisted in editor settings');
 assert(/d\.objectSettings/.test(app),'Object settings are not restored');
-assert(/objectSettings\.title\.visible/.test(app)&&/objectSettings\.subtitle\.visible/.test(app),'Text visibility not applied to canvas');
-assert(/objectSettings\.lyric\.visible/.test(app)&&/objectSettings\.logo\.visible/.test(app),'Lyric/logo visibility not applied to canvas');
+assert(/titleState\.settings\.visible/.test(app)&&/subtitleState\.settings\.visible/.test(app),'Animated text visibility not applied to canvas');
+assert(/lyricState\.settings\.visible/.test(app)&&/logoState\.settings\.visible/.test(app),'Animated lyric/logo visibility not applied to canvas');
 assert(/beginObjectTransform/.test(app)&&/moveObjectTransform/.test(app)&&/endObjectTransform/.test(app),'Touch resize and rotate handles are missing');
 assert(/object-selection-overlay/.test(app)&&/updateSelectionOverlay/.test(app),'Canvas selection outline is not connected');
 assert(/function beginWordSync/.test(app)&&/function markSyncWord/.test(app)&&/function finishWordSync/.test(app),'Manual word-level karaoke timing workflow missing');
@@ -26,7 +26,7 @@ assert(/WaveForgeBPM\.fromTaps/.test(app)&&/tapTempoBtn/.test(app)&&/tapBeatOffs
 assert(/fromTaps\(times\)/.test(fs.readFileSync('bpm-engine.js','utf8')),'Tap tempo estimator API is missing');
 assert(/line\.words=wordSync\.words\.map/.test(app),'Word timing data is not stored on lyric lines');
 assert(/wordSyncMark/.test(index)&&/wordSyncPanel/.test(index),'Word timing controls are not present in the lyric UI');
-assert(/getMediaAsset\('logo'\)/.test(app)&&/saveMediaAsset\('logo',f\)/.test(app),'Logo media is not restored and persisted');
+assert(/getMediaAsset\('logo'\)/.test(app)&&/saveMediaAsset\('logo',file\)/.test(app),'Logo media is not restored and persisted');
 assert(/getMediaAsset\('background'\)/.test(app)&&/saveMediaAsset\('background',f\)/.test(app),'Background media is not restored and persisted');
 assert(/deleteMediaAsset\('logo'\)/.test(app)&&/deleteMediaAsset\('background'\)/.test(app),'Clearing media does not remove saved assets');
 assert(/image\/jpeg':'jpg'/.test(images)&&/image\/webp':'webp'/.test(images),'Image import must preserve supported file extensions');
@@ -58,6 +58,7 @@ assert(/symbol-library\.js/.test(index)&&/WaveForgeSymbols\.mount/.test(app)&&/l
 assert(/aiSegmentation:window\.WaveForgeSegmentation/.test(app),'AI segmentation settings are not saved');
 assert(/WaveForgeSoundLibrary\.mount/.test(app)&&/addMixerLayer\(file,item\.role\)/.test(app),'Open audio library is not connected to the mixer');
 assert(/WaveForgeTimeline\.resolveLayerTime/.test(app)&&/Split at playhead/.test(app),'Mixer timeline trim/split controls are missing');
+assert(/Pitch preserving/.test(app)&&/Speed','rate'/.test(app)&&/pitchPreserving:!!l\.pitchPreserving/.test(app),'Independent pitch/speed controls or persistence are missing');
 assert(/historyUndo/.test(app)&&/historyRedo/.test(app)&&/captureUndoState/.test(app),'Visual editor undo/redo controls are missing');
 assert(/history-engine\.js/.test(index)&&/WaveForgeHistory\.create/.test(app),'History engine is not loaded and initialized');
 assert(/keyframe-engine\.js/.test(index)&&/WaveForgeKeyframes\.upsert/.test(app)&&/objectKeyframeAdd/.test(app),'Object keyframe animation controls are missing');
