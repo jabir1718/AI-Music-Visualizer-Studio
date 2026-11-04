@@ -369,3 +369,29 @@ This is an order for development, not a reduction of the full scope:
 - Offer high-quality processing and up to 16K export only where source dimensions, device memory, GPU/renderer and encoder support it. Filter quality and output pixel resolution are separate settings.
 - Apply filters non-destructively to photo or video backgrounds, with intensity, before/after preview, enable/disable and reset.
 - Use lower-resolution preview proxies when needed, then render at the highest supported quality during export. Give clear fallbacks instead of freezing or crashing on unsupported devices.
+
+## 32. In-app ChatGPT-powered editing assistant
+- Add a dedicated AI Assistant workspace inside the APK. The user can describe desired edits in natural language, ask questions about the current project, and request changes to music, voice, lyrics, images, artwork, visualizer objects and video edits.
+- The assistant must understand the current project context only after the user explicitly chooses to share it. Provide a clear preview of which project/media metadata or selected assets will be sent to an AI service; do not upload full media by default.
+- Use the OpenAI API (Responses API and supported tool/function calling) through a protected backend. Do not embed OpenAI API keys in Android assets, JavaScript, APK resources, public GitHub files or client-side storage. Never ask the user to paste an API secret into a public chat or repository.
+- Clearly explain that ChatGPT app subscriptions and OpenAI API usage are separate products/billing. Signing into ChatGPT does not automatically grant the APK API access or transfer the user's ChatGPT plan. If a supported official account authorization route becomes available for this app use case, assess it separately; do not invent or simulate a ChatGPT login.
+- Let the assistant convert requests into structured editor actions such as set layer volume/pan/pitch, trim/split/move clips, adjust filters, set text/lyrics, select a voice preset, create a beat-cut plan or change export settings.
+- Before applying a batch of changes, show an editable action plan with affected tracks/layers and a before/after summary. Require user confirmation for destructive actions, source replacement, deletion, external uploads, paid operations and final export. Preserve undo/redo and the original source.
+- Execute only supported editor functions. If an operation is not implemented or unsupported by the current project, say so and offer a manual alternative; never claim an AI instruction was applied when it only generated advice.
+- Include chat history per project, stop/cancel, retry, clear conversation, optional prompt suggestions and transparent usage/cost notices. Keep errors, network failures and rate limits recoverable without freezing the editor.
+- Do not imitate real people or generate deceptive identity clones. Apply content, copyright, privacy and safety restrictions to user prompts and media.
+- Provide an offline/manual mode when the AI service is not configured or unavailable.
+
+## 33. AI Auto Video Editor and social-media styles
+- Add a dedicated Auto Video workspace that imports multiple clips and a selected music track, analyzes the audio beat grid and video metadata, and creates a non-destructive editable draft.
+- Support beat-synchronized cuts, clip selection/reordering, scene-change suggestions, speech-pause cuts, configurable clip duration, speed ramps, slow motion, punch-in/punch-out zooms, transitions, motion effects, color/filter looks, captions, lyric overlays, stickers, sound effects and music ducking where supported.
+- Offer selectable editing styles such as fast TikTok/Reels montage, cinematic, travel, vlog, product promo, lyric video, calm aesthetic, energetic beat edit and story/highlight recap. Style presets must be original generic styles, not copied proprietary templates or unlicensed content.
+- Offer output presets for vertical 9:16, square 1:1 and horizontal 16:9; let the user set target duration, cut intensity, transition density, caption style and preferred clips.
+- Analyze beat positions and optional speech transcription/pauses. Let users choose whether cuts follow every beat, strong beats, bars, phrase boundaries or speech pauses. Never assume every beat should become a cut.
+- Show the generated result on an editable video timeline with each clip, transition, caption, effect and audio layer separately selectable. Users can replace, reorder, trim, mute, remove or manually adjust each item.
+- Add preview proxies and asynchronous processing with visible progress, cancellation and memory-aware fallbacks. Do not block the UI during analysis or export.
+- Preserve imported source clips and the original music. Applying an auto-edit creates a new draft/project version; it must not overwrite source media.
+- Support captions/lyrics with manual correction. Speech recognition and lyric transcription may be inaccurate; display confidence/allow edits and do not claim perfect transcription.
+- Export at the highest genuinely supported resolution/frame rate/codec for the source and Android device. Do not advertise 16K unless the entire render/encoder pipeline supports it and tests verify it.
+- Provide a manual-edit path when AI services, transcription models or advanced effects are unavailable. Clearly identify cloud-based features and any usage charges.
+- Run automated timeline/audio/render tests and physical Android tests for playback, frame timing, memory, touch editing, export, cancellation and recovery before marking the feature device-tested.
