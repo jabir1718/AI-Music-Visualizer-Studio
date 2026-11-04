@@ -1,0 +1,16 @@
+'use strict';
+const assert=require('assert');
+const recorder=require('../voice-recorder.js');
+assert.strictEqual(recorder.extensionForMime('audio/webm;codecs=opus'),'webm');
+assert.strictEqual(recorder.extensionForMime('audio/ogg;codecs=opus'),'ogg');
+assert.strictEqual(recorder.extensionForMime('audio/mp4'),'m4a');
+assert.strictEqual(recorder.extensionForMime('audio/wav'),'wav');
+assert.strictEqual(recorder.filenameForRole('Ad-lib','audio/webm',123),'wf-ad-lib-123.webm');
+assert.strictEqual(recorder.filenameForRole('Humming / harmony','audio/ogg',456),'wf-humming-harmony-456.ogg');
+const supported={isTypeSupported:type=>type==='audio/ogg;codecs=opus'};
+assert.strictEqual(recorder.chooseMimeType(supported),'audio/ogg;codecs=opus');
+assert.strictEqual(recorder.chooseMimeType({isTypeSupported:()=>false}),'');
+assert.strictEqual(recorder.MAX_DURATION_MS,180000);
+assert.strictEqual(recorder.MAX_BYTES,30*1024*1024);
+assert.strictEqual(recorder.mount(null,'Voice',()=>{}),null,'mount must safely skip without a DOM host');
+console.log('Voice recording helper tests passed.');
