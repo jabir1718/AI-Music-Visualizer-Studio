@@ -409,7 +409,7 @@ This is an order for development, not a reduction of the full scope:
 
 ## 34. Ten-template photo + video Auto Cut (free offline milestone)
 - Import up to 12 photos and 8 videos from the device, within 180 MB total; photos are limited to 20 MB each and videos to 120 MB/180 seconds each.
-- Choose one of 10 local templates: Beat Snap, Cinematic Flow, Travel Diary, Vlog Story, Calm Aesthetic, Photo Memories, Lyric Pulse, Flash Cuts, Memory Film and Documentary.
+- Choose one of 10 local templates: Beat Snap, Cinematic Flow, Travel Diary, Vlog Story, Calm Aesthetic, Photo Memories, Lyric Pulse, Flash Cuts, Memory Film and Documentary. Each changes beat spacing and its photo motion treatment; Flash Cuts adds a brief white flash to photo changes.
 - Use the detected BPM or a clearly disclosed 120 BPM fallback. Photo-only montages are paced to the main song duration; photos receive gentle pan/zoom motion. Video clips are split into beat-sized segments.
 - Keep sources unchanged and segments editable (reorder, trim, split, remove). Save media and settings locally and in portable project packages.
 - This is deterministic offline beat/template editing, not AI scene understanding, automatic semantic photo selection, generated transitions, or a full multi-track video compositor. Codec, memory and export reliability still require physical Android testing.
