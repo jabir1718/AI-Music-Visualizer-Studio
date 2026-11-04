@@ -141,7 +141,7 @@ async function ensureEngine(){
  engine.setMainSoloMute(mixerLayers.some(x=>x.solo));return engine;
 }
 
-let mixerLayers=[],mixerPanel=null,mixerCategory='Voice',savedProjectData={},mediaDbPromise=null;
+let mixerLayers=[],mixerPanel=null,mixerCategory='Voice',savedProjectData={},mediaDbPromise=null,voiceRecorder=null;
 function syncMixerLayers(){
  const now=audio.currentTime||0;
  mixerLayers.forEach(layer=>{
@@ -224,6 +224,7 @@ function initMixerUI(){
  audio.addEventListener('ended',()=>mixerLayers.forEach(layer=>layer.audio.pause()));
 }
 function selectMusicCategory(category){
+ if(voiceRecorder){voiceRecorder.dispose();voiceRecorder=null;}
  mixerCategory=category;
  document.querySelectorAll('.music-category').forEach(btn=>btn.classList.toggle('active',btn.dataset.category===category));
  const detail=$('musicCategoryDetail'),role=$('mixerRole'),add=$('mixerAddBtn'),file=$('mixerFile');
@@ -246,6 +247,7 @@ function selectMusicCategory(category){
  add.disabled=!item.available;file.disabled=!item.available;
  if(item.available&&window.WaveForgeSoundLibrary&&['Sound effect','Engine','Character'].includes(category)){const query=category==='Engine'?'race car engine':category==='Character'?'evil laugh cartoon':'sound effect';window.WaveForgeSoundLibrary.mount(detail,query,file=>addMixerLayer(file,item.role));}
  if(category==='Cleanup'&&window.WaveForgeCleanup)window.WaveForgeCleanup.mount(detail,{onLayer:file=>addMixerLayer(file,'Voice')});
+ const recordRoles={'Voice':'Voice','Ad-lib':'Ad-lib','Humming':'Humming','Harmony':'Harmony','Voice FX':'Voice FX'};if(recordRoles[category]&&window.WaveForgeRecorder)voiceRecorder=window.WaveForgeRecorder.mount(detail,recordRoles[category],file=>addMixerLayer(file,recordRoles[category]));
  renderMixerLayers();
 }
 function addMixerLayer(file,role,restore={},persist=true){
