@@ -6,4 +6,5 @@ assert.deepStrictEqual(timeline.clipLayout(layer,30,40),{left:120,width:240,star
 assert.strictEqual(timeline.clipLayout({...layer,trimEnd:0},30,20).width,160);
 assert.strictEqual(timeline.formatTime(125.9),'02:05');
 assert.strictEqual(timeline.clipLayout({...layer,offset:-2},30,40).left,0);
+assert.deepStrictEqual(timeline.videoSegmentLayout({timelineStart:4,sourceStart:2,sourceEnd:8,rateStart:.5,rateEnd:1.5},20),{left:80,width:120,start:4,end:10,duration:6});
 console.log('Visual multitrack timeline layout tests passed.');
