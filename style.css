@@ -319,3 +319,85 @@ button[data-action-icon]:disabled{opacity:.45;cursor:not-allowed}
 .auto-video-actions button:disabled{opacity:.55;cursor:wait}
 
 .wf-timeline-clip.video{background:linear-gradient(135deg,#245d76,#287d8c);border-color:#56c4d0;color:#fff}.wf-timeline-clip.video.selected{outline:2px solid var(--accent,#8fe7d1);outline-offset:1px}.wf-video-lane{background:repeating-linear-gradient(90deg,transparent 0,transparent 39px,rgba(255,255,255,.035) 40px)}
+
+
+/* WaveForge single-screen editor shell */
+html,body{height:100%;min-height:0;overflow:hidden}
+body.wf-studio-app{height:100dvh;overflow:hidden;background:#080d13}
+body.wf-studio-app .app-shell{height:100dvh;min-height:0;overflow:hidden}
+body.wf-studio-app .topbar{height:58px;min-height:58px;padding:0 18px;background:#0b1119;border-bottom:1px solid #263341}
+body.wf-studio-app .workspace{height:calc(100dvh - 58px);min-height:0;max-width:none;margin:0;display:block;overflow:hidden}
+body.wf-studio-app .sidebar,body.wf-studio-app .inspector{display:none!important}
+body.wf-studio-app .editor.wf-single-screen{height:100%;max-width:none;width:100%;margin:0;padding:12px 16px 14px;display:grid;grid-template-columns:minmax(260px,1fr) minmax(330px,420px);grid-template-rows:38px minmax(0,1fr);gap:10px 18px;overflow:hidden}
+body.wf-studio-app .section-heading{grid-column:1/-1;grid-row:1;margin:0;min-height:0;align-items:center}
+body.wf-studio-app .section-heading h1{font-size:17px;line-height:1;margin:0;letter-spacing:-.3px}
+body.wf-studio-app .section-heading h1 em{color:#72e3c2}
+body.wf-studio-app .section-heading .eyebrow{display:none}
+body.wf-studio-app .project-chip{padding:6px 10px;font-size:9px}
+body.wf-studio-app .stage-wrap{grid-column:1;grid-row:2;min-width:0;min-height:0;width:100%;height:100%;max-width:none;margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+body.wf-studio-app .stage{height:min(100%,calc(100dvh - 185px));width:auto;max-width:100%;aspect-ratio:9/16;max-height:none;flex:0 1 auto;border-radius:16px}
+body.wf-studio-app .stage-toolbar{width:min(100%,520px);padding:7px 2px;letter-spacing:.4px}
+body.wf-studio-app .media-tools{width:min(100%,520px);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+body.wf-studio-app .drag-hint{margin:0;font-size:10px}
+body.wf-studio-app .wf-studio-dock{grid-column:2;grid-row:2;min-width:0;min-height:0;height:100%;display:flex;flex-direction:column;background:#0e1620;border:1px solid #273645;border-radius:17px;overflow:hidden;box-shadow:0 12px 40px #0003}
+body.wf-studio-app .wf-tool-nav{display:flex;gap:5px;padding:9px;overflow-x:auto;flex:0 0 auto;border-bottom:1px solid #263341;background:#101a25;scrollbar-width:thin}
+body.wf-studio-app .wf-tool-tab{flex:1 0 auto;min-width:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 7px;border:1px solid transparent;border-radius:11px;background:transparent;color:#aebdca;font:600 10px 'DM Sans',sans-serif;cursor:pointer}
+body.wf-studio-app .wf-tool-tab .wf-tab-icon{font-size:17px;line-height:1.1;color:#7ee2c2}
+body.wf-studio-app .wf-tool-tab.active{background:#203a3a;border-color:#3b776e;color:#fff}
+body.wf-studio-app .wf-tool-tab.active .wf-tab-icon{color:#9fffdc}
+body.wf-studio-app .wf-tool-content{flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain;padding:10px 12px 14px;scrollbar-color:#405464 transparent}
+body.wf-studio-app .wf-tool-content>.panel{display:none;margin:0;padding:14px;background:transparent;border:0;border-radius:0;box-shadow:none}
+body.wf-studio-app .wf-tool-content>.panel:not([hidden]){display:grid}
+body.wf-studio-app .wf-tool-content>.panel .panel-head{margin-bottom:10px}
+body.wf-studio-app .wf-tool-content>.panel h2{font-size:16px}
+body.wf-studio-app .wf-tool-content .hint{font-size:10px}
+body.wf-studio-app .wf-tool-content .auto-video-actions button{flex:1 1 auto}
+body.wf-studio-app .wf-tool-content .auto-video-segments{max-height:34vh;overflow:auto}
+body.wf-studio-app .wf-tool-content .artwork-layer-list{max-height:25vh;overflow:auto}
+body.wf-studio-app .wf-tool-content .style-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+body.wf-studio-app .wf-tool-content .template-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+body.wf-studio-app .wf-tool-content .inspector-divider{display:none}
+body.wf-studio-app .wf-export-panel .notes,body.wf-studio-app .wf-export-panel .version{display:none}
+body.wf-studio-app .wf-export-panel .full{margin-top:10px}
+body.wf-studio-app .wf-export-panel label{margin:10px 0}
+body.wf-studio-app .wf-export-panel .export-note{margin-top:10px}
+body.wf-studio-app .offline-edit-panel textarea{min-height:58px}
+body.wf-studio-app .auto-video-panel>p.hint:last-child{display:none}
+body.wf-studio-app .risk-panel{min-width:0}
+@media(max-width:760px){
+ body.wf-studio-app .topbar{height:52px;min-height:52px;padding:0 11px}
+ body.wf-studio-app .brand{font-size:12px;letter-spacing:1px;gap:7px}
+ body.wf-studio-app .brand-mark{width:29px;height:29px;border-radius:9px;font-size:17px}
+ body.wf-studio-app .brand small{font-size:7px;letter-spacing:1px}
+ body.wf-studio-app .top-actions{gap:5px}
+ body.wf-studio-app .top-actions .btn{padding:8px 10px;font-size:10px}
+ body.wf-studio-app .workspace{height:calc(100dvh - 52px)}
+ body.wf-studio-app .editor.wf-single-screen{padding:7px 8px 8px;grid-template-columns:minmax(0,1fr);grid-template-rows:26px minmax(0,1fr) minmax(205px,36dvh);gap:5px}
+ body.wf-studio-app .section-heading{grid-column:1;grid-row:1}
+ body.wf-studio-app .section-heading h1{font-size:14px}
+ body.wf-studio-app .project-chip{font-size:7px;padding:4px 7px}
+ body.wf-studio-app .stage-wrap{grid-column:1;grid-row:2;gap:1px}
+ body.wf-studio-app .stage{height:100%;width:auto;max-width:100%;max-height:100%;border-radius:12px}
+ body.wf-studio-app .stage-toolbar{padding:3px 0;font-size:8px}
+ body.wf-studio-app .ratio{padding:4px 6px;font-size:8px}
+ body.wf-studio-app .media-tools{justify-content:center;gap:5px}
+ body.wf-studio-app .media-tools .hint,body.wf-studio-app .drag-hint{display:none}
+ body.wf-studio-app .file-button{margin:2px 0;padding:7px 9px;font-size:9px}
+ body.wf-studio-app .wf-studio-dock{grid-column:1;grid-row:3;border-radius:13px}
+ body.wf-studio-app .wf-tool-nav{padding:5px;gap:3px}
+ body.wf-studio-app .wf-tool-tab{min-width:53px;padding:6px 5px;font-size:9px;gap:2px}
+ body.wf-studio-app .wf-tool-tab .wf-tab-icon{font-size:15px}
+ body.wf-studio-app .wf-tool-content{padding:5px 7px 8px}
+ body.wf-studio-app .wf-tool-content>.panel{padding:8px}
+ body.wf-studio-app .wf-tool-content>.panel .panel-head{margin-bottom:7px}
+ body.wf-studio-app .wf-tool-content .auto-video-segments{max-height:15dvh}
+ body.wf-studio-app .wf-tool-content .artwork-layer-list{max-height:13dvh}
+ body.wf-studio-app .wf-tool-content .style-card{padding:6px 3px}
+ body.wf-studio-app .wf-tool-content .style-preview{height:25px}
+ body.wf-studio-app .wf-tool-content .style-card b{font-size:8px}
+}
+@media(max-height:680px) and (max-width:760px){
+ body.wf-studio-app .editor.wf-single-screen{grid-template-rows:22px minmax(0,1fr) minmax(175px,34dvh)}
+ body.wf-studio-app .stage-toolbar{display:none}
+ body.wf-studio-app .media-tools{display:none}
+}
