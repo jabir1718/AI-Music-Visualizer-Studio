@@ -17,7 +17,7 @@ let engine=null,raf=0,playing=false,style='bars',logoUrl=null,logoImage=null,med
 const palette={aurora:['#9b8cff','#65e5c0','#e8f5ff'],sunset:['#ff8c75','#ffca7a','#f8a8cf'],ice:['#62d8ff','#9fbaff','#e4f7ff'],mono:['#fff','#b9c4d5','#eef3fb']};
 const positions={title:{x:.5,y:.23},subtitle:{x:.5,y:.29},lyric:{x:.5,y:.80},logo:{x:.82,y:.08}};
 const objectDefaults={title:{visible:true,scale:1,rotation:0,opacity:1,color:''},subtitle:{visible:true,scale:1,rotation:0,opacity:1,color:''},lyric:{visible:true,scale:1,rotation:0,opacity:1,color:''},logo:{visible:true,scale:1,rotation:0,opacity:1,color:''}};
-let objectSettings=JSON.parse(JSON.stringify(objectDefaults)),selectedObject='title';
+let objectSettings=JSON.parse(JSON.stringify(objectDefaults)),selectedObject='title',wordSync=null;
 function setStatus(t){$('saveState').textContent='● '+t;}
 function fmt(s){if(!isFinite(s))s=0;return String(Math.floor(s/60)).padStart(2,'0')+':'+String(Math.floor(s%60)).padStart(2,'0');}
 function resizeCanvas(){
@@ -328,10 +328,44 @@ function loadAudio(file){
  if(audio.src)URL.revokeObjectURL(audio.src);audioFile=file;audio.src=URL.createObjectURL(file);saveMediaAsset('main',file);
  $('trackName').textContent=file.name;$('trackMeta').textContent=(file.type||'Audio')+' · '+(file.size/1024/1024).toFixed(1)+' MB';$('playBtn').textContent='▶';$('timeLabel').textContent='00:00 / 00:00';if(file.name!==savedTrackName)lyrics=[];savedTrackName=file.name;renderLyricList();setStatus('Audio loaded');saveSettings();
 }
+function updateWordSyncPanel(){
+ const panel=$('wordSyncPanel');if(!panel||!wordSync)return;
+ const total=wordSync.words.length,done=wordSync.marks.length,next=wordSync.words[done];
+ $('wordSyncProgress').textContent=done+'/'+total+' words marked';
+ $('wordSyncCurrent').textContent=next?'Next word: “'+next+'”':'All words marked · finish to apply timing';
+ $('wordSyncMark').disabled=done>=total;$('wordSyncFinish').disabled=done!==total;
+ $('wordSyncUndo').disabled=done===0;
+}
+function beginWordSync(index){
+ const line=lyrics[index];if(!line)return;
+ const words=String(line.text||'').trim().split(/\s+/).filter(Boolean);
+ if(!words.length)return;
+ wordSync={lineIndex:index,words,marks:[]};$('wordSyncPanel').hidden=false;updateWordSyncPanel();
+ $('wordSyncStatus').textContent='Play the song, then tap Mark word as each word begins.';
+ $('wordSyncPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function markSyncWord(){
+ if(!wordSync)return;
+ const line=lyrics[wordSync.lineIndex],time=audio.currentTime||0,last=wordSync.marks[wordSync.marks.length-1];
+ if(time<line.start||time>=line.end){$('wordSyncStatus').textContent='Move playback inside this lyric line ('+fmt(line.start)+'–'+fmt(line.end)+').';return;}
+ if(last&&time<=last.time){$('wordSyncStatus').textContent='Play forward before marking the next word.';return;}
+ wordSync.marks.push({time});updateWordSyncPanel();
+ $('wordSyncStatus').textContent=wordSync.marks.length===wordSync.words.length?'All words marked. Tap Finish to apply word timing.':'Word start saved at '+fmt(time)+'. Keep playing and mark the next word.';
+}
+function undoSyncWord(){if(!wordSync||!wordSync.marks.length)return;wordSync.marks.pop();updateWordSyncPanel();$('wordSyncStatus').textContent='Last word mark removed.';}
+function finishWordSync(){
+ if(!wordSync)return;
+ if(wordSync.marks.length!==wordSync.words.length){$('wordSyncStatus').textContent='Mark every word before finishing.';return;}
+ const line=lyrics[wordSync.lineIndex],marks=wordSync.marks;
+ if(marks.some((m,i)=>i&&m.time<=marks[i-1].time)||marks[marks.length-1].time>=line.end){$('wordSyncStatus').textContent='Word timings must increase and finish before the lyric line ends.';return;}
+ line.words=wordSync.words.map((text,i)=>({text,start:marks[i].time,end:i+1<marks.length?marks[i+1].time:line.end}));
+ wordSync=null;$('wordSyncPanel').hidden=true;renderLyricList();saveSettings();
+}
+function cancelWordSync(){wordSync=null;$('wordSyncPanel').hidden=true;}
 function renderLyricList(){
  const host=$('lyricList');host.innerHTML='';
  if(!lyrics.length){host.innerHTML='<span class="hint">Generated or imported lyric lines will appear here.</span>';return;}
- lyrics.forEach((line,i)=>{const row=document.createElement('div');row.className='lyric-row';const time=document.createElement('time');time.textContent=fmt(line.start);const text=document.createElement('span');text.textContent=line.text;const edit=document.createElement('button');edit.textContent='Edit';decorateActionButton(edit);edit.onclick=()=>{const v=prompt('Edit lyric line',line.text);if(v!==null){line.text=v;if(Array.isArray(line.words))delete line.words;$('captionInput').value=lyrics.map(x=>x.text).join('\n');renderLyricList();saveSettings();}};row.append(time,text,edit);host.appendChild(row);});
+ lyrics.forEach((line,i)=>{const row=document.createElement('div');row.className='lyric-row';const time=document.createElement('time');time.textContent=fmt(line.start);const text=document.createElement('span');text.textContent=line.text;const edit=document.createElement('button');edit.textContent='Edit';decorateActionButton(edit);edit.onclick=()=>{const v=prompt('Edit lyric line',line.text);if(v!==null){line.text=v;if(Array.isArray(line.words))delete line.words;$('captionInput').value=lyrics.map(x=>x.text).join('\n');renderLyricList();saveSettings();}};const sync=document.createElement('button');sync.textContent='Sync words';decorateActionButton(sync);sync.onclick=()=>beginWordSync(i);row.append(time,text,sync,edit);host.appendChild(row);});
 }
 function manualLyrics(){
  const lines=$('captionInput').value.split(/\n+/).map(x=>x.trim()).filter(Boolean),duration=audio.duration||Math.max(4,lines.length*4),previous=lyrics;
@@ -357,6 +391,7 @@ $('fadeIn').oninput=e=>$('fadeInValue').textContent=e.target.value+'s';$('fadeOu
 document.querySelectorAll('.style-card').forEach(b=>b.onclick=()=>{style=b.dataset.style;document.querySelectorAll('.style-card').forEach(x=>x.classList.toggle('selected',x===b));saveSettings();});
 ['titleInput','subtitleInput','textColor','fontStyle','visualColor','intensity','sensitivity'].forEach(id=>$(id).addEventListener('input',()=>{updateText();saveSettings();}));
 $('captionInput').addEventListener('input',manualLyrics);
+$('wordSyncMark').onclick=markSyncWord;$('wordSyncUndo').onclick=undoSyncWord;$('wordSyncFinish').onclick=finishWordSync;$('wordSyncCancel').onclick=cancelWordSync;
 document.querySelectorAll('.template-card').forEach(b=>b.onclick=()=>{selectTemplate(b.dataset.template);saveSettings();});
 $('lyricSize').oninput=saveSettings;
 $('lyricPosition').onchange=e=>{positions.lyric.y=e.target.value==='upper'?.36:e.target.value==='middle'?.56:.80;saveSettings();};
