@@ -26,7 +26,7 @@ assert(/WaveForgeBPM\.fromTaps/.test(app)&&/tapTempoBtn/.test(app)&&/tapBeatOffs
 assert(/fromTaps\(times\)/.test(fs.readFileSync('bpm-engine.js','utf8')),'Tap tempo estimator API is missing');
 assert(/line\.words=wordSync\.words\.map/.test(app),'Word timing data is not stored on lyric lines');
 assert(/wordSyncMark/.test(index)&&/wordSyncPanel/.test(index),'Word timing controls are not present in the lyric UI');
-assert(/getMediaAsset\('logo'\)/.test(app)&&/saveMediaAsset\('logo',f\)/.test(app),'Logo media is not restored and persisted');
+assert(/getMediaAsset\('logo'\)/.test(app)&&/saveMediaAsset\('logo',file\)/.test(app),'Logo media is not restored and persisted');
 assert(/getMediaAsset\('background'\)/.test(app)&&/saveMediaAsset\('background',f\)/.test(app),'Background media is not restored and persisted');
 assert(/deleteMediaAsset\('logo'\)/.test(app)&&/deleteMediaAsset\('background'\)/.test(app),'Clearing media does not remove saved assets');
 assert(/image\/jpeg':'jpg'/.test(images)&&/image\/webp':'webp'/.test(images),'Image import must preserve supported file extensions');
