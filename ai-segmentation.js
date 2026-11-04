@@ -1,7 +1,7 @@
 (function(root){
 'use strict';
 const BASE='https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@0.1.1675465747/';
-let enabled=false,model=null,loading=null,processing=false,lastResults=null,lastSent=0,status='AI model not loaded',onStatus=()=>{};
+let enabled=false,model=null,loading=null,modelLoading=null,failed=false,processing=false,lastResults=null,lastSent=0,status='AI model not loaded',onStatus=()=>{};
 let foreground=null,maskCanvas=null,lastSource=null;
 function setSettings(value){if(value&&typeof value.enabled==='boolean')enabled=value.enabled;return getSettings();}
 function getSettings(){return{enabled};}
@@ -20,16 +20,19 @@ function loadScript(){
 async function loadModel(callback){
  if(typeof callback==='function')onStatus=callback;
  if(model)return true;
- if(loading&&model)return true;
- report('Loading AI person-segmentation library…');
- try{
-  await loadScript();
-  const instance=new root.SelfieSegmentation({locateFile:file=>BASE+file});
-  instance.setOptions({modelSelection:0});
-  instance.onResults(results=>{lastResults=results;processing=false;});
-  await instance.initialize();
-  model=instance;report('AI person segmentation ready. Processing stays on this device.');return true;
- }catch(error){processing=false;report('AI segmentation unavailable: '+error.message);throw error;}
+ if(modelLoading)return modelLoading;
+ modelLoading=(async()=>{
+  report('Loading AI person-segmentation library…');
+  try{
+   await loadScript();
+   const instance=new root.SelfieSegmentation({locateFile:file=>BASE+file});
+   instance.setOptions({modelSelection:0});
+   instance.onResults(results=>{lastResults=results;processing=false;});
+   await instance.initialize();
+   model=instance;failed=false;report('AI person segmentation ready. Processing stays on this device.');return true;
+  }catch(error){processing=false;failed=true;report('AI segmentation unavailable: '+error.message);throw error;}
+ })();
+ try{return await modelLoading;}finally{modelLoading=null;}
 }
 function ensureCanvases(w,h){
  const scale=Math.min(1,720/Math.max(w,h)),width=Math.max(1,Math.round(w*scale)),height=Math.max(1,Math.round(h*scale));
@@ -39,7 +42,7 @@ function ensureCanvases(w,h){
 }
 function draw(ctx,source,x,y,dw,dh,w,h){
  if(!enabled)return false;
- if(!model){if(!loading)loadModel(onStatus).catch(()=>{});return false;}
+ if(!model){if(!modelLoading&&!failed)loadModel(onStatus).catch(()=>{});return false;}
  const now=Date.now(),isVideo=String(source.tagName||'').toLowerCase()==='video';
  if(!processing&&(isVideo?now-lastSent>100:lastSource!==source)){processing=true;lastSent=now;lastSource=source;Promise.resolve(model.send({image:source})).catch(error=>{processing=false;report('AI segmentation frame failed: '+error.message);});}
  if(!lastResults||!lastResults.segmentationMask||!lastResults.image)return false;
@@ -60,7 +63,7 @@ function mount(host,onChange){
  const update=message=>{label.textContent=message;button.disabled=!!model;};
  onStatus=update;
  toggle.onchange=()=>{enabled=toggle.checked;if(onChange)onChange(getSettings());};
- button.onclick=async()=>{button.disabled=true;try{await loadModel(update);}catch(e){}finally{button.disabled=!!model;}};
+ button.onclick=async()=>{button.disabled=true;failed=false;try{await loadModel(update);}catch(e){}finally{button.disabled=!!model;}};
 }
 const api={setSettings,getSettings,loadModel,draw,mount,getStatus:()=>status};
 root.WaveForgeSegmentation=api;
