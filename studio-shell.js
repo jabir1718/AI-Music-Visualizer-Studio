@@ -49,6 +49,12 @@ function init(){
  ];
  const grid=toolSection.querySelector('#wfToolGrid');
  const descriptions=new Map(tools.map(t=>[t[0],t[3]]));
+ function focusToolTarget(id,p){
+  const targets={filterStudio:['#filterStudio','.filter-studio'],colorTools:['#visualColor'],stickerTools:['#symbolLibrary','.symbol-library'],overlayTools:['#artworkLayerPanel'],transitionTools:['#autoVideoSegments'],speedTools:['#autoVideoSegments']};
+  const selectors=targets[id]||[];
+  for(const selector of selectors){const target=p&&p.querySelector(selector);if(target){target.scrollIntoView({block:'start',behavior:'smooth'});return true;}}
+  return false;
+ }
  function panelFor(id){
   if(id==='filterStudio')return editor.querySelector('#filterStudio')?.closest('.panel')||panelMap.get('visualPanel');
   if(id==='transitionTools'||id==='speedTools')return panelMap.get('autoVideoPanel');
@@ -80,9 +86,10 @@ function init(){
   modal.querySelector('#wfModalPreviewText').textContent=desc;
   const tabs=modal.querySelector('#wfModalTabs');tabs.replaceChildren();
   const related=tools.filter(t=>panelFor(t[0])===p);
-  related.forEach(t=>{const tab=document.createElement('button');tab.type='button';tab.textContent=t[2];tab.className=t[0]===id?'active':'';tab.addEventListener('click',()=>{modal.querySelector('#wfModalTitle').textContent=t[2];modal.querySelector('#wfModalPreviewTitle').textContent=t[2];modal.querySelector('#wfModalPreviewText').textContent=t[3];tabs.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===tab));const targets={filterStudio:['#filterStudio','.filter-studio'],colorTools:['#visualColor'],stickerTools:['#symbolLibrary','.symbol-library'],overlayTools:['#artworkLayerPanel'],transitionTools:['#autoVideoSegments'],speedTools:['#autoVideoSegments']};const selectors=targets[t[0]]||[];let target=null;for(const selector of selectors){target=p.querySelector(selector);if(target)break;}if(target)target.scrollIntoView({block:'start',behavior:'smooth'});});tabs.append(tab);});
+  related.forEach(t=>{const tab=document.createElement('button');tab.type='button';tab.textContent=t[2];tab.className=t[0]===id?'active':'';tab.addEventListener('click',()=>{modal.querySelector('#wfModalTitle').textContent=t[2];modal.querySelector('#wfModalPreviewTitle').textContent=t[2];modal.querySelector('#wfModalPreviewText').textContent=t[3];tabs.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===tab));focusToolTarget(t[0],p);});tabs.append(tab);});
   const host=modal.querySelector('#wfModalContent');host.replaceChildren();host.append(p);p.hidden=false;
   modal.querySelector('.wf-modal-sheet').scrollTop=0;
+  requestAnimationFrame(()=>focusToolTarget(id,p));
  }
  function close(){modal.hidden=true;document.body.classList.remove('wf-modal-open');modal.querySelectorAll('.wf-modal-content>.panel').forEach(p=>p.hidden=true);}
  modal.addEventListener('click',e=>{if(e.target.closest('[data-close]'))close();});
