@@ -13,7 +13,7 @@ Last source audit: 2026-11-04 (after editable object layers, image import, 50 fi
 
 | # | Feature group | Current status | Verified source-level foundation / remaining work |
 |---:|---|---|---|
-| 1 | Lyrics, transcription and karaoke | Partial | Whisper timed-line transcription, manual lyrics, SRT/VTT import/editing and a manual word-sync workflow now let users mark each word's start during playback; karaoke highlighting uses saved word timings. Automatic word-level alignment and robust transcription correction remain. |
+| 1 | Lyrics, transcription and karaoke | Partial | Whisper transcription now requests word-level timestamps and stores them per word for karaoke highlighting; manual word-sync can correct timing, and SRT/VTT import/editing is supported. Timestamp quality depends on Whisper's recognition output; forced alignment, robust transcription correction and singing-aware lyric recognition remain. |
 | 2 | Fonts, typography and 3D text studio | Partial | Added a searchable 100-family typography studio with independent title/subtitle/lyrics font family, weight, scale, spacing, outline, glow and canvas extrusion-depth controls. Google Fonts load on demand; offline fallback remains. This is layered 2D canvas extrusion, not volumetric 3D text. |
 | 3 | Advanced music visualizer | Partial | Four canvas visualizer modes, color/intensity/sensitivity controls and audio-energy reaction exist. Advanced 3D designs, true beat maps and broader object controls are missing. |
 | 4 | Tempo, BPM and timing studio | Partial | Offline BPM estimation plus tap-tempo calculation now report tempo and rhythm consistency. Tapping while the song plays anchors a manual beat pulse grid to the song position; advanced beat-grid editing and automation remain. |
