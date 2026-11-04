@@ -18,6 +18,7 @@ const defaults=()=>({
  lyric:{family:'Montserrat',weight:800,scale:1,spacing:0,depth:0,outline:0,glow:0,depthColor:'#10172b',outlineColor:'#ffffff'}
 });
 let styles=defaults();
+const requestedFonts=new Set();
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function normalize(key,value){
  const d=defaults()[key]||defaults().title,s={...d,...(value||{})};
@@ -36,7 +37,8 @@ function setAll(value){const d=defaults();Object.keys(d).forEach(k=>styles[k]=no
 function getAll(){return JSON.parse(JSON.stringify(styles));}
 function getStyle(key){return {...(styles[key]||styles.title)};}
 function loadFont(family){
- if(!fonts.includes(family)||!root.document)return;
+ if(!fonts.includes(family)||!root.document||requestedFonts.has(family))return;
+ requestedFonts.add(family);
  const id='wf-font-'+family.toLowerCase().replace(/[^a-z0-9]+/g,'-');
  if(!root.document.getElementById(id)){
   const link=root.document.createElement('link');link.id=id;link.rel='stylesheet';
