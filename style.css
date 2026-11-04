@@ -674,3 +674,13 @@ body.wf-dashboard-app .wf-tool-modal{inset:64px 0 0}
  body.wf-dashboard-app .wf-hero .stage{height:min(32dvh,340px)!important;max-height:340px}
  body.wf-dashboard-app .wf-tool-card{min-height:76px}
 }
+
+.wf-clip-lane{display:flex;align-items:stretch;gap:6px;min-height:38px;overflow:hidden}
+.wf-add-clip{flex:0 0 56px;border:1px solid #20dfff;border-radius:10px;background:linear-gradient(145deg,#15194b,#080d25);color:#55eaff;font-size:19px;box-shadow:0 0 10px #1adfff33;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer}
+.wf-add-clip small{font-size:6px;line-height:1.1;color:#c5d9ff}
+.wf-clip-placeholder{flex:1;min-width:0;border:1px solid #6444b8;border-radius:10px;background:linear-gradient(100deg,#101b49,#210d43,#082044);display:flex;flex-direction:column;justify-content:center;padding:5px 9px;gap:2px}
+.wf-clip-placeholder span{font-size:6px;letter-spacing:1.2px;color:#53eaff}
+.wf-clip-placeholder b{font-size:8px;color:#e3eaff}
+.wf-transport button{width:25px;height:25px;border:1px solid #4549a0;border-radius:50%;background:#11153c;color:#f5f4ff;font-size:12px;display:grid;place-items:center;cursor:pointer}
+.wf-transport button[data-transport="play"]{width:32px;height:32px;border-color:#ed3dff;background:radial-gradient(circle,#ec37ff,#49158b);box-shadow:0 0 13px #d52dff88;font-size:14px}
+body.wf-dashboard-app .wf-timeline{gap:5px}
