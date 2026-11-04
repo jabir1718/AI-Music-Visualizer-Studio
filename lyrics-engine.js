@@ -70,6 +70,7 @@
       const words=result.text.trim().split(' ').filter(Boolean);
       words.forEach((word,i)=>tokens.push({text:word,start:decoded.duration*i/words.length,end:decoded.duration*(i+1)/words.length}));
     }
+    const lines=[];
     for(let i=0;i<tokens.length;i+=5){
       const group=tokens.slice(i,i+5);
       if(!group.length)continue;
