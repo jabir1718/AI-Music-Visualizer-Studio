@@ -57,7 +57,7 @@ assert(/audio-cleanup\.js/.test(index)&&/WaveForgeCleanup\.mount/.test(app),'Spe
 assert(/symbol-library\.js/.test(index)&&/WaveForgeSymbols\.mount/.test(app)&&/loadLogoFile/.test(app),'OpenMoji symbol library is not connected to logo import');
 assert(/three-studio\.js/.test(index)&&/WaveForge3D\.mount/.test(app)&&/initThreeStudio/.test(app),'3D object studio is not mounted');
 assert(/WaveForge3D\.drawToCanvas\(ctx,w,h\)/.test(app),'3D object is not composited into the visualizer canvas');
-assert(/threeStudio:window\.WaveForge3D\.getSettings\(\)/.test(app)&&/WaveForge3D\.setSettings\(d\.threeStudio\)/.test(app),'3D overlay settings are not saved/restored');
+assert(/threeStudio:window\.WaveForge3D\?window\.WaveForge3D\.getSettings\(\)/.test(app)&&/WaveForge3D\.setSettings\(d\.threeStudio\)/.test(app),'3D overlay settings are not saved/restored');
 assert(/onChange:saveSettings/.test(app),'3D studio changes are not connected to editor autosave');
 assert(/type="importmap"/.test(index)&&/three\/addons/.test(index),'Three.js import map for 3D text addons is missing');
 assert(/aiSegmentation:window\.WaveForgeSegmentation/.test(app),'AI segmentation settings are not saved');
