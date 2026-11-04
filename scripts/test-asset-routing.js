@@ -7,8 +7,9 @@ const app=read('app.js'),images=read('image-search.js'),symbols=read('symbol-lib
 for(const [label,source,pattern] of [
  ['asset bridge exposed',app,/WaveForgeAssetBridge\s*=\s*\{/],
  ['background import routed through shared loader',app,/if\(target==='background'\)return setBackgroundFile\(file\)/],
- ['artwork has independent placement',app,/target==='artwork'[\s\S]*positions\.logo=\{x:\.5,y:\.55\}/],
- ['text decoration has independent placement',app,/target==='text-decoration'[\s\S]*positions\.logo=\{x:\.5,y:\.34\}/],
+ ['artwork routes to independent layer stack',app,/WaveForgeArtworkLayers\.add\(file,target\)/],
+ ['artwork layer module is initialized',app,/WaveForgeArtworkLayers\.mount\(\$\('artworkLayerPanel'\)/],
+ ['artwork layers render into export canvas',app,/WaveForgeArtworkLayers\.draw\(ctx,w,h\)/],
  ['image search supports background',images,/importImage\(item,'background'/],
  ['image search supports logo',images,/importImage\(item,'logo'/],
  ['image search supports artwork',images,/importImage\(item,'artwork'/],
