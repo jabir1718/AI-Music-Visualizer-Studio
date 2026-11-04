@@ -132,7 +132,7 @@ async function ensureEngine(){
  for(const layer of mixerLayers){
   if(!layer.connected){const soloActive=mixerLayers.some(x=>x.solo);engine.addLayer(layer.id,layer.audio,(!layer.muted&&(!soloActive||layer.solo))?layer.volume:0,layer);layer.connected=true;}
   if(layer.pitchPreserving&&!engine.layers.get(layer.id).pitchNode){
-   try{await enableLayerPitchNode(layer,engine);}
+   try{const wantsFormant=layer.formantStrength>0;await enableLayerPitchNode(layer,engine);if(wantsFormant&&layer.formantStrength===0)fallback=true;}
    catch(error){layer.pitchPreserving=false;layer.rate=Math.pow(2,layer.pitch/12);layer.audio.playbackRate=layer.rate;fallback=true;setStatus('Pitch-preserving DSP unavailable; standard pitch/rate restored. '+error.message);}
   }
  }
@@ -311,7 +311,7 @@ function renderMixerLayers(){
   speedControl.hidden=!layer.pitchPreserving;
   const formantControl=addRange('Formant preservation','formantStrength',0,100,5,'%',v=>{if(layer.pitchPreserving&&engine&&layer.connected)enableLayerPitchNode(layer,engine).then(()=>{if(layer.formantStrength===0)renderMixerLayers();}).catch(error=>setStatus('Formant processing unavailable: '+error.message));});
   formantControl.hidden=!layer.pitchPreserving;
-  const preserveWrap=document.createElement('label');preserveWrap.className='mixer-pitch-preserve';preserveWrap.title='SoundTouchJS AudioWorklet (MPL-2.0) loads from jsDelivr on first use; internet and AudioWorklet support are required.';const preserve=document.createElement('input');preserve.type='checkbox';preserve.checked=!!layer.pitchPreserving;const preserveText=document.createElement('span');preserveText.textContent='Pitch preserving · separate pitch from speed';preserveWrap.append(preserve,preserveText);row.append(preserveWrap);
+  const preserveWrap=document.createElement('label');preserveWrap.className='mixer-pitch-preserve';preserveWrap.title='SoundTouchJS AudioWorklet (MPL-2.0) loads from jsDelivr on first use; formant correction is available for voice layers. Internet and AudioWorklet support are required.';const preserve=document.createElement('input');preserve.type='checkbox';preserve.checked=!!layer.pitchPreserving;const preserveText=document.createElement('span');preserveText.textContent='Pitch preserving · separate pitch from speed';preserveWrap.append(preserve,preserveText);row.append(preserveWrap);
   preserve.onchange=async()=>{if(preserve.checked){try{const eng=await ensureEngine();await enableLayerPitchNode(layer,eng);layer.pitchPreserving=true;speedControl.hidden=false;formantControl.hidden=false;setStatus('Pitch and speed are independent for this layer.');}catch(error){layer.pitchPreserving=false;preserve.checked=false;setStatus('Pitch-preserving DSP unavailable: '+error.message);}}else{const effective=Math.pow(2,layer.pitch/12);if(engine&&layer.connected)engine.disableLayerPitchPreserving(layer.id,effective);layer.pitchPreserving=false;layer.rate=effective;layer.audio.playbackRate=effective;speedControl.hidden=true;formantControl.hidden=true;setStatus('Pitch-preserving mode disabled; speed is linked to pitch again.');}renderMixerLayers();syncMixerLayers();saveSettings();};
   addRange('Stereo pan','pan',-1,1,.05,'',v=>{if(engine&&layer.connected)engine.setLayerPan(layer.id,v);});
   addRange('Bass EQ','bass',-12,12,1,' dB',()=>{if(engine&&layer.connected)engine.setLayerEQ(layer.id,layer.bass,layer.treble);});
