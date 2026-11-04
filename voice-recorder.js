@@ -29,8 +29,8 @@ function mount(host,options={}){
  const panel=root.document.createElement('section');panel.className='voice-recorder-panel';
  panel.innerHTML='<div class="eyebrow">MICROPHONE RECORDING</div><h4>Record a new '+String(options.role||'voice').replace(/[&<>"]/g,'')+' layer</h4><p>Record vocals, ad-libs, humming or harmonies directly into a separate mixer layer. The original song is not changed and microphone audio stays on this device.</p><div class="voice-recorder-actions"><button type="button" class="btn small primary" data-record-start>● Start recording</button><button type="button" class="btn small" data-record-stop disabled>■ Stop</button><button type="button" class="btn small" data-record-cancel disabled>Cancel</button></div><div class="voice-recorder-meter"><span data-record-meter></span></div><p class="hint" data-record-status aria-live="polite">Ready · maximum 03:00 per take</p><div class="voice-recorder-output" data-record-output hidden><audio controls preload="metadata" data-record-preview></audio><div class="voice-recorder-actions"><button type="button" class="btn small primary" data-record-add>Add to mixer</button><a class="btn small" data-record-download download>Download recording</a></div></div><small class="voice-recorder-note">Microphone permission is required. Use headphones while recording to reduce background music bleed. This records your performance; it does not generate vocals or automatically remove the backing track.</small>';
  host.appendChild(panel);
- const q=selector=>panel.querySelector(selector),start=q('[data-record-start]'),stop=q('[data-record-stop]'),cancel=q('[data-record-cancel]'),status=q('[data-record-status]'),meter=q('[data-record-meter]'),output=q('[data-record-output]'),preview=q('[data-record-preview]'),add=q('[data-record-add]'),download=q('[data-record-download');
- let recorder=null,stream=null,chunks=[],file=null,url=null,timer=null,started=0,discard=false,finished=false,bytes=0;
+ const q=selector=>panel.querySelector(selector),start=q('[data-record-start]'),stop=q('[data-record-stop]'),cancel=q('[data-record-cancel]'),status=q('[data-record-status]'),meter=q('[data-record-meter]'),output=q('[data-record-output]'),preview=q('[data-record-preview]'),add=q('[data-record-add]'),download=q('[data-record-download]');
+ let recorder=null,stream=null,chunks=[],file=null,url=null,timer=null,started=0,discard=false,bytes=0,requestId=0;
  const session={cancel:()=>cancelTake()};active.add(session);
  function releaseStream(){if(stream)stream.getTracks().forEach(track=>track.stop());stream=null;}
  function releaseOutput(){if(url)root.URL.revokeObjectURL(url);url=null;preview.removeAttribute('src');preview.load();file=null;output.hidden=true;}
@@ -42,7 +42,7 @@ function mount(host,options={}){
  function finish(){
   if(timer){root.clearInterval(timer);timer=null;}
   releaseStream();setRecordingState(false);
-  if(discard){discard=false;status.textContent='Recording discarded.';return;}
+  if(discard){discard=false;chunks=[];bytes=0;recorder=null;status.textContent='Recording discarded.';active.delete(session);return;}
   const blob=new root.Blob(chunks,{type:(recorder&&recorder.mimeType)||chunks[0]?.type||'audio/webm'});
   try{
    file=makeRecordingFile(blob,options.role);
@@ -50,16 +50,17 @@ function mount(host,options={}){
    url=root.URL.createObjectURL(file);preview.src=url;download.href=url;download.download=file.name;output.hidden=false;
    status.textContent='Take ready · '+formatTime(elapsed())+' · '+(file.size/1024/1024).toFixed(2)+' MB';
   }catch(error){status.textContent='Recording failed: '+error.message;}
-  chunks=[];bytes=0;recorder=null;finished=true;active.delete(session);
+  chunks=[];bytes=0;recorder=null;
  }
  async function startRecording(){
   if(recorder&&recorder.state==='recording')return;
   if(!root.navigator||!root.navigator.mediaDevices||typeof root.navigator.mediaDevices.getUserMedia!=='function'){status.textContent='Microphone access is unavailable. Open the app in a secure browser or supported Android WebView.';return;}
   if(typeof root.MediaRecorder!=='function'){status.textContent='MediaRecorder is not supported on this device.';return;}
-  releaseOutput();chunks=[];bytes=0;discard=false;finished=false;
+  releaseOutput();chunks=[];bytes=0;discard=false;const currentRequest=++requestId;
   start.disabled=true;status.textContent='Requesting microphone permission…';
   try{
    stream=await root.navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+   if(currentRequest!==requestId){releaseStream();return;}
    const mime=chooseMimeType(root.MediaRecorder),instance=mime?new root.MediaRecorder(stream,{mimeType:mime}):new root.MediaRecorder(stream);
    recorder=instance;started=Date.now();
    instance.ondataavailable=event=>{if(event.data&&event.data.size){bytes+=event.data.size;if(bytes>MAX_BYTES){status.textContent='Recording stopped: 100 MB safety limit reached.';discard=true;instance.stop();return;}chunks.push(event.data);}};
@@ -71,7 +72,7 @@ function mount(host,options={}){
  }
  function stopRecording(){if(recorder&&recorder.state==='recording')recorder.stop();}
  function cancelTake(){
-  discard=true;if(timer){root.clearInterval(timer);timer=null;}
+  requestId++;discard=true;if(timer){root.clearInterval(timer);timer=null;}
   if(recorder&&recorder.state==='recording'){recorder.stop();}else{releaseStream();setRecordingState(false);chunks=[];bytes=0;recorder=null;releaseOutput();status.textContent='Recording cancelled.';active.delete(session);}
  }
  start.onclick=startRecording;stop.onclick=stopRecording;cancel.onclick=cancelTake;
