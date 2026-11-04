@@ -295,6 +295,32 @@
 - Copyright-risk estimate/warning for user-selected media where a reliable authorized checking service is available; clearly label it as an estimate, not legal advice or a guarantee that a video is safe to publish.
 - Keep all effects and publishing aids optional and independently editable; do not silently add effects or change the user's source media.
 
+
+## 29. Dedicated post-import Music Studio and nested editing workflow
+- After the user imports an MP3/audio track, open a dedicated Music Studio workspace for that selected track instead of presenting a scattered collection of unrelated controls.
+- Keep the song identity, waveform/timeline, playback, play/pause, seek, loop and master preview easy to reach.
+- Organize editing into separate top-level feature buttons/tabs or clearly grouped panels. Opening a feature reveals its own nested sub-options; do not display every detailed control at once.
+- Keep the interface visually modern, compact and touch-friendly, with a central preview/timeline and contextual controls. Avoid the older flat layout with many permanent buttons crowded together.
+- Provide separate vocal/audio editing categories, including:
+  - Main vocal and vocal cleanup.
+  - Background vocals.
+  - Ad-libs and doubled/stacked vocals.
+  - Humming and humming-style layers/effects.
+  - Harmonies and backing harmonies.
+  - Pitch correction/tuning where supported.
+  - Voice changer and character effects.
+  - Breath, noise and unwanted-sound cleanup.
+  - Bass, drums, piano, guitar and other instrument stems where available.
+  - Sound effects and added audio layers.
+- Each category should open dedicated sub-controls, such as add/import or generate where supported, select source, preview, trim, timing/offset, volume, pan, pitch, speed, fade, mute/solo, effects, duplicate and remove.
+- Allow users to add a new ad-lib, hum/humming layer, harmony or vocal effect as a separate track, position it on the timeline, preview it in context and adjust it without changing the original song.
+- Make it clear which operations edit an existing isolated stem and which create/add a new recorded, imported or generated layer. Do not imply that a mixed MP3 already contains separately editable ad-libs, humming, vocals or instruments.
+- When the source is a single mixed MP3, offer optional AI source separation for supported stems. If separation cannot isolate a requested part cleanly, explain the limitation and let the user add/record/import a separate layer instead.
+- Preserve the original imported audio as a non-destructive source. Provide duplicate/version or undo/redo before destructive processing.
+- Keep background music, voice, ad-libs, humming, harmonies and added effects on independently controllable paths. Changing one layer must not unexpectedly alter another.
+- Keep all nested controls fast to open, avoid unnecessary loading, and show progress/cancel only for operations that genuinely need processing.
+- Remember each track's editing state in the project so the user can reopen the Music Studio and continue editing.
+
 ---
 
 ## Suggested delivery order
