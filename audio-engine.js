@@ -1,6 +1,6 @@
 (function(){
   class AudioEngine {
-    constructor(audio){this.audio=audio;this.context=null;this.analyser=null;this.source=null;this.gain=null;this.exportDestination=null;this.monitorGain=null;this.masterVolume=.85;this.data=null;this.lastBeat=0;this.energy=0;this.ready=false;this.layers=new Map();this.reverbBuffer=null;}
+    constructor(audio){this.audio=audio;this.context=null;this.analyser=null;this.source=null;this.gain=null;this.mainSoloGain=null;this.exportDestination=null;this.monitorGain=null;this.masterVolume=.85;this.data=null;this.lastBeat=0;this.energy=0;this.ready=false;this.layers=new Map();this.reverbBuffer=null;}
     async connect(){
       if(this.ready)return;const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)throw new Error('Web Audio is not supported in this browser.');
       this.context=new Ctx();this.analyser=this.context.createAnalyser();this.analyser.fftSize=2048;this.analyser.smoothingTimeConstant=.78;
@@ -11,6 +11,7 @@
       this.data=new Uint8Array(this.analyser.frequencyBinCount);this.ready=true;
     }
     async resume(){if(this.context&&this.context.state==='suspended')await this.context.resume();}
+    setMainSoloMute(muted){if(this.mainSoloGain&&this.context)this.mainSoloGain.gain.setTargetAtTime(muted?0:1,this.context.currentTime,.025);}
     setVolume(v){this.masterVolume=v;if(this.gain)this.gain.gain.setTargetAtTime(v,this.context.currentTime,.025);else this.audio.volume=v;}
     applyFade(fadeIn,fadeOut){if(!this.gain||!this.context)return;const t=this.audio.currentTime,d=this.audio.duration||0;let factor=1;if(fadeIn>0&&t<fadeIn)factor=Math.min(factor,t/fadeIn);if(fadeOut>0&&d>0&&t>d-fadeOut)factor=Math.min(factor,Math.max(0,(d-t)/fadeOut));this.gain.gain.setTargetAtTime(this.masterVolume*factor,this.context.currentTime,.035);}
     makeReverbBuffer(){if(this.reverbBuffer)return this.reverbBuffer;const length=Math.floor(this.context.sampleRate*1.8),buffer=this.context.createBuffer(2,length,this.context.sampleRate);for(let ch=0;ch<2;ch++){const data=buffer.getChannelData(ch);for(let i=0;i<length;i++)data[i]=(Math.random()*2-1)*Math.pow(1-i/length,2.8);}this.reverbBuffer=buffer;return buffer;}

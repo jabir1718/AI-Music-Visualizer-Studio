@@ -1,5 +1,17 @@
 (function(){
 const $=id=>document.getElementById(id);
+function decorateActionButton(btn){
+ if(!btn||btn.classList.contains('icon-btn')||btn.classList.contains('style-card')||btn.classList.contains('template-card'))return;
+ const label=(btn.textContent||'').trim().toLowerCase();
+ const ids={exportBtn:'🎬',exportBtnSide:'🎬',themeToggle:'🌓',openProjectBtn:'📂',audioPickBtn:'🎵',clearMedia:'🧹',clearLogo:'🖼️',transcribeBtn:'🎙️',riskCheck:'🛡️',mixerAddBtn:'➕'};
+ let icon=ids[btn.id]||'';
+ if(!icon&&btn.classList.contains('music-category'))icon=({'Voice':'🎙️','Ad-lib':'✨','Humming':'🎧','Harmony':'🎼','Instruments':'🎹','Sound effect':'🔊','Voice FX':'🗣️','Separation':'🧬','Cleanup':'🧹'})[btn.dataset.category]||'🎵';
+ if(!icon&&btn.classList.contains('ratio'))icon='▣';
+ if(!icon){if(/export/.test(label))icon='🎬';else if(/add|import|browse/.test(label))icon='➕';else if(/remove|clear|delete/.test(label))icon='🗑️';else if(/mute|unmute/.test(label))icon='🔇';else if(/solo/.test(label))icon='🎧';else if(/edit/.test(label))icon='✏️';else if(/open/.test(label))icon='📂';else if(/generate|listen/.test(label))icon='🎙️';else if(/check|risk/.test(label))icon='🛡️';else icon='⚙️';}
+ btn.dataset.actionIcon=icon;
+}
+function decorateButtonIcons(root=document){root.querySelectorAll('button').forEach(decorateActionButton);}
+
 const audio=$('audio'),canvas=$('visualizer'),ctx=canvas.getContext('2d');
 let engine=null,raf=0,playing=false,style='bars',logoUrl=null,logoImage=null,mediaUrl=null,mediaKind='',audioFile=null,savedTrackName='',lyrics=[],template='trend',beatPulse=0,dragTarget=null,dragOffset={x:0,y:0};
 const palette={aurora:['#9b8cff','#65e5c0','#e8f5ff'],sunset:['#ff8c75','#ffca7a','#f8a8cf'],ice:['#62d8ff','#9fbaff','#e4f7ff'],mono:['#fff','#b9c4d5','#eef3fb']};
@@ -86,7 +98,7 @@ function draw(){
  raf=requestAnimationFrame(draw);
 }
 function startDraw(){if(!raf)draw();}
-async function ensureEngine(){if(!engine)engine=new AudioEngine(audio);await engine.connect();await engine.resume();engine.setVolume(Number($('volume').value));mixerLayers.forEach(layer=>{if(!layer.connected){const soloActive=mixerLayers.some(x=>x.solo);engine.addLayer(layer.id,layer.audio,(!layer.muted&&(!soloActive||layer.solo))?layer.volume:0,layer);layer.connected=true;}});return engine;}
+async function ensureEngine(){if(!engine)engine=new AudioEngine(audio);await engine.connect();await engine.resume();engine.setVolume(Number($('volume').value));mixerLayers.forEach(layer=>{if(!layer.connected){const soloActive=mixerLayers.some(x=>x.solo);engine.addLayer(layer.id,layer.audio,(!layer.muted&&(!soloActive||layer.solo))?layer.volume:0,layer);layer.connected=true;}});engine.setMainSoloMute(mixerLayers.some(x=>x.solo));return engine;}
 
 let mixerLayers=[],mixerPanel=null,mixerCategory='Voice',savedProjectData={},mediaDbPromise=null;
 function syncMixerLayers(){
@@ -172,7 +184,7 @@ function addMixerLayer(file,role,restore={},persist=true){
 }
 function applyMixerSoloState(){
  const soloActive=mixerLayers.some(x=>x.solo);
- mixerLayers.forEach(layer=>{const audible=!layer.muted&&(!soloActive||layer.solo);if(engine&&layer.connected)engine.setLayerVolume(layer.id,audible?layer.volume:0);});
+ mixerLayers.forEach(layer=>{const audible=!layer.muted&&(!soloActive||layer.solo);if(engine&&layer.connected)engine.setLayerVolume(layer.id,audible?layer.volume:0);});if(engine&&engine.ready)engine.setMainSoloMute(soloActive);
 }
 function renderMixerLayers(){
  const list=$('mixerList');list.innerHTML='';
@@ -181,9 +193,9 @@ function renderMixerLayers(){
   const row=document.createElement('div');row.className='mixer-track';
   const head=document.createElement('div');head.className='mixer-track-head';
   const info=document.createElement('div'),name=document.createElement('b'),meta=document.createElement('small');name.textContent=layer.file.name;meta.textContent=layer.role;info.append(name,meta);
-  const mute=document.createElement('button');mute.className='btn small';mute.textContent=layer.muted?'Unmute':'Mute';mute.onclick=()=>{layer.muted=!layer.muted;mute.textContent=layer.muted?'Unmute':'Mute';applyMixerSoloState();saveSettings();};
-  const solo=document.createElement('button');solo.className='btn small';solo.textContent=layer.solo?'Solo on':'Solo';solo.setAttribute('aria-pressed',String(layer.solo));solo.onclick=()=>{layer.solo=!layer.solo;solo.textContent=layer.solo?'Solo on':'Solo';solo.setAttribute('aria-pressed',String(layer.solo));applyMixerSoloState();saveSettings();};
-  const remove=document.createElement('button');remove.className='btn small';remove.textContent='Remove';remove.onclick=()=>{if(engine&&layer.connected)engine.removeLayer(layer.id);layer.audio.pause();layer.audio.removeAttribute('src');layer.audio.load();URL.revokeObjectURL(layer.url);mixerLayers=mixerLayers.filter(x=>x!==layer);deleteMediaAsset(layer.id);renderMixerLayers();applyMixerSoloState();saveSettings();};
+  const mute=document.createElement('button');mute.className='btn small';mute.textContent=layer.muted?'Unmute':'Mute';decorateActionButton(mute);mute.onclick=()=>{layer.muted=!layer.muted;mute.textContent=layer.muted?'Unmute':'Mute';applyMixerSoloState();saveSettings();};
+  const solo=document.createElement('button');solo.className='btn small';solo.textContent=layer.solo?'Solo on':'Solo';decorateActionButton(solo);solo.setAttribute('aria-pressed',String(layer.solo));solo.onclick=()=>{layer.solo=!layer.solo;solo.textContent=layer.solo?'Solo on':'Solo';solo.setAttribute('aria-pressed',String(layer.solo));applyMixerSoloState();saveSettings();};
+  const remove=document.createElement('button');remove.className='btn small';remove.textContent='Remove';decorateActionButton(remove);remove.onclick=()=>{if(engine&&layer.connected)engine.removeLayer(layer.id);layer.audio.pause();layer.audio.removeAttribute('src');layer.audio.load();URL.revokeObjectURL(layer.url);mixerLayers=mixerLayers.filter(x=>x!==layer);deleteMediaAsset(layer.id);renderMixerLayers();applyMixerSoloState();saveSettings();};
   head.append(info,mute,solo,remove);row.append(head);
   const controls=document.createElement('div');controls.className='mixer-track-controls';
   function addRange(labelText,key,min,max,step,unit,apply){
@@ -200,7 +212,7 @@ function renderMixerLayers(){
   addRange('Reverb','reverb',0,1,.05,'',v=>{if(engine&&layer.connected)engine.setLayerReverb(layer.id,v);});
   const offsetWrap=document.createElement('label');offsetWrap.textContent='Start offset (seconds)';const offset=document.createElement('input');offset.type='number';offset.min='0';offset.max='3600';offset.step='.1';offset.value=layer.offset;offset.onchange=()=>{layer.offset=Math.max(0,Number(offset.value)||0);syncMixerLayers();saveSettings();};offsetWrap.append(offset);controls.append(offsetWrap);
   row.append(controls);list.append(row);
- });applyMixerSoloState();
+ });applyMixerSoloState();decorateButtonIcons(list);
 }
 function updateText(){ $('previewTitle').textContent=$('titleInput').value||' ';$('previewSubtitle').textContent=$('subtitleInput').value||'';$('stageCopy').style.color=$('textColor').value;$('stageCopy').style.fontFamily=$('fontStyle').value==='serif'?'Georgia,serif':$('fontStyle').value==='mono'?'monospace':'Manrope,sans-serif';}
 
@@ -232,7 +244,7 @@ async function restoreSavedMedia(){
   const file=new File([stored.blob],stored.name||'Restored layer',{type:stored.type||'audio/mpeg',lastModified:stored.lastModified||Date.now()});
   addMixerLayer(file,meta.role||'Other',meta,false);
  }
- if(main||layers.length)setStatus('Project media restored');
+ const restored=mixerLayers.length;if((main&&main.blob)||restored)setStatus('Project media restored · '+restored+' extra layer(s)');
 }
 
 function saveSettings(){
@@ -323,6 +335,6 @@ async function doExport(){
  finally{$('exportBtn').disabled=false;$('exportBtnSide').disabled=false;}
 }
 $('exportBtn').onclick=doExport;$('exportBtnSide').onclick=doExport;
-loadSettings();audio.volume=.85;initMixerUI();restoreSavedMedia();startDraw();
+loadSettings();audio.volume=.85;initMixerUI();restoreSavedMedia();decorateButtonIcons();startDraw();
 window.addEventListener('beforeunload',()=>{if(mediaUrl)URL.revokeObjectURL(mediaUrl);if(logoUrl)URL.revokeObjectURL(logoUrl);if(audio.src)URL.revokeObjectURL(audio.src);});
 })();

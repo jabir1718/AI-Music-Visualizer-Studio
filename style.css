@@ -74,3 +74,11 @@
 .music-studio .mixer-add button:disabled,.music-studio .mixer-file:has(input:disabled){opacity:.42;cursor:not-allowed}
 .music-studio .mixer-track{min-width:0}
 @media(max-width:700px){.music-category-nav{margin-right:-4px;padding-bottom:12px}.music-category{padding:10px 13px}.music-detail-title h3{font-size:13px}}
+
+/* Consistent action identity: icon badge plus clear action name. */
+button[data-action-icon]{display:inline-flex;align-items:center;justify-content:center;gap:7px}
+button[data-action-icon]::before{content:attr(data-action-icon);display:inline-grid;place-items:center;flex:0 0 20px;width:20px;height:20px;border-radius:6px;background:#ffffff12;border:1px solid #ffffff18;font-size:12px;line-height:1}
+.music-category[data-action-icon]::before{background:#9b8cff18;border-color:#9b8cff35}
+.ratio[data-action-icon]::before{width:15px;height:15px;flex-basis:15px;font-size:10px}
+button[data-action-icon]:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:700px){button[data-action-icon]{gap:6px}button[data-action-icon]::before{flex-basis:18px;width:18px;height:18px;font-size:11px}}
