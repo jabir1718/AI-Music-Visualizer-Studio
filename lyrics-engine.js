@@ -50,35 +50,47 @@
       stride_length_s:5,
       return_timestamps:'word'
     });
-    const chunks=(result&&result.chunks)||[];
-    const tokens=[];
-    if(chunks.length){
-      chunks.forEach((chunk,index)=>{
-        const parts=(chunk.text||'').trim().split(' ').filter(Boolean);
-        const ts=chunk.timestamp||[];
-        const fallbackStart=decoded.duration*index/chunks.length;
-        const fallbackEnd=decoded.duration*(index+1)/chunks.length;
-        const start=Number.isFinite(ts[0])?ts[0]:fallbackStart;
-        const end=Number.isFinite(ts[1])?ts[1]:fallbackEnd;
-        parts.forEach((word,i)=>{
-          const a=start+(end-start)*i/Math.max(1,parts.length);
-          const b=start+(end-start)*(i+1)/Math.max(1,parts.length);
-          tokens.push({text:word,start:a,end:Math.max(a+.08,b)});
-        });
-      });
-    }else if(result&&result.text){
-      const words=result.text.trim().split(' ').filter(Boolean);
-      words.forEach((word,i)=>tokens.push({text:word,start:decoded.duration*i/words.length,end:decoded.duration*(i+1)/words.length}));
-    }
-    const lines=[];
-    for(let i=0;i<tokens.length;i+=5){
-      const group=tokens.slice(i,i+5);
-      if(!group.length)continue;
-      const start=group[0].start,end=group[group.length-1].end;
-      lines.push({start,end:Math.max(start+.5,end),text:group.map(x=>x.text).join(' '),words:group});
-    }
+    const tokens=tokensFromResult(result,decoded.duration);
+    const lines=groupTokens(tokens);
     if(onProgress)onProgress({status:'Lyrics ready — review the words and timing',progress:100});
     return lines;
   }
-  window.WaveForgeLyrics={transcribe};
+  function tokensFromResult(result,duration){
+    const chunks=(result&&result.chunks)||[],tokens=[];
+    if(chunks.length){
+      let previousEnd=0;
+      chunks.forEach((chunk,index)=>{
+        const text=String(chunk&&chunk.text||'').trim(),parts=text.match(/\S+/g)||[];
+        if(!parts.length)return;
+        const stamp=chunk.timestamp||[],rawStart=Number(stamp[0]),rawEnd=Number(stamp[1]);
+        const hasStart=Number.isFinite(rawStart),hasEnd=Number.isFinite(rawEnd)&&Number.isFinite(rawStart)&&rawEnd>rawStart;
+        const fallbackStart=duration*index/chunks.length,fallbackEnd=duration*(index+1)/chunks.length;
+        const start=hasStart?Math.max(0,Math.min(duration,rawStart)):Math.max(previousEnd,fallbackStart);
+        const end=hasEnd?Math.max(start+.04,Math.min(duration,rawEnd)):Math.max(start+.08,fallbackEnd);
+        parts.forEach((word,i)=>{
+          const a=start+(end-start)*i/parts.length,b=start+(end-start)*(i+1)/parts.length;
+          tokens.push({text:word,start:a,end:Math.max(a+.04,b),source:hasEnd?'whisper-word-timestamp':'estimated'});
+        });
+        previousEnd=end;
+      });
+      return tokens;
+    }
+    const text=String(result&&result.text||'').trim(),words=text.match(/\S+/g)||[];
+    words.forEach((word,i)=>{
+      const start=duration*i/Math.max(1,words.length),end=duration*(i+1)/Math.max(1,words.length);
+      tokens.push({text:word,start,end:Math.max(start+.04,end),source:'estimated'});
+    });
+    return tokens;
+  }
+  function groupTokens(tokens,wordsPerLine=5){
+    const lines=[];
+    for(let i=0;i<tokens.length;i+=wordsPerLine){
+      const words=tokens.slice(i,i+wordsPerLine);if(!words.length)continue;
+      const start=words[0].start,end=words[words.length-1].end;
+      lines.push({start,end:Math.max(start+.5,end),text:words.map(x=>x.text).join(' '),words,timingSource:words.every(x=>x.source==='whisper-word-timestamp')?'whisper-word-timestamps':'estimated'});
+    }
+    return lines;
+  }
+  window.WaveForgeLyrics={transcribe,tokensFromResult,groupTokens};
+  if(typeof module!=='undefined'&&module.exports)module.exports=window.WaveForgeLyrics;
 })();
