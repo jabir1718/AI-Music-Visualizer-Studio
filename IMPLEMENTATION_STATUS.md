@@ -143,3 +143,13 @@ Last source audit: 2026-11-05 (after connecting image-search and OpenMoji import
 - Scope is recorded in ROADMAP.md §33. No complete multi-clip AI video auto-editor has been implemented or tested yet.
 - Existing BPM detection, beat grid and canvas recording/export are useful foundations, but the current product does not yet provide the complete editable multi-clip video timeline, scene-aware clip selection, automatic beat-cut arrangement, speech-pause editing or style-based montage generation.
 - The future implementation must create a non-destructive editable draft, preserve source media, allow manual refinement, and be tested on real Android devices for memory and export reliability.
+
+## Device-targeted free Auto Cut implementation — 2026-11-05
+
+- Target device profile is Infinix ZERO 40 model family. The user's reported device identifier is X6860, corresponding to the ZERO 40 4G configuration; the implementation therefore uses conservative local storage and one-active-video-at-a-time playback rather than assuming the more powerful 5G chipset.
+- Added `auto-video-editor.js` and an in-app Auto Cut Studio panel. It imports up to 8 local video sources, each up to 120 MB and 180 seconds, with a combined video-source limit of 180 MB to reduce storage and portable-project risks.
+- Added offline cut planning from the existing BPM value (or a clearly disclosed 120 BPM starting grid when no BPM has been detected), with fast social, cinematic, travel, vlog and calm presets and a cut-intensity control.
+- Generated montage segments are non-destructive references to the original local videos. Users can reorder, shorten or remove individual segments. The current preview/export canvas follows the main music playhead and switches the active video source; source files are not overwritten.
+- Video files are stored locally in the existing IndexedDB media store. Auto-video source and segment metadata are included in local editor settings and portable .waveforge project packaging.
+- Automated tests are being added for imports, beat-cut planning, playback mapping and manual segment edits. The APK build and physical Infinix device behavior must be confirmed separately.
+- **Not yet implemented:** scene-change detection, speech-pause cuts, AI-generated captions, crossfade/transition library, speed ramps, zoom/motion effects, multi-layer video compositing, cloud AI, and device-verified export codec/resolution. This first Auto Cut implementation makes direct cuts only; do not advertise the remaining items as available.
