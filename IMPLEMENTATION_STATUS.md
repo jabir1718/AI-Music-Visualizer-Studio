@@ -160,3 +160,6 @@ Last source audit: 2026-11-05 (after connecting image-search and OpenMoji import
 - Every request is previewed before applying. Unsupported requests are not guessed or executed. All processing stays on the device; there is no ChatGPT connection, API key, cloud upload or usage charge.
 - This is a deterministic rules-based helper, **not ChatGPT and not a general AI editor**. Broader natural-language understanding and advanced edit actions remain unimplemented.
 - Added parser regression tests; final CI confirmation and physical-device UI testing remain pending.
+
+
+- Expanded Auto Cut to accept mixed local photos and videos (up to 12 photos + 8 videos; 180 MB total) and added ten named offline montage templates. Photo-only edits can be paced to the imported song duration and photos receive a gentle pan/zoom motion; video remains beat-cut into editable segments. Sources are preserved and media/project state uses the existing IndexedDB packaging bridge. Automated tests cover mixed import, template count, music-length photo montage, frame mapping, motion and manual edits. Android codec/export performance still needs a real device test; this is not AI scene understanding or a full transitions/compositor system.
