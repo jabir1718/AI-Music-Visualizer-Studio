@@ -86,7 +86,7 @@ function draw(){
  raf=requestAnimationFrame(draw);
 }
 function startDraw(){if(!raf)draw();}
-async function ensureEngine(){if(!engine)engine=new AudioEngine(audio);await engine.connect();await engine.resume();engine.setVolume(Number($('volume').value));mixerLayers.forEach(layer=>{if(!layer.connected){engine.addLayer(layer.id,layer.audio,layer.muted?0:layer.volume);layer.connected=true;}});return engine;}
+async function ensureEngine(){if(!engine)engine=new AudioEngine(audio);await engine.connect();await engine.resume();engine.setVolume(Number($('volume').value));mixerLayers.forEach(layer=>{if(!layer.connected){engine.addLayer(layer.id,layer.audio,layer.muted?0:layer.volume,layer);layer.connected=true;}});return engine;}
 
 let mixerLayers=[],mixerPanel=null,mixerCategory='Voice';
 function syncMixerLayers(){
@@ -165,41 +165,43 @@ function addMixerLayer(file,role){
  if(!file.type.startsWith('audio/')){alert('Choose a supported audio file.');return;}
  const id='mix-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),url=URL.createObjectURL(file);
  const el=document.createElement('audio');el.preload='auto';el.hidden=true;el.src=url;el.preservesPitch=false;
- const layer={id,file,url,audio:el,role,volume:.85,rate:1,offset:0,muted:false,connected:false};
+ const layer={id,file,url,audio:el,role,volume:.85,rate:1,offset:0,muted:false,solo:false,pan:0,bass:0,treble:0,delay:0,reverb:0,connected:false};
  mixerLayers.push(layer);mixerPanel.appendChild(el);renderMixerLayers();
- if(engine&&engine.ready){engine.addLayer(id,el,layer.volume);layer.connected=true;}
+ if(engine&&engine.ready){engine.addLayer(id,el,layer.volume,layer);layer.connected=true;}
  syncMixerLayers();setStatus('Audio layer added');
+}
+function applyMixerSoloState(){
+ const soloActive=mixerLayers.some(x=>x.solo);
+ mixerLayers.forEach(layer=>{const audible=!layer.muted&&(!soloActive||layer.solo);if(engine&&layer.connected)engine.setLayerVolume(layer.id,audible?layer.volume:0);});
 }
 function renderMixerLayers(){
  const list=$('mixerList');list.innerHTML='';
- if(!mixerLayers.length){list.innerHTML='<p class="hint">No extra layers yet. Your main audio remains the background music.</p>';return;}
+ if(!mixerLayers.length){list.innerHTML='<p class="hint">No extra layers yet. Your original song remains the background music.</p>';return;}
  mixerLayers.forEach(layer=>{
   const row=document.createElement('div');row.className='mixer-track';
   const head=document.createElement('div');head.className='mixer-track-head';
-  const info=document.createElement('div'),name=document.createElement('b'),meta=document.createElement('small');
-  name.textContent=layer.file.name;meta.textContent=layer.role;info.append(name,meta);
-  const mute=document.createElement('button');mute.className='btn small';mute.textContent=layer.muted?'Unmute':'Mute';
-  mute.onclick=()=>{layer.muted=!layer.muted;mute.textContent=layer.muted?'Unmute':'Mute';if(engine&&layer.connected)engine.setLayerVolume(layer.id,layer.muted?0:layer.volume);};
-  const remove=document.createElement('button');remove.className='btn small';remove.textContent='Remove';
-  remove.onclick=()=>{if(engine&&layer.connected)engine.removeLayer(layer.id);layer.audio.pause();layer.audio.removeAttribute('src');layer.audio.load();URL.revokeObjectURL(layer.url);mixerLayers=mixerLayers.filter(x=>x!==layer);renderMixerLayers();};
-  head.append(info,mute,remove);row.append(head);
+  const info=document.createElement('div'),name=document.createElement('b'),meta=document.createElement('small');name.textContent=layer.file.name;meta.textContent=layer.role;info.append(name,meta);
+  const mute=document.createElement('button');mute.className='btn small';mute.textContent=layer.muted?'Unmute':'Mute';mute.onclick=()=>{layer.muted=!layer.muted;mute.textContent=layer.muted?'Unmute':'Mute';applyMixerSoloState();};
+  const solo=document.createElement('button');solo.className='btn small';solo.textContent=layer.solo?'Solo on':'Solo';solo.setAttribute('aria-pressed',String(layer.solo));solo.onclick=()=>{layer.solo=!layer.solo;solo.textContent=layer.solo?'Solo on':'Solo';solo.setAttribute('aria-pressed',String(layer.solo));applyMixerSoloState();};
+  const remove=document.createElement('button');remove.className='btn small';remove.textContent='Remove';remove.onclick=()=>{if(engine&&layer.connected)engine.removeLayer(layer.id);layer.audio.pause();layer.audio.removeAttribute('src');layer.audio.load();URL.revokeObjectURL(layer.url);mixerLayers=mixerLayers.filter(x=>x!==layer);renderMixerLayers();applyMixerSoloState();};
+  head.append(info,mute,solo,remove);row.append(head);
   const controls=document.createElement('div');controls.className='mixer-track-controls';
-  const volWrap=document.createElement('label');volWrap.textContent='Volume';
-  const vol=document.createElement('input');vol.type='range';vol.min='0';vol.max='1';vol.step='.01';vol.value=layer.volume;
-  vol.oninput=()=>{layer.volume=Number(vol.value);if(engine&&layer.connected)engine.setLayerVolume(layer.id,layer.muted?0:layer.volume);};
-  volWrap.append(vol);
-  const pitchWrap=document.createElement('label');pitchWrap.textContent='Pitch';
-  const pitch=document.createElement('input');pitch.type='range';pitch.min='-12';pitch.max='12';pitch.step='1';pitch.value='0';
-  const pitchText=document.createElement('small');pitchText.textContent='0 semitones';
-  pitch.oninput=()=>{const n=Number(pitch.value);layer.rate=Math.pow(2,n/12);layer.audio.playbackRate=layer.rate;layer.audio.preservesPitch=false;pitchText.textContent=(n>0?'+':'')+n+' semitones';syncMixerLayers();};
-  pitchWrap.append(pitch,pitchText);
-  const offsetWrap=document.createElement('label');offsetWrap.textContent='Start offset (seconds)';
-  const offset=document.createElement('input');offset.type='number';offset.min='0';offset.max='3600';offset.step='.1';offset.value='0';
-  offset.onchange=()=>{layer.offset=Math.max(0,Number(offset.value)||0);syncMixerLayers();};
-  offsetWrap.append(offset);controls.append(volWrap,pitchWrap,offsetWrap);row.append(controls);list.append(row);
- });
+  function addRange(labelText,key,min,max,step,unit,apply){
+   const wrap=document.createElement('label');wrap.textContent=labelText;const input=document.createElement('input');input.type='range';input.min=String(min);input.max=String(max);input.step=String(step);input.value=String(layer[key]??0);const readout=document.createElement('small');
+   const show=()=>{const v=Number(input.value);readout.textContent=(v>0&&min<0?'+':'')+v+unit;};
+   input.oninput=()=>{layer[key]=Number(input.value);show();apply(layer[key]);};show();wrap.append(input,readout);controls.append(wrap);
+  }
+  addRange('Volume','volume',0,1,.01,'',()=>applyMixerSoloState());
+  addRange('Pitch / speed','pitch',-12,12,1,' semitones',v=>{layer.rate=Math.pow(2,v/12);layer.audio.playbackRate=layer.rate;layer.audio.preservesPitch=false;syncMixerLayers();});
+  addRange('Stereo pan','pan',-1,1,.05,'',v=>{if(engine&&layer.connected)engine.setLayerPan(layer.id,v);});
+  addRange('Bass EQ','bass',-12,12,1,' dB',()=>{if(engine&&layer.connected)engine.setLayerEQ(layer.id,layer.bass,layer.treble);});
+  addRange('Treble EQ','treble',-12,12,1,' dB',()=>{if(engine&&layer.connected)engine.setLayerEQ(layer.id,layer.bass,layer.treble);});
+  addRange('Echo','delay',0,1,.05,'',v=>{if(engine&&layer.connected)engine.setLayerDelay(layer.id,v);});
+  addRange('Reverb','reverb',0,1,.05,'',v=>{if(engine&&layer.connected)engine.setLayerReverb(layer.id,v);});
+  const offsetWrap=document.createElement('label');offsetWrap.textContent='Start offset (seconds)';const offset=document.createElement('input');offset.type='number';offset.min='0';offset.max='3600';offset.step='.1';offset.value=layer.offset;offset.onchange=()=>{layer.offset=Math.max(0,Number(offset.value)||0);syncMixerLayers();};offsetWrap.append(offset);controls.append(offsetWrap);
+  row.append(controls);list.append(row);
+ });applyMixerSoloState();
 }
-
 function updateText(){ $('previewTitle').textContent=$('titleInput').value||' ';$('previewSubtitle').textContent=$('subtitleInput').value||'';$('stageCopy').style.color=$('textColor').value;$('stageCopy').style.fontFamily=$('fontStyle').value==='serif'?'Georgia,serif':$('fontStyle').value==='mono'?'monospace':'Manrope,sans-serif';}
 function saveSettings(){
  const data={mainPitch:$('mainPitch')?$('mainPitch').value:0,title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,positions,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
