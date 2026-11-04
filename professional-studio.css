@@ -103,3 +103,23 @@ body.wf-dashboard-app .wf-modal-panel[hidden],
 body.wf-dashboard-app .wf-export-panel[hidden],
 body.wf-dashboard-app .wf-tool-modal[hidden]{display:none!important}
 body.wf-dashboard-app .editor>.panel[hidden]{display:none!important}
+
+
+/* V2 showcase strip and mobile header controls. */
+body.wf-dashboard-app .wf-showcase-strip{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;padding:9px;border:1px solid #344b7b;border-radius:16px;background:linear-gradient(120deg,#101a35,#080d20 60%,#17102e);box-shadow:inset 0 1px #ffffff12,0 8px 22px #0007}
+body.wf-dashboard-app .wf-showcase-strip button{display:flex;min-width:0;min-height:58px;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:1px solid #345a91;border-radius:11px;background:linear-gradient(145deg,#17264a,#090f22);color:#eaf3ff}
+body.wf-dashboard-app .wf-showcase-strip button span{font-size:20px;color:#68eaff;text-shadow:0 0 10px #27cfff88}
+body.wf-dashboard-app .wf-showcase-strip button b{font-size:9px;text-align:center;line-height:1.2}
+body.wf-dashboard-app .wf-showcase-strip button:active{transform:scale(.97);border-color:#d34bff}
+body.wf-dashboard-app .topbar #wfMenuToggle,body.wf-dashboard-app .topbar #wfHeaderSettings{display:inline-grid!important}
+body.wf-dashboard-app .wf-hero .stage{position:relative}
+body.wf-dashboard-app .wf-project-info{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+body.wf-dashboard-app .wf-project-info span{min-width:0}
+@media(max-width:700px){
+ body.wf-dashboard-app .wf-showcase-strip{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:7px}
+ body.wf-dashboard-app .wf-showcase-strip button{min-height:50px}
+ body.wf-dashboard-app .wf-showcase-strip button span{font-size:17px}
+ body.wf-dashboard-app .wf-showcase-strip button b{font-size:8px}
+ body.wf-dashboard-app .topbar .top-actions{display:flex!important}
+ body.wf-dashboard-app .topbar #wfMenuToggle,body.wf-dashboard-app .topbar #wfHeaderSettings{width:30px;height:30px;min-width:30px}
+}
