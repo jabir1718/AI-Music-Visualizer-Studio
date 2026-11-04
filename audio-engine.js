@@ -32,16 +32,18 @@
       if(layer.pitchNode){this.setLayerPitch(id,semitones);this.setLayerRate(id,rate);return true;}
       const node=new this.SoundTouchNode({context:this.context});
       layer.high.disconnect(layer.pan);layer.high.disconnect(layer.delay);layer.high.disconnect(layer.convolver);layer.high.connect(node);node.connect(layer.pan);node.connect(layer.delay);node.connect(layer.convolver);layer.pitchNode=node;
-      node.pitchSemitones.value=Math.max(-12,Math.min(12,Number(semitones)||0));
-      node.playbackRate.value=Math.max(.5,Math.min(2,Number(rate)||1));
-      layer.audio.preservesPitch=false;layer.audio.playbackRate=node.playbackRate.value;return true;
+      layer.pitchSemitones=Math.max(-12,Math.min(12,Number(semitones)||0));
+      const playbackRate=Math.max(.5,Math.min(2,Number(rate)||1));
+      node.pitchSemitones.value=layer.pitchSemitones-12*Math.log2(playbackRate);
+      node.playbackRate.value=1;
+      layer.audio.preservesPitch=false;layer.audio.playbackRate=playbackRate;return true;
     }
     disableLayerPitchPreserving(id,rate=1){
       const layer=this.layers.get(id);if(!layer)return;
       if(layer.pitchNode){try{layer.high.disconnect(layer.pitchNode);}catch(e){}try{layer.pitchNode.disconnect();}catch(e){}layer.pitchNode=null;layer.high.connect(layer.pan);layer.high.connect(layer.delay);layer.high.connect(layer.convolver);}
       layer.audio.preservesPitch=false;layer.audio.playbackRate=rate;
     }
-    setLayerPitch(id,semitones){const layer=this.layers.get(id);if(layer&&layer.pitchNode)layer.pitchNode.pitchSemitones.setTargetAtTime(Math.max(-12,Math.min(12,Number(semitones)||0)),this.context.currentTime,.025);}
+    setLayerPitch(id,semitones){const layer=this.layers.get(id);if(!layer)return;layer.pitchSemitones=Math.max(-12,Math.min(12,Number(semitones)||0));if(layer.pitchNode){const compensation=layer.pitchSemitones-12*Math.log2(Math.max(.5,Math.min(2,layer.audio.playbackRate||1)));layer.pitchNode.pitchSemitones.setTargetAtTime(compensation,this.context.currentTime,.025);}}
 
     setMainSoloMute(muted){if(this.mainSoloGain&&this.context)this.mainSoloGain.gain.setTargetAtTime(muted?0:1,this.context.currentTime,.025);}
     setVolume(v){this.masterVolume=v;if(this.gain)this.gain.gain.setTargetAtTime(v,this.context.currentTime,.025);else this.audio.volume=v;}
@@ -62,11 +64,11 @@
       source.connect(this.analyser);source.connect(gain);gain.connect(low);low.connect(high);high.connect(panner);panner.connect(shaper);shaper.connect(c.destination);shaper.connect(this.exportDestination);
       high.connect(delay);delay.connect(feedback);feedback.connect(delay);delay.connect(delaySend);delaySend.connect(panner);
       high.connect(convolver);convolver.connect(reverbSend);reverbSend.connect(panner);
-      const layer={audio,source,gain,low,high,pan:panner,hasPan,delay,feedback,delaySend,convolver,reverbSend,shaper,pitchNode:null};this.layers.set(id,layer);
+      const layer={audio,source,gain,low,high,pan:panner,hasPan,delay,feedback,delaySend,convolver,reverbSend,shaper,pitchNode:null,pitchSemitones:Number(settings.pitch)||0};this.layers.set(id,layer);
       this.setLayerEQ(id,settings.bass||0,settings.treble||0);this.setLayerPan(id,settings.pan||0);this.setLayerDelay(id,settings.delay||0);this.setLayerReverb(id,settings.reverb||0);this.setLayerDistortion(id,(settings.distortion||0)*100);
     }
     setLayerVolume(id,v){const l=this.layers.get(id);if(l)l.gain.gain.setTargetAtTime(v,this.context.currentTime,.02);}
-    setLayerRate(id,v){const l=this.layers.get(id);if(!l)return;l.audio.playbackRate=v;if(l.pitchNode)l.pitchNode.playbackRate.setTargetAtTime(Math.max(.5,Math.min(2,Number(v)||1)),this.context.currentTime,.025);}
+    setLayerRate(id,v){const l=this.layers.get(id);if(!l)return;const rate=Math.max(.5,Math.min(2,Number(v)||1));l.audio.playbackRate=rate;if(l.pitchNode){const compensation=(l.pitchSemitones||0)-12*Math.log2(rate);l.pitchNode.pitchSemitones.setTargetAtTime(compensation,this.context.currentTime,.025);l.pitchNode.playbackRate.setTargetAtTime(1,this.context.currentTime,.025);}}
     setLayerPan(id,v){const l=this.layers.get(id);if(l&&l.hasPan)l.pan.pan.setTargetAtTime(v,this.context.currentTime,.025);}
     setLayerEQ(id,bass,treble){const l=this.layers.get(id);if(!l)return;l.low.gain.setTargetAtTime(bass,this.context.currentTime,.025);l.high.gain.setTargetAtTime(treble,this.context.currentTime,.025);}
     setLayerDelay(id,v){const l=this.layers.get(id);if(l)l.delaySend.gain.setTargetAtTime(v*.42,this.context.currentTime,.04);}
