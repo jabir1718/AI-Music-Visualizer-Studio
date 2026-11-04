@@ -88,7 +88,7 @@ function draw(){
 function startDraw(){if(!raf)draw();}
 async function ensureEngine(){if(!engine)engine=new AudioEngine(audio);await engine.connect();await engine.resume();engine.setVolume(Number($('volume').value));mixerLayers.forEach(layer=>{if(!layer.connected){engine.addLayer(layer.id,layer.audio,layer.muted?0:layer.volume);layer.connected=true;}});return engine;}
 
-let mixerLayers=[],mixerPanel=null;
+let mixerLayers=[],mixerPanel=null,mixerCategory='Voice';
 function syncMixerLayers(){
  const now=audio.currentTime||0;
  mixerLayers.forEach(layer=>{
@@ -104,8 +104,23 @@ function syncMixerLayers(){
 }
 function initMixerUI(){
  const host=$('audioPanel'),audioEl=$('audio');
- mixerPanel=document.createElement('section');mixerPanel.className='mixer-panel';
- mixerPanel.innerHTML='<div class="mixer-heading"><div><b>Separate audio layers</b><small>Voice, ad-libs, instruments and sound effects stay independent from background music.</small></div><span class="mixer-live">MULTI-TRACK</span></div><div class="mixer-add"><label>Layer type<select id="mixerRole"><option>Voice</option><option>Ad-lib</option><option>Sound effect</option><option>Bass stem</option><option>Drums</option><option>Piano</option><option>Guitar</option><option>Instrumental</option><option>Other</option></select></label><label class="mixer-file">＋ Choose audio<input id="mixerFile" type="file" accept="audio/*" hidden></label><button class="btn small" id="mixerAddBtn" type="button">Add layer</button></div><div class="mixer-main-pitch"><label>Background music pitch <input id="mainPitch" type="range" min="-12" max="12" step="1" value="0"></label><span id="mainPitchValue">0 semitones</span></div><div id="mixerList" class="mixer-list"><p class="hint">No extra layers yet. Your main audio remains the background music.</p></div><p class="hint mixer-footnote">Pitch uses playback-rate shifting, so changing pitch also changes playback speed. Add separately prepared stems for independent instrument control; this does not automatically separate a mixed song.</p>';
+ mixerPanel=document.createElement('section');mixerPanel.className='mixer-panel music-studio';
+ mixerPanel.innerHTML='<div class="mixer-heading"><div><b>Music Studio</b><small>Choose one workspace. Its controls open below, so the screen stays organized.</small></div><span class="mixer-live">TRACK EDITOR</span></div>'+
+ '<div class="music-category-nav" id="musicCategoryNav" role="tablist" aria-label="Music editing categories">'+
+ '<button type="button" class="music-category active" data-category="Voice">Vocals</button>'+
+ '<button type="button" class="music-category" data-category="Ad-lib">Ad-libs</button>'+
+ '<button type="button" class="music-category" data-category="Humming">Humming</button>'+
+ '<button type="button" class="music-category" data-category="Harmony">Harmonies</button>'+
+ '<button type="button" class="music-category" data-category="Instruments">Instruments</button>'+
+ '<button type="button" class="music-category" data-category="Sound effect">Sound effects</button>'+
+ '<button type="button" class="music-category" data-category="Voice FX">Voice FX</button>'+
+ '<button type="button" class="music-category" data-category="Separation">AI separation</button>'+
+ '<button type="button" class="music-category" data-category="Cleanup">Noise cleanup</button></div>'+
+ '<div class="music-category-detail" id="musicCategoryDetail" aria-live="polite"></div>'+
+ '<div class="mixer-add"><label>Layer source<select id="mixerRole"><option>Voice</option><option>Background vocal</option><option>Ad-lib</option><option>Humming</option><option>Harmony</option><option>Bass stem</option><option>Drums</option><option>Piano</option><option>Guitar</option><option>Instrumental</option><option>Sound effect</option><option>Voice FX</option><option>Other</option></select></label><label class="mixer-file">＋ Import audio<input id="mixerFile" type="file" accept="audio/*" hidden></label><button class="btn small" id="mixerAddBtn" type="button">Add to track</button></div>'+
+ '<div class="mixer-main-pitch"><label>Background music pitch <input id="mainPitch" type="range" min="-12" max="12" step="1" value="0"></label><span id="mainPitchValue">0 semitones</span></div>'+
+ '<div id="mixerList" class="mixer-list"><p class="hint">No extra layers yet. Your original song remains the background music.</p></div>'+
+ '<p class="hint mixer-footnote">Imported layers are independently adjustable. A mixed MP3 does not contain separately editable stems automatically. AI separation and generated vocal effects are not connected yet.</p>';
  host.insertBefore(mixerPanel,audioEl);
  try{const saved=JSON.parse(localStorage.getItem('waveforge-v1')||'{}');if(saved.mainPitch!==undefined){$('mainPitch').value=saved.mainPitch;audio.playbackRate=Math.pow(2,Number(saved.mainPitch)/12);audio.preservesPitch=false;$('mainPitchValue').textContent=(Number(saved.mainPitch)>0?'+':'')+saved.mainPitch+' semitones';}}catch(e){}
  const file=$('mixerFile');
@@ -117,11 +132,34 @@ function initMixerUI(){
   $('mainPitchValue').textContent=(semitones>0?'+':'')+semitones+' semitones';
   saveSettings();
  };
+ document.querySelectorAll('.music-category').forEach(btn=>btn.onclick=()=>selectMusicCategory(btn.dataset.category));
+ selectMusicCategory('Voice');
  audio.addEventListener('timeupdate',syncMixerLayers);
  audio.addEventListener('play',syncMixerLayers);
  audio.addEventListener('seeking',syncMixerLayers);
  audio.addEventListener('pause',()=>mixerLayers.forEach(layer=>layer.audio.pause()));
  audio.addEventListener('ended',()=>mixerLayers.forEach(layer=>layer.audio.pause()));
+}
+function selectMusicCategory(category){
+ mixerCategory=category;
+ document.querySelectorAll('.music-category').forEach(btn=>btn.classList.toggle('active',btn.dataset.category===category));
+ const detail=$('musicCategoryDetail'),role=$('mixerRole'),add=$('mixerAddBtn'),file=$('mixerFile');
+ const config={
+  'Voice':{role:'Voice',title:'Main vocals',desc:'Import an isolated vocal stem to adjust its volume, pitch, speed and timing without changing the background track.',available:true},
+  'Ad-lib':{role:'Ad-lib',title:'Ad-libs & doubles',desc:'Add a separate ad-lib or doubled-vocal recording, then position it and control it independently.',available:true},
+  'Humming':{role:'Humming',title:'Humming layers',desc:'Import or record a humming layer separately. Humming generation is not connected yet.',available:true},
+  'Harmony':{role:'Harmony',title:'Harmonies & backing vocals',desc:'Import harmony/backing-vocal stems as separate tracks. Automatic harmony generation is not connected yet.',available:true},
+  'Instruments':{role:'Bass stem',title:'Instrument stems',desc:'Choose bass, drums, piano, guitar or instrumental in the source selector. Each imported stem gets its own controls.',available:true},
+  'Sound effect':{role:'Sound effect',title:'Sound effects',desc:'Import a clean effect clip and position it independently over your song.',available:true},
+  'Voice FX':{role:'Voice FX',title:'Voice changer & character effects',desc:'Import a processed voice layer. Built-in character generation and advanced formant processing are not connected yet.',available:true},
+  'Separation':{role:'Instrumental',title:'AI vocal & instrument separation',desc:'This operation is planned but not implemented yet. The current app cannot extract vocals or instruments from a mixed MP3 automatically.',available:false},
+  'Cleanup':{role:'Voice',title:'Noise cleanup',desc:'Noise removal and voice isolation are planned but not implemented yet. Original audio is left unchanged.',available:false}
+ };
+ const item=config[category]||config.Voice;
+ role.value=item.role;
+ detail.innerHTML='<div class="music-detail-title"><div><span class="eyebrow">SELECTED WORKSPACE</span><h3>'+item.title+'</h3></div><span class="music-detail-state">'+(item.available?'IMPORT READY':'NOT IMPLEMENTED')+'</span></div><p>'+item.desc+'</p>';
+ add.disabled=!item.available;file.disabled=!item.available;
+ renderMixerLayers();
 }
 function addMixerLayer(file,role){
  if(!file.type.startsWith('audio/')){alert('Choose a supported audio file.');return;}
