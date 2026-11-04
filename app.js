@@ -42,13 +42,13 @@ function draw(){
  let source=null;
  if(mediaKind==='image'&&bg.complete&&bg.naturalWidth>0)source=bg;
  if(mediaKind==='video'&&vid.readyState>=2&&vid.videoWidth>0)source=vid;
+ const grad=ctx.createRadialGradient(w*.5,h*.4,0,w*.5,h*.5,h*.75);grad.addColorStop(0,'#29304f');grad.addColorStop(1,'#080d18');ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
  if(source){
   const sw=source.videoWidth||source.naturalWidth,sh=source.videoHeight||source.naturalHeight;
-  const scale=Math.max(w/sw,h/sh),dw=sw*scale,dh=sh*scale;
-  if(window.WaveForgeFilters)window.WaveForgeFilters.draw(ctx,source,(w-dw)/2,(h-dh)/2,dw,dh);else ctx.drawImage(source,(w-dw)/2,(h-dh)/2,dw,dh);
- }else{
-  const grad=ctx.createRadialGradient(w*.5,h*.4,0,w*.5,h*.5,h*.75);
-  grad.addColorStop(0,'#29304f');grad.addColorStop(1,'#080d18');ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
+  const scale=Math.max(w/sw,h/sh),dw=sw*scale,dh=sh*scale,x=(w-dw)/2,y=(h-dh)/2;
+  const keySettings=window.WaveForgeChromaKey?window.WaveForgeChromaKey.getSettings():{enabled:false};
+  if(keySettings.enabled&&window.WaveForgeChromaKey){try{const keyed=window.WaveForgeChromaKey.process(source,x,y,dw,dh,w,h);if(window.WaveForgeFilters)window.WaveForgeFilters.draw(ctx,keyed,0,0,w,h);else ctx.drawImage(keyed,0,0,w,h);}catch(error){ctx.drawImage(source,x,y,dw,dh);}}
+  else if(window.WaveForgeFilters)window.WaveForgeFilters.draw(ctx,source,x,y,dw,dh);else ctx.drawImage(source,x,y,dw,dh);
  }
  const shade=ctx.createLinearGradient(0,0,0,h);shade.addColorStop(0,'#080d2420');shade.addColorStop(1,'#080d24bb');ctx.fillStyle=shade;ctx.fillRect(0,0,w,h);
  const colors=palette[$('visualColor').value]||palette.aurora;
@@ -253,6 +253,7 @@ function renderMixerLayers(){
 function updateText(){ $('previewTitle').textContent=$('titleInput').value||' ';$('previewSubtitle').textContent=$('subtitleInput').value||'';$('stageCopy').style.color=$('textColor').value;$('stageCopy').style.fontFamily=$('fontStyle').value==='serif'?'Georgia,serif':$('fontStyle').value==='mono'?'monospace':'Manrope,sans-serif';}
 
 function initFilterStudio(){if(window.WaveForgeFilters)window.WaveForgeFilters.mount($('visualPanel'),saveSettings);}
+function initChromaKey(){if(window.WaveForgeChromaKey)window.WaveForgeChromaKey.mount($('visualPanel'),saveSettings);}
 function initMediaTools(){if(window.WaveForgeMediaTools)window.WaveForgeMediaTools.mount($('audioPanel'),{onMain:loadAudio,onLayer:file=>addMixerLayer(file,'Other')});}
 function initObjectEditor(){
  const host=$('overlayPanel');if(!host||$('objectEditor'))return;
@@ -317,11 +318,11 @@ async function restoreSavedMedia(){
 }
 
 function saveSettings(){
- const data={mainPitch:$('mainPitch')?$('mainPitch').value:0,mainEffects:readMainEffects(),layers:mixerLayers.map(l=>({id:l.id,role:l.role,volume:l.volume,rate:l.rate,pitch:l.pitch,offset:l.offset,muted:l.muted,solo:l.solo,pan:l.pan,bass:l.bass,treble:l.treble,delay:l.delay,reverb:l.reverb,preset:l.preset||'clean'})),title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,lyricPosition:$('lyricPosition').value,positions,objectSettings,manualBpm,tapBeatOffset,filterPreset:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterPreset:'f01',filterIntensity:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterIntensity:100,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
+ const data={mainPitch:$('mainPitch')?$('mainPitch').value:0,mainEffects:readMainEffects(),layers:mixerLayers.map(l=>({id:l.id,role:l.role,volume:l.volume,rate:l.rate,pitch:l.pitch,offset:l.offset,muted:l.muted,solo:l.solo,pan:l.pan,bass:l.bass,treble:l.treble,delay:l.delay,reverb:l.reverb,preset:l.preset||'clean'})),title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,lyricPosition:$('lyricPosition').value,positions,objectSettings,manualBpm,tapBeatOffset,filterPreset:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterPreset:'f01',filterIntensity:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterIntensity:100,chromaKey:window.WaveForgeChromaKey?window.WaveForgeChromaKey.getSettings():null,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
  try{localStorage.setItem('waveforge-v1',JSON.stringify(data));setStatus('Saved locally');}catch(e){setStatus('Ready');}
 }
 function loadSettings(){
- try{const d=JSON.parse(localStorage.getItem('waveforge-v1')||'{}');if(d.title!==undefined)$('titleInput').value=d.title;if(d.subtitle!==undefined)$('subtitleInput').value=d.subtitle;if(d.caption!==undefined)$('captionInput').value=d.caption;if(d.color)$('visualColor').value=d.color;if(d.ratio)$('exportRatio').value=d.ratio;if(d.quality)$('quality').value=d.quality;if(d.font)$('fontStyle').value=d.font;if(d.textColor)$('textColor').value=d.textColor;if(Number.isFinite(d.manualBpm))manualBpm=d.manualBpm;if(Number.isFinite(d.tapBeatOffset))tapBeatOffset=d.tapBeatOffset;if(window.WaveForgeFilters)window.WaveForgeFilters.set(d.filterPreset||'f01',d.filterIntensity===undefined?100:d.filterIntensity);if(d.style)style=d.style;if(d.template)template=d.template;savedProjectData=d;if(d.lyricSize)$('lyricSize').value=d.lyricSize;if(d.lyricPosition)$('lyricPosition').value=d.lyricPosition;if(d.positions)Object.assign(positions,d.positions);if(d.objectSettings)Object.keys(objectDefaults).forEach(k=>objectSettings[k]={...objectDefaults[k],...(d.objectSettings[k]||{})});if(Array.isArray(d.lyrics))lyrics=d.lyrics;savedTrackName=d.trackName||'';}catch(e){}
+ try{const d=JSON.parse(localStorage.getItem('waveforge-v1')||'{}');if(d.title!==undefined)$('titleInput').value=d.title;if(d.subtitle!==undefined)$('subtitleInput').value=d.subtitle;if(d.caption!==undefined)$('captionInput').value=d.caption;if(d.color)$('visualColor').value=d.color;if(d.ratio)$('exportRatio').value=d.ratio;if(d.quality)$('quality').value=d.quality;if(d.font)$('fontStyle').value=d.font;if(d.textColor)$('textColor').value=d.textColor;if(Number.isFinite(d.manualBpm))manualBpm=d.manualBpm;if(Number.isFinite(d.tapBeatOffset))tapBeatOffset=d.tapBeatOffset;if(window.WaveForgeFilters)window.WaveForgeFilters.set(d.filterPreset||'f01',d.filterIntensity===undefined?100:d.filterIntensity);if(window.WaveForgeChromaKey&&d.chromaKey)window.WaveForgeChromaKey.set(d.chromaKey);if(d.style)style=d.style;if(d.template)template=d.template;savedProjectData=d;if(d.lyricSize)$('lyricSize').value=d.lyricSize;if(d.lyricPosition)$('lyricPosition').value=d.lyricPosition;if(d.positions)Object.assign(positions,d.positions);if(d.objectSettings)Object.keys(objectDefaults).forEach(k=>objectSettings[k]={...objectDefaults[k],...(d.objectSettings[k]||{})});if(Array.isArray(d.lyrics))lyrics=d.lyrics;savedTrackName=d.trackName||'';}catch(e){}
  updateText();selectTemplate(template);renderLyricList();resizeCanvas();
 }
 function selectTemplate(value){template=value;document.querySelectorAll('.template-card').forEach(b=>b.classList.toggle('selected',b.dataset.template===template));}
@@ -440,6 +441,6 @@ async function doExport(){
  finally{$('exportBtn').disabled=false;$('exportBtnSide').disabled=false;}
 }
 $('exportBtn').onclick=doExport;$('exportBtnSide').onclick=doExport;
-initFilterStudio();loadSettings();audio.volume=.85;initObjectEditor();initMixerUI();initMediaTools();restoreSavedMedia();decorateButtonIcons();startDraw();
+initFilterStudio();loadSettings();initChromaKey();audio.volume=.85;initObjectEditor();initMixerUI();initMediaTools();restoreSavedMedia();decorateButtonIcons();startDraw();
 window.addEventListener('beforeunload',()=>{if(mediaUrl)URL.revokeObjectURL(mediaUrl);if(logoUrl)URL.revokeObjectURL(logoUrl);if(audio.src)URL.revokeObjectURL(audio.src);});
 })();
