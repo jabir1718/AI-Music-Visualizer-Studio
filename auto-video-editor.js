@@ -32,7 +32,7 @@
   segments.forEach((segment,index)=>{
    const asset=assets.get(segment.assetId);if(!asset)return;
    const card=document.createElement('article');card.className='auto-video-clip'+(selected===segment.id?' selected':'');
-   const top=document.createElement('div');top.className='auto-video-clip-head';
+   const top=document.createElement('div');top.className='auto-video-clip-head';top.addEventListener('click',()=>{selected=segment.id;render();});
    const name=document.createElement('b');name.textContent=(index+1)+'. '+(isPhoto(asset)?'PHOTO · ':'VIDEO · ')+asset.name;
    const time=document.createElement('small');time.textContent=segment.timelineStart.toFixed(1)+'s · '+segmentDuration(segment).toFixed(1)+'s · '+averageRate(segment).toFixed(1)+'× avg';
    top.append(name,time);card.append(top);
@@ -209,5 +209,5 @@
   render();
  }
  function dispose(){assets.forEach(a=>{if(a.kind==='video')a.media.pause();URL.revokeObjectURL(a.media.src);});assets.clear();segments=[];}
- root.WaveForgeAutoVideo={mount,addFiles,generateAutoCut,move,splitSegment,removeSegment,setSpeedRamp,setTransition,detectScenes,detectAllScenes,detectQuietGaps,detectAllQuietGaps,sync,getMotion,getVisualEffect,getState,restore,dispose,getDuration:totalDuration,getCount:()=>segments.length,PRESETS};if(typeof module!=='undefined'&&module.exports)module.exports=root.WaveForgeAutoVideo;
+ root.WaveForgeAutoVideo={mount,addFiles,generateAutoCut,move,splitSegment,removeSegment,setSpeedRamp,setTransition,detectScenes,detectAllScenes,detectQuietGaps,detectAllQuietGaps,sync,getMotion,getVisualEffect,getState,getSelectedSegment:()=>segments.find(s=>s.id===selected)||null,getSelectedSegmentId:()=>selected,restore,dispose,getDuration:totalDuration,getCount:()=>segments.length,PRESETS};if(typeof module!=='undefined'&&module.exports)module.exports=root.WaveForgeAutoVideo;
 })(typeof window!=='undefined'?window:globalThis);
