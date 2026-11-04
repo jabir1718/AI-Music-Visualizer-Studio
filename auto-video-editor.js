@@ -75,7 +75,7 @@
    if(bytes+file.size>MAX_TOTAL)throw new Error('All source photos/videos are limited to 180 MB total to protect phone storage.');
    const assetId=id(),media=photo?await createImage(file):await createVideo(file),saved=await bridge.saveMediaAsset(assetId,file);
    if(!saved){URL.revokeObjectURL(media.src);throw new Error('Could not save '+file.name+' to local project storage.');}
-   const asset={id:assetId,name:file.name,type:file.type,size:file.size,kind:photo?'image':'video',media,virtualDuration:0};
+   const asset={id:assetId,name:file.name,type:file.type,size:file.size,kind:photo?'image':'video',media,file,virtualDuration:0};
    assets.set(assetId,asset);if(!photo)segments.push({id:id(),assetId,sourceStart:0,sourceEnd:durationOf(asset),timelineStart:0,rate:1});
    bytes+=file.size;
   }
@@ -87,7 +87,7 @@
  function buildQueue(asset,cutLength){
   const duration=durationOf(asset),ranges=[];
   if(asset.kind==='video'){
-   const points=[0,...(Array.isArray(asset.sceneCuts)?asset.sceneCuts:[]).filter(t=>t>0&&t<duration).sort((a,b)=>a-b),duration];
+   const points=[0,...(Array.isArray(asset.sceneCuts)?asset.sceneCuts:[]),...(Array.isArray(asset.audioPauses)?asset.audioPauses.map(g=>g.midpoint):[])].filter(t=>t>0&&t<duration).sort((a,b)=>a-b).filter((t,i,a)=>i===0||t-a[i-1]>.35);points.push(duration);
    for(let i=0;i<points.length-1;i++){let cursor=points[i];while(cursor<points[i+1]-.12){const end=Math.min(points[i+1],cursor+cutLength);if(end-cursor>=.2)ranges.push({id:id(),assetId:asset.id,sourceStart:cursor,sourceEnd:end,timelineStart:0,rateStart:1,rateEnd:1,transition:'cut'});cursor=end;}}
   }else{let cursor=0;while(cursor<duration-.12){const end=Math.min(duration,cursor+cutLength);if(end-cursor>=.2)ranges.push({id:id(),assetId:asset.id,sourceStart:cursor,sourceEnd:end,timelineStart:0,rateStart:1,rateEnd:1,transition:'cut'});cursor=end;}}
   return ranges;
@@ -141,7 +141,7 @@
   const scale=motion==='slow'?1.08+progress*.10:motion==='pulse'?1.04+Math.sin(progress*Math.PI)*.10:motion==='pan'?1.04+progress*.04:motion==='flash'?1.01+progress*.02:1.06+progress*.12;
   return{scale:scale*effect.scale,x:(progress-.5)*(motion==='pan'?.06:.018),y:(.5-progress)*(motion==='pan'?.04:.012),flash:motion==='flash'&&progress<.12?(1-progress/.12)*.22:0};
  }
- function getState(){return{style,intensity,assets:Array.from(assets.values()).map(({id,name,type,size,kind,virtualDuration,sceneCuts})=>({id,name,type,size,kind,virtualDuration,sceneCuts})),segments:segments.map(s=>({...s}))};}
+ function getState(){return{style,intensity,assets:Array.from(assets.values()).map(({id,name,type,size,kind,virtualDuration,sceneCuts,audioPauses})=>({id,name,type,size,kind,virtualDuration,sceneCuts,audioPauses})),segments:segments.map(s=>({...s}))};}
  async function restore(state){
   if(!state||!Array.isArray(state.assets)||!state.assets.length)return 0;
   style=PRESETS[state.style]?state.style:'social';intensity=clamp(state.intensity||3,1,5);
@@ -149,7 +149,7 @@
    const stored=await bridge.getMediaAsset(meta.id);if(!stored||!stored.blob)continue;
    const type=meta.type||stored.type||'',photo=(meta.kind==='image'||type.startsWith('image/'));
    const file=new File([stored.blob],meta.name|| (photo?'Restored photo.jpg':'Restored video.mp4'),{type:type||(photo?'image/jpeg':'video/mp4')});
-   try{const media=photo?await createImage(file):await createVideo(file);assets.set(meta.id,{...meta,kind:photo?'image':'video',virtualDuration:Number(meta.virtualDuration)||0,size:file.size,media});}catch(e){}
+   try{const media=photo?await createImage(file):await createVideo(file);assets.set(meta.id,{...meta,kind:photo?'image':'video',virtualDuration:Number(meta.virtualDuration)||0,size:file.size,media,file});}catch(e){}
   }
   segments=(Array.isArray(state.segments)?state.segments:[]).filter(s=>assets.has(s.assetId)&&Number.isFinite(s.sourceStart)&&Number.isFinite(s.sourceEnd)&&s.sourceEnd>s.sourceStart).slice(0,MAX_SEGMENTS).map(s=>({...s,rateStart:clamp(s.rateStart||s.rate||1,.5,2),rateEnd:clamp(s.rateEnd||s.rate||1,.5,2),transition:['cut','fade','flash','wipe','zoom'].includes(s.transition)?s.transition:'cut'}));
   relayout();render();return assets.size;
@@ -170,16 +170,44 @@
   for(let i=0;i<videos.length;i++){const cuts=await detectScenes(videos[i].id,p=>onProgress&&onProgress(i,videos.length,p));total+=cuts.length;}
   return total;
  }
+ async function detectQuietGaps(assetId,onProgress){
+  const asset=assets.get(assetId);if(!asset||asset.kind!=='video')throw new Error('Choose an imported video clip first.');
+  const AudioCtor=root.AudioContext||root.webkitAudioContext;if(!AudioCtor)throw new Error('Local audio analysis is not supported by this Android WebView.');
+  if(!asset.file||typeof asset.file.arrayBuffer!=='function')throw new Error('The original video file is unavailable. Re-import this clip to analyse its audio.');
+  const audioContext=new AudioCtor();let buffer;
+  try{
+   buffer=await audioContext.decodeAudioData(await asset.file.arrayBuffer());
+   const rate=buffer.sampleRate,windowSize=Math.max(1,Math.floor(rate*.05)),channels=buffer.numberOfChannels||1,length=buffer.length,levels=[];
+   for(let start=0;start<length;start+=windowSize){
+    let sum=0,count=0;for(let channel=0;channel<channels;channel++){const samples=buffer.getChannelData(channel);const end=Math.min(length,start+windowSize);for(let i=start;i<end;i++){sum+=samples[i]*samples[i];count++;}}
+    levels.push(Math.sqrt(sum/Math.max(1,count)));
+    if(onProgress&&levels.length%50===0)onProgress(Math.min(99,Math.round(start/length*100)));
+   }
+   const quietThreshold=.012,minFrames=7,gaps=[];let begin=-1;
+   for(let i=0;i<=levels.length;i++){
+    const quiet=i<levels.length&&levels[i]<quietThreshold;
+    if(quiet&&begin<0)begin=i;
+    if(!quiet&&begin>=0){const end=i,duration=(end-begin)*.05,startTime=begin*.05,endTime=end*.05;if(duration>=minFrames*.05&&startTime>.25&&endTime<buffer.duration-.25)gaps.push({start:Number(startTime.toFixed(2)),end:Number(endTime.toFixed(2)),midpoint:Number(((startTime+endTime)/2).toFixed(2))});begin=-1;}
+   }
+   asset.audioPauses=gaps;persist();return gaps;
+  }finally{if(audioContext.close)await audioContext.close().catch(()=>{});}
+ }
+ async function detectAllQuietGaps(onProgress){
+  const videos=Array.from(assets.values()).filter(a=>a.kind==='video');let total=0;
+  for(let i=0;i<videos.length;i++){const gaps=await detectQuietGaps(videos[i].id,p=>onProgress&&onProgress(i,videos.length,p));total+=gaps.length;}
+  return total;
+ }
  function mount(container,api){
-  host=container;bridge=api;const input=$('autoVideoInput'),add=$('autoVideoAdd'),run=$('autoVideoCut'),sceneButton=$('autoVideoScenes'),styleInput=$('autoVideoStyle'),power=$('autoVideoIntensity');
+  host=container;bridge=api;const input=$('autoVideoInput'),add=$('autoVideoAdd'),run=$('autoVideoCut'),sceneButton=$('autoVideoScenes'),pauseButton=$('autoVideoPauses'),styleInput=$('autoVideoStyle'),power=$('autoVideoIntensity');
   if(add&&input)add.addEventListener('click',()=>input.click());
   if(input)input.addEventListener('change',async()=>{const files=input.files;input.value='';try{await addFiles(files);}catch(e){updateStatus(e.message);}});
   if(styleInput){styleInput.value=style;styleInput.addEventListener('change',()=>{style=PRESETS[styleInput.value]?styleInput.value:'social';persist();});}
   if(power){power.value=String(intensity);power.addEventListener('input',()=>{intensity=clamp(power.value,1,5);const label=$('autoVideoIntensityValue');if(label)label.textContent=String(intensity);persist();});}
   if(sceneButton)sceneButton.addEventListener('click',async()=>{try{sceneButton.disabled=true;const total=await detectAllScenes((i,n,p)=>updateStatus('Analysing scene changes · clip '+(i+1)+'/'+n+' · '+p+'%'));updateStatus('Scene analysis complete · '+total+' scene boundary/boundaries found. Create Auto Cut again to use them.');}catch(e){updateStatus(e.message);}finally{sceneButton.disabled=false;}});
+  if(pauseButton)pauseButton.addEventListener('click',async()=>{try{pauseButton.disabled=true;const total=await detectAllQuietGaps((i,n,p)=>updateStatus('Analysing quiet audio gaps · clip '+(i+1)+'/'+n+' · '+p+'%'));updateStatus('Quiet-gap analysis complete · '+total+' gap(s) found. The next Auto Cut draft can use these as cut points.');}catch(e){updateStatus(e.message+' This is audio-level analysis, not speech recognition.');}finally{pauseButton.disabled=false;}});
   if(run)run.addEventListener('click',async()=>{try{let bpm=api.getBpm?api.getBpm():0;if(!bpm&&api.detectBpm){updateStatus('Analysing your uploaded song tempo…');try{const detected=await api.detectBpm(message=>updateStatus(message));bpm=detected&&detected.bpm;}catch(error){bpm=120;updateStatus('Tempo analysis unavailable; using the clearly marked 120 BPM fallback.');}}const result=generateAutoCut({bpm:bpm||120,musicDuration:api.getMusicDuration?api.getMusicDuration():0});updateStatus('Draft ready · '+result.count+' cuts · '+result.duration.toFixed(1)+' sec · '+result.bpm+' BPM. Press Play to preview with the music.');}catch(e){updateStatus(e.message);}});
   render();
  }
  function dispose(){assets.forEach(a=>{if(a.kind==='video')a.media.pause();URL.revokeObjectURL(a.media.src);});assets.clear();segments=[];}
- root.WaveForgeAutoVideo={mount,addFiles,generateAutoCut,move,splitSegment,removeSegment,setSpeedRamp,setTransition,detectScenes,detectAllScenes,sync,getMotion,getVisualEffect,getState,restore,dispose,getDuration:totalDuration,getCount:()=>segments.length,PRESETS};if(typeof module!=='undefined'&&module.exports)module.exports=root.WaveForgeAutoVideo;
+ root.WaveForgeAutoVideo={mount,addFiles,generateAutoCut,move,splitSegment,removeSegment,setSpeedRamp,setTransition,detectScenes,detectAllScenes,detectQuietGaps,detectAllQuietGaps,sync,getMotion,getVisualEffect,getState,restore,dispose,getDuration:totalDuration,getCount:()=>segments.length,PRESETS};if(typeof module!=='undefined'&&module.exports)module.exports=root.WaveForgeAutoVideo;
 })(typeof window!=='undefined'?window:globalThis);
