@@ -59,7 +59,7 @@
         if(!text)return;
         const start=Number.isFinite(ts[0])?ts[0]:0;
         const end=Number.isFinite(ts[1])?ts[1]:Math.min(decoded.duration,start+5);
-        const words=text.split(/\\s+/).filter(Boolean);
+        const words=text.split(' ').filter(Boolean);
         const groupSize=6;
         const groups=[];
         for(let i=0;i<words.length;i+=groupSize)groups.push(words.slice(i,i+groupSize).join(' '));
@@ -70,7 +70,7 @@
         });
       });
     }else if(result&&result.text){
-      const words=result.text.trim().split(/\\s+/).filter(Boolean),groups=[];
+      const words=result.text.trim().split(' ').filter(Boolean),groups=[];
       for(let i=0;i<words.length;i+=6)groups.push(words.slice(i,i+6).join(' '));
       groups.forEach((piece,i)=>lines.push({start:decoded.duration*i/groups.length,end:decoded.duration*(i+1)/groups.length,text:piece}));
     }
