@@ -4,6 +4,8 @@ const assert=require('assert');
 const app=fs.readFileSync('app.js','utf8');
 const images=fs.readFileSync('image-search.js','utf8');
 const project=fs.readFileSync('project-file.js','utf8');
+const filters=fs.readFileSync('filter-studio.js','utf8');
+const index=fs.readFileSync('index.html','utf8');
 for(const id of ['objectSelect','objectTextValue','objectX','objectY','objectScale','objectRotation','objectOpacity','objectColor','objectVisible','objectReset','objectCenter']){
  assert(app.includes(id),'Object editor control missing: '+id);
 }
@@ -22,4 +24,8 @@ assert(/commons\.wikimedia\.org\/w\/api\.php/.test(images),'Wikimedia Commons se
 assert(/safeName\(item\.title,blob\.type\)/.test(images),'Imported image filename does not use MIME type');
 assert(/sourceUrl/.test(images),'Image source/licence page link missing');
 assert(/MAX_BYTES=250\*1024\*1024/.test(project),'Portable project media limit missing');
-console.log('Object editor and image import regression tests passed.');
+assert(/filterPreset:window\.WaveForgeFilters/.test(app)&&/filterIntensity:window\.WaveForgeFilters/.test(app),'Filter settings are not saved');
+assert(/WaveForgeFilters\.set/.test(app)&&/WaveForgeFilters\.draw/.test(app),'Filters are not restored and applied');
+assert(/filter-studio\.js/.test(index),'Filter studio script is not loaded');
+assert(/profiles\.forEach/.test(filters),'Filter catalogue generation missing');
+console.log('Object editor, image import and filter integration regression tests passed.');
