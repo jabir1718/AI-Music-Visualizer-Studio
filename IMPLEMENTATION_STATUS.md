@@ -27,7 +27,7 @@ Last source audit: 2026-11-04 (after mixer, lyric-edit and export reliability fi
 | 12 | Direct canvas editing and selection | Partial | Some canvas dragging exists. Tap-to-select for every object, selection bounds, contextual editing and multi-select remain. |
 | 13 | Studio navigation and panel layout | Partial | Nested Music Studio categories exist. Swipe navigation, movable/minimizable panels and full workspace navigation remain. |
 | 14 | Advanced audio mixer and instrument studio | Partial | Separate imported audio layers now support volume, mute, solo, pitch/rate, offset, pan, bass/treble EQ, echo and reverb. True independent pitch/speed DSP, waveform editing, automation and automatic stem separation remain. |
-| 15 | Searchable PNG/artwork library | Not started | No in-app asset search/provider integration or curated searchable library. |
+| 15 | Searchable PNG/artwork library | Partial | Added in-app image search through Wikimedia Commons with preview, source/licence note and direct import as background or logo. Google API option is present but needs user-owned API key and Search Engine ID; curated local library remains. |
 | 16 | Custom backgrounds, writing and lyrics | Partial | Local photo/video backgrounds, manual writing and audio transcription exist. Dedicated multi-layer text/art composition and template-to-layer workflows remain. |
 | 17 | Smart template editing | Not started | No template element detection or editable object list. |
 | 18 | Decorative artwork, skulls, symbols and emoji collection | Not started | No curated 2,000+ asset library. |
@@ -42,7 +42,7 @@ Last source audit: 2026-11-04 (after mixer, lyric-edit and export reliability fi
 | 27 | Video project, timeline, autosave and export studio | Partial | Browser settings and imported audio assets can now be restored using localStorage/IndexedDB; real-time canvas export exists. Full project files, multi-layer video timeline, undo/redo, crash recovery and robust export presets remain. |
 | 28 | Visual effects, compositing, publishing aids and studio preferences | Not started | No complete compositing/effects/keyframe/publishing suite. |
 | 29 | Dedicated post-import Music Studio and nested editing workflow | Partial | A dedicated nested Music Studio area has Vocal, Ad-lib, Humming, Harmony, Instruments, Sound Effects, Voice FX, AI Separation and Cleanup categories. Some categories are import-only; generated processing and AI operations are not implemented. |
-| 30 | In-app Google image search and smart template editing | Not started | No authorized image-search provider, in-app asset fetch workflow or template element detection. |
+| 30 | In-app Google image search and smart template editing | Partial | Added a Google Custom Search image API configuration option plus a working no-key Wikimedia Commons search/import fallback. Google credentials are not supplied; editable template element detection remains unimplemented. |
 | 31 | Expanded voice characters and high-resolution filter pack | Not started | No verified voice model suite or 50+ high-resolution filter pack. |
 
 ## Current development checkpoint — 2026-11-04
