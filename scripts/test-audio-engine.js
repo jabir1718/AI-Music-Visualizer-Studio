@@ -80,6 +80,7 @@ const mainAudio = { volume: .85, currentTime: 2, duration: 30, playbackRate: 1 }
   engine.setLayerFormantStrength('voice',.5);assert.equal(engine.layers.get('voice').pitchNode.formantStrength.value,.5);
   await engine.enableLayerPitchPreserving('voice',-2,.9);
   assert.equal(engine.layers.get('voice').pitchNodeType,'soundtouch','formant processor should switch back to standard pitch processor');
+  const activePitchProcessor=engine.layers.get('voice').pitchNode;
   engine.disableLayerPitchPreserving('voice',1.25);
   assert.equal(engine.layers.get('voice').pitchNode,null,'disable should remove pitch processor');
   assert.ok(engine.layers.get('voice').compressor.connections.includes(engine.layers.get('voice').pan),'disable should restore compressor-to-mixer route');
