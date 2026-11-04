@@ -67,7 +67,7 @@
  }
  function move(index,delta){const next=index+delta;if(next<0||next>=segments.length)return;[segments[index],segments[next]]=[segments[next],segments[index]];relayout();render();persist();}
  function removeSegment(segmentId){segments=segments.filter(s=>s.id!==segmentId);relayout();render();persist();}
- async function generateAutoCut(options={}){
+ function generateAutoCut(options={}){
   if(!assets.size)throw new Error('Import video clips first.');
   const bpm=clamp(options.bpm||120,30,240),beat=60/bpm,preset=PRESETS[style]||PRESETS.social;
   const beatsPerCut=Math.max(.5,preset.beats*(1.2-intensity*.15)),totalSource=Array.from(assets.values()).reduce((n,a)=>n+durationOf(a),0),cutLength=Math.max(.35,beat*beatsPerCut,totalSource/300);
