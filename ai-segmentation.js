@@ -25,7 +25,7 @@ async function loadModel(callback){
  try{
   await loadScript();
   const instance=new root.SelfieSegmentation({locateFile:file=>BASE+file});
-  instance.setOptions({modelSelection:1});
+  instance.setOptions({modelSelection:0});
   instance.onResults(results=>{lastResults=results;processing=false;});
   await instance.initialize();
   model=instance;report('AI person segmentation ready. Processing stays on this device.');return true;
