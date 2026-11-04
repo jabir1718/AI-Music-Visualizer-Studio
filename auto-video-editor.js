@@ -209,5 +209,5 @@
   render();
  }
  function dispose(){assets.forEach(a=>{if(a.kind==='video')a.media.pause();URL.revokeObjectURL(a.media.src);});assets.clear();segments=[];}
- root.WaveForgeAutoVideo={mount,addFiles,generateAutoCut,move,splitSegment,removeSegment,setSpeedRamp,setTransition,detectScenes,detectAllScenes,detectQuietGaps,detectAllQuietGaps,sync,getMotion,getVisualEffect,getState,getSelectedSegment:()=>segments.find(s=>s.id===selected)||null,getSelectedSegmentId:()=>selected,restore,dispose,getDuration:totalDuration,getCount:()=>segments.length,PRESETS};if(typeof module!=='undefined'&&module.exports)module.exports=root.WaveForgeAutoVideo;
+ root.WaveForgeAutoVideo={mount,addFiles,generateAutoCut,move,splitSegment,removeSegment,setSpeedRamp,setTransition,detectScenes,detectAllScenes,detectQuietGaps,detectAllQuietGaps,sync,getMotion,getVisualEffect,getState,getSelectedSegment:()=>segments.find(s=>s.id===selected)||null,getSelectedSegmentId:()=>selected,selectSegment:segmentId=>{if(!segments.some(s=>s.id===segmentId))return false;selected=segmentId;render();return true;},restore,dispose,getDuration:totalDuration,getCount:()=>segments.length,PRESETS};if(typeof module!=='undefined'&&module.exports)module.exports=root.WaveForgeAutoVideo;
 })(typeof window!=='undefined'?window:globalThis);
