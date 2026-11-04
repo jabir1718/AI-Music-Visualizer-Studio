@@ -2,7 +2,7 @@
   class AudioEngine {
     constructor(audio){
       this.audio=audio;this.context=null;this.analyser=null;this.source=null;this.gain=null;
-      this.exportDestination=null;this.masterVolume=.85;this.data=null;this.lastBeat=0;
+      this.exportDestination=null;this.monitorGain=null;this.masterVolume=.85;this.data=null;this.lastBeat=0;
       this.energy=0;this.ready=false;this.layers=new Map();
     }
     async connect(){
@@ -13,10 +13,10 @@
       this.analyser.fftSize=2048;this.analyser.smoothingTimeConstant=.78;
       this.gain=this.context.createGain();this.gain.gain.value=this.masterVolume;
       this.source=this.context.createMediaElementSource(this.audio);
-      this.source.connect(this.analyser);this.analyser.connect(this.gain);
-      this.gain.connect(this.context.destination);
       this.exportDestination=this.context.createMediaStreamDestination();
-      this.gain.connect(this.exportDestination);
+      this.monitorGain=this.context.createGain();this.monitorGain.gain.value=0;
+      this.source.connect(this.analyser);this.analyser.connect(this.monitorGain);this.monitorGain.connect(this.context.destination);
+      this.source.connect(this.gain);this.gain.connect(this.context.destination);this.gain.connect(this.exportDestination);
       this.data=new Uint8Array(this.analyser.frequencyBinCount);this.ready=true;
     }
     async resume(){if(this.context&&this.context.state==='suspended')await this.context.resume();}
@@ -32,7 +32,8 @@
       if(!this.ready)throw new Error('Start the main audio engine before adding a mixer layer.');
       if(this.layers.has(id))return;
       const source=this.context.createMediaElementSource(audio),gain=this.context.createGain();
-      gain.gain.value=volume;source.connect(gain);gain.connect(this.analyser);
+      gain.gain.value=volume;source.connect(this.analyser);source.connect(gain);
+      gain.connect(this.context.destination);gain.connect(this.exportDestination);
       this.layers.set(id,{audio,source,gain});
     }
     setLayerVolume(id,volume){
