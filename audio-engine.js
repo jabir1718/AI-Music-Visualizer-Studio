@@ -31,14 +31,14 @@
       await this.loadSoundTouch();
       if(layer.pitchNode){this.setLayerPitch(id,semitones);this.setLayerRate(id,rate);return true;}
       const node=new this.SoundTouchNode({context:this.context});
-      layer.high.disconnect(layer.pan);layer.high.connect(node);node.connect(layer.pan);layer.pitchNode=node;
+      layer.high.disconnect(layer.pan);layer.high.disconnect(layer.delay);layer.high.disconnect(layer.convolver);layer.high.connect(node);node.connect(layer.pan);node.connect(layer.delay);node.connect(layer.convolver);layer.pitchNode=node;
       node.pitchSemitones.value=Math.max(-12,Math.min(12,Number(semitones)||0));
       node.playbackRate.value=Math.max(.5,Math.min(2,Number(rate)||1));
       layer.audio.preservesPitch=false;layer.audio.playbackRate=node.playbackRate.value;return true;
     }
     disableLayerPitchPreserving(id,rate=1){
       const layer=this.layers.get(id);if(!layer)return;
-      if(layer.pitchNode){try{layer.high.disconnect(layer.pitchNode);}catch(e){}try{layer.pitchNode.disconnect();}catch(e){}layer.pitchNode=null;layer.high.connect(layer.pan);}
+      if(layer.pitchNode){try{layer.high.disconnect(layer.pitchNode);}catch(e){}try{layer.pitchNode.disconnect();}catch(e){}layer.pitchNode=null;layer.high.connect(layer.pan);layer.high.connect(layer.delay);layer.high.connect(layer.convolver);}
       layer.audio.preservesPitch=false;layer.audio.playbackRate=rate;
     }
     setLayerPitch(id,semitones){const layer=this.layers.get(id);if(layer&&layer.pitchNode)layer.pitchNode.pitchSemitones.setTargetAtTime(Math.max(-12,Math.min(12,Number(semitones)||0)),this.context.currentTime,.025);}
@@ -78,7 +78,7 @@
     getWaveform(){const a=new Uint8Array(this.analyser?this.analyser.fftSize:128);if(this.analyser)this.analyser.getByteTimeDomainData(a);return a;}
     detectBeat(sensitivity){const f=this.getFrequency();let sum=0;for(let i=2;i<Math.min(18,f.length);i++)sum+=f[i];const low=sum/16,now=performance.now(),threshold=90-(sensitivity*.55);const hit=low>threshold&&low>this.energy*1.23&&now-this.lastBeat>220;if(hit)this.lastBeat=now;this.energy=this.energy*.82+low*.18;return{hit,energy:low/255};}
     get duration(){return this.audio.duration||0;}
-    destroy(){this.layers.forEach(l=>{l.audio.pause();['source','gain','low','high','pan','delay','feedback','delaySend','convolver','reverbSend','shaper'].forEach(k=>{try{l[k].disconnect();}catch(e){}});});this.layers.clear();if(this.context)this.context.close();this.ready=false;}
+    destroy(){this.layers.forEach(l=>{l.audio.pause();['source','gain','low','high','pan','delay','feedback','delaySend','convolver','reverbSend','shaper','pitchNode'].forEach(k=>{try{if(l[k])l[k].disconnect();}catch(e){}});});this.layers.clear();if(this.context)this.context.close();this.ready=false;}
   }
   window.AudioEngine=AudioEngine;
 })();
