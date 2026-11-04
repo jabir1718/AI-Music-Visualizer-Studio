@@ -7,6 +7,7 @@ const project=fs.readFileSync('project-file.js','utf8');
 const filters=fs.readFileSync('filter-studio.js','utf8');
 const index=fs.readFileSync('index.html','utf8');
 const mediaTools=fs.readFileSync('video-audio-extractor.js','utf8');
+const chroma=fs.readFileSync('chroma-key.js','utf8');
 for(const id of ['objectSelect','objectTextValue','objectX','objectY','objectScale','objectRotation','objectOpacity','objectColor','objectVisible','objectReset','objectCenter']){
  assert(app.includes(id),'Object editor control missing: '+id);
 }
@@ -44,4 +45,7 @@ assert(/video-audio-extractor\.js/.test(index),'Video extractor script is not lo
 assert(/WaveForgeMediaTools\.mount/.test(app),'Video extractor UI is not mounted');
 assert(/onMain:loadAudio/.test(app)&&/addMixerLayer\(file,'Other'\)/.test(app),'Extracted audio import actions are not connected');
 assert(/MediaRecorder/.test(mediaTools)&&/createMediaElementSource/.test(mediaTools),'Video audio extraction must use real media capture');
+assert(/WaveForgeChromaKey\.mount/.test(app)&&/WaveForgeChromaKey\.process/.test(app),'Chroma key processor is not integrated');
+assert(/chromaKey:window\.WaveForgeChromaKey/.test(app),'Chroma key settings are not saved');
+assert(/chroma-key\.js/.test(index)&&/processPixels/.test(chroma),'Chroma key module or UI is missing');
 console.log('Object editor, image import, filters and media-tool integration tests passed.');
