@@ -12,7 +12,7 @@ assert.strictEqual(new Set(api.items.map(x=>x.name)).size,50,'Filter names must 
 assert(new Set(api.items.map(x=>x.group)).size>=8,'Expected multiple filter families');
 assert(api.items.every(x=>Number.isFinite(x.brightness)&&Number.isFinite(x.contrast)&&Number.isFinite(x.saturate)),'Filter parameters must be numeric');
 let drawn=0;
-const ctx={filter:'none',globalAlpha:1,globalCompositeOperation:'source-over',save(){},restore(){},drawImage(){drawn++;},fillRect(){},set fillStyle(v){this._fill=v;}};
+const stack=[];const ctx={filter:'none',globalAlpha:1,globalCompositeOperation:'source-over',save(){stack.push([this.filter,this.globalAlpha,this.globalCompositeOperation]);},restore(){const s=stack.pop();[this.filter,this.globalAlpha,this.globalCompositeOperation]=s;},drawImage(){drawn++;},fillRect(){},set fillStyle(v){this._fill=v;}};
 api.set('f02',65);api.draw(ctx,{},0,0,100,100);
 assert.strictEqual(drawn,1,'Selected filter must draw source media');
 assert.strictEqual(ctx.filter,'none','Canvas filter state must not leak into visualizer layers');
