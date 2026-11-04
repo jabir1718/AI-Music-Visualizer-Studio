@@ -1,0 +1,16 @@
+{
+  "name": "waveforge-music-visualizer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "WaveForge Music Visualizer Studio Android wrapper",
+  "scripts": {
+    "build:web": "node scripts/build-web.js"
+  },
+  "dependencies": {
+    "@capacitor/android": "6.2.0",
+    "@capacitor/core": "6.2.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "6.2.0"
+  }
+}
