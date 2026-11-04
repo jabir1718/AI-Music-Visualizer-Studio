@@ -29,7 +29,7 @@
   else if(/(?:square|chowkor)/i.test(lower))add('exportRatio','Canvas format','1:1');
   const titlePatterns=[
    /(?:video\s+)?\btitle\s*(?:to|as|[:=]|ko|mein)\s*([^,;]+)/i,
-   /(?:video\s+)?title\s+(.+?)\s+(?:rakho|likho|set\s+karo)(?=$|[,;])/i
+   /(?:video\s+)?\btitle\s+(.+?)\s+(?:rakho|likho|set\s+karo)(?=$|[,;])/i
   ];
   for(const pattern of titlePatterns){const match=text.match(pattern);if(match){const value=match[1].trim().replace(/\s+(?:rakho|likho|set\s+karo)$/i,'').trim();if(value){add('titleInput','Video title',value.slice(0,60));break;}}}
   const subtitlePatterns=[
