@@ -57,12 +57,14 @@ const mainAudio = { volume: .85, currentTime: 2, duration: 30, playbackRate: 1 }
   engine.SoundTouchNode=FakeSoundTouchNode;engine.soundTouchRegistered=true;
   await engine.enableLayerPitchPreserving('voice',5,1.1);
   assert.equal(engine.layers.get('voice').pitchNode.pitchSemitones.value,5,'pitch preserving node should receive semitone value');
-  assert.equal(engine.layers.get('voice').pitchNode.playbackRate.value,1.1,'pitch preserving node should receive independent speed');
+  assert.equal(engine.layers.get('voice').pitchNode.playbackRate.value,1,'pitch node tempo remains neutral while source rate controls speed');
+  assert.equal(layerAudio.playbackRate,1.1,'source playback rate should remain the timeline speed');
   assert.ok(engine.layers.get('voice').high.connections.includes(engine.layers.get('voice').pitchNode),'EQ should feed pitch-preserving processor');
   assert.ok(engine.layers.get('voice').pitchNode.connections.includes(engine.layers.get('voice').pan),'pitch processor should feed mixer effects');
   engine.setLayerPitch('voice',-3);engine.setLayerRate('voice',.9);
   assert.equal(engine.layers.get('voice').pitchNode.pitchSemitones.value,-3);
-  assert.equal(engine.layers.get('voice').pitchNode.playbackRate.value,.9);
+  assert.equal(engine.layers.get('voice').pitchNode.pitchSemitones.value,-3-12*Math.log2(.9));
+  assert.equal(engine.layers.get('voice').pitchNode.playbackRate.value,1);
   engine.disableLayerPitchPreserving('voice',1.25);
   assert.equal(engine.layers.get('voice').pitchNode,null,'disable should remove pitch processor');
   assert.ok(engine.layers.get('voice').high.connections.includes(engine.layers.get('voice').pan),'disable should restore direct mixer route');
