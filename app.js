@@ -86,7 +86,7 @@ function draw(){
  raf=requestAnimationFrame(draw);
 }
 function startDraw(){if(!raf)draw();}
-async function ensureEngine(){if(!engine)engine=new AudioEngine(audio);await engine.connect();await engine.resume();mixerLayers.forEach(layer=>{if(!layer.connected){engine.addLayer(layer.id,layer.audio,layer.muted?0:layer.volume);layer.connected=true;}});return engine;}
+async function ensureEngine(){if(!engine)engine=new AudioEngine(audio);await engine.connect();await engine.resume();engine.setVolume(Number($('volume').value));mixerLayers.forEach(layer=>{if(!layer.connected){engine.addLayer(layer.id,layer.audio,layer.muted?0:layer.volume);layer.connected=true;}});return engine;}
 
 let mixerLayers=[],mixerPanel=null;
 function syncMixerLayers(){
@@ -107,6 +107,7 @@ function initMixerUI(){
  mixerPanel=document.createElement('section');mixerPanel.className='mixer-panel';
  mixerPanel.innerHTML='<div class="mixer-heading"><div><b>Separate audio layers</b><small>Voice, ad-libs, instruments and sound effects stay independent from background music.</small></div><span class="mixer-live">MULTI-TRACK</span></div><div class="mixer-add"><label>Layer type<select id="mixerRole"><option>Voice</option><option>Ad-lib</option><option>Sound effect</option><option>Bass stem</option><option>Drums</option><option>Piano</option><option>Guitar</option><option>Instrumental</option><option>Other</option></select></label><label class="mixer-file">＋ Choose audio<input id="mixerFile" type="file" accept="audio/*" hidden></label><button class="btn small" id="mixerAddBtn" type="button">Add layer</button></div><div class="mixer-main-pitch"><label>Background music pitch <input id="mainPitch" type="range" min="-12" max="12" step="1" value="0"></label><span id="mainPitchValue">0 semitones</span></div><div id="mixerList" class="mixer-list"><p class="hint">No extra layers yet. Your main audio remains the background music.</p></div><p class="hint mixer-footnote">Pitch uses playback-rate shifting, so changing pitch also changes playback speed. Add separately prepared stems for independent instrument control; this does not automatically separate a mixed song.</p>';
  host.insertBefore(mixerPanel,audioEl);
+ try{const saved=JSON.parse(localStorage.getItem('waveforge-v1')||'{}');if(saved.mainPitch!==undefined){$('mainPitch').value=saved.mainPitch;audio.playbackRate=Math.pow(2,Number(saved.mainPitch)/12);audio.preservesPitch=false;$('mainPitchValue').textContent=(Number(saved.mainPitch)>0?'+':'')+saved.mainPitch+' semitones';}}catch(e){}
  const file=$('mixerFile');
  $('mixerAddBtn').onclick=()=>file.click();
  file.onchange=e=>{const f=e.target.files&&e.target.files[0];if(f)addMixerLayer(f,$('mixerRole').value);file.value='';};
@@ -125,7 +126,7 @@ function initMixerUI(){
 function addMixerLayer(file,role){
  if(!file.type.startsWith('audio/')){alert('Choose a supported audio file.');return;}
  const id='mix-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),url=URL.createObjectURL(file);
- const el=document.createElement('audio');el.preload='auto';el.src=url;el.preservesPitch=false;
+ const el=document.createElement('audio');el.preload='auto';el.hidden=true;el.src=url;el.preservesPitch=false;
  const layer={id,file,url,audio:el,role,volume:.85,rate:1,offset:0,muted:false,connected:false};
  mixerLayers.push(layer);mixerPanel.appendChild(el);renderMixerLayers();
  if(engine&&engine.ready){engine.addLayer(id,el,layer.volume);layer.connected=true;}
@@ -163,7 +164,7 @@ function renderMixerLayers(){
 
 function updateText(){ $('previewTitle').textContent=$('titleInput').value||' ';$('previewSubtitle').textContent=$('subtitleInput').value||'';$('stageCopy').style.color=$('textColor').value;$('stageCopy').style.fontFamily=$('fontStyle').value==='serif'?'Georgia,serif':$('fontStyle').value==='mono'?'monospace':'Manrope,sans-serif';}
 function saveSettings(){
- const data={title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,positions,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
+ const data={mainPitch:$('mainPitch')?$('mainPitch').value:0,title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,positions,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
  try{localStorage.setItem('waveforge-v1',JSON.stringify(data));setStatus('Saved locally');}catch(e){setStatus('Ready');}
 }
 function loadSettings(){
