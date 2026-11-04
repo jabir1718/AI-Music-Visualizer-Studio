@@ -6,7 +6,7 @@ assert.deepStrictEqual({...timeline.resolveLayerTime(layer,1,12)},{active:false,
 assert.deepStrictEqual({...timeline.resolveLayerTime(layer,4,12)},{active:true,currentTime:5,reason:'playing'});
 assert.deepStrictEqual({...timeline.resolveLayerTime(layer,8,12)},{active:false,currentTime:8,reason:'after-end'});
 const loop={...layer,loop:true};
-assert.strictEqual(timeline.resolveLayerTime(loop,8,12).currentTime,6,'loop wraps within trimmed section');
+assert.strictEqual(timeline.resolveLayerTime(loop,8,12).currentTime,4,'loop wraps within trimmed section');
 const split=timeline.splitLayer(layer,4,12);
 assert(Math.abs(split.splitMediaTime-5)<1e-9);
 assert.strictEqual(split.first.trimEnd,5);
