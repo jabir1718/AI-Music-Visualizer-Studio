@@ -511,3 +511,6 @@ body.wf-studio-app .wf-tool-content .risk-result{
  body.wf-studio-app .style-card,body.wf-studio-app .template-card{transition:none}
  body.wf-studio-app .wf-tool-content>.panel:not([hidden]){animation:none}
 }
+
+/* Keyboard focus visibility for the 3D tool dock */
+body.wf-studio-app .wf-tool-tab:focus-visible,body.wf-studio-app .btn:focus-visible,body.wf-studio-app .style-card:focus-visible,body.wf-studio-app .template-card:focus-visible{outline:2px solid #9feaff;outline-offset:3px;}
