@@ -413,3 +413,7 @@ This is an order for development, not a reduction of the full scope:
 - Use the detected BPM or a clearly disclosed 120 BPM fallback. Photo-only montages are paced to the main song duration; photos receive gentle pan/zoom motion. Video clips are split into beat-sized segments.
 - Keep sources unchanged and segments editable (reorder, trim, split, remove). Save media and settings locally and in portable project packages.
 - This is deterministic offline beat/template editing, not AI scene understanding, automatic semantic photo selection, generated transitions, or a full multi-track video compositor. Codec, memory and export reliability still require physical Android testing.
+
+
+### Offline helper language support
+- The rules-based Quick Edit Assistant should accept short English and Roman Urdu commands for its supported local actions. It must preview changes and reject unsupported requests rather than pretending to understand arbitrary prompts.
