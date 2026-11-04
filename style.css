@@ -317,3 +317,5 @@ button[data-action-icon]:disabled{opacity:.45;cursor:not-allowed}
 .auto-video-speed{display:grid;grid-template-columns:1fr 1fr;gap:10px}.auto-video-clip select{width:100%;min-height:38px;background:var(--panel-soft);color:var(--text);border:1px solid var(--line);border-radius:9px;padding:7px}@media(max-width:560px){.auto-video-speed{grid-template-columns:1fr}}
 
 .auto-video-actions button:disabled{opacity:.55;cursor:wait}
+
+.wf-timeline-clip.video{background:linear-gradient(135deg,#245d76,#287d8c);border-color:#56c4d0;color:#fff}.wf-timeline-clip.video.selected{outline:2px solid var(--accent,#8fe7d1);outline-offset:1px}.wf-video-lane{background:repeating-linear-gradient(90deg,transparent 0,transparent 39px,rgba(255,255,255,.035) 40px)}
