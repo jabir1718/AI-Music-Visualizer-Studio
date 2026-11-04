@@ -44,9 +44,10 @@
    if(!pending.length){const item=root.document.createElement('li');item.textContent='No supported changes detected.';preview.appendChild(item);}
    apply.disabled=!pending.length;
   }
+  input.addEventListener('input',()=>{pending=[];show();status.textContent='Prompt changed. Preview again before applying.';});
   analyse.addEventListener('click',()=>{
    const result=parsePrompt(input.value,current());pending=result.actions;show();
-   status.textContent=result.unsupported[0]||'Preview ready. Nothing changes until you tap Apply edits.';
+   status.textContent=result.unsupported[0]||'Preview ready. Only the listed supported edits will be applied; other parts are ignored.';
   });
   apply.addEventListener('click',()=>{
    if(!pending.length)return;
