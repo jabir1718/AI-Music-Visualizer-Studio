@@ -40,6 +40,8 @@ const mainAudio = { volume: .85, currentTime: 2, duration: 30, playbackRate: 1 }
   await engine.connect();
   assert.ok(engine.mainSoloGain, 'main solo gain node must be initialized');
   assert.ok(engine.mainCompressor,'main dynamics compressor must be initialized');
+  assert.ok(engine.mainHigh.connections.includes(engine.mainCompressor),'main EQ should feed main compressor');
+  assert.ok(engine.mainCompressor.connections.includes(engine.mainShaper),'main compressor should feed master distortion/pan path');
   await assert.rejects(engine.loadSoundTouch(),/AudioWorklet support/,'unsupported browsers must receive a clear pitch-preserving error');
   await assert.rejects(engine.loadFormantCorrection(),/AudioWorklet support/,'unsupported browsers must receive a clear formant-correction error');
   assert.ok(engine.mainPanner.connections.includes(engine.mainSoloGain), 'main effects chain must route through solo gain');
@@ -85,6 +87,7 @@ const mainAudio = { volume: .85, currentTime: 2, duration: 30, playbackRate: 1 }
   engine.setLayerRate('voice', 1.2);
   engine.setLayerEQ('voice', 3, -2);
   engine.setLayerCompression('voice',40);assert.equal(engine.layers.get('voice').compressor.ratio.value,5.4,'per-layer compression should update independently');
+  assert.ok(engine.layers.get('voice').high.connections.includes(engine.layers.get('voice').compressor),'layer EQ should feed its independent compressor');
   engine.setLayerPan('voice', .25);
   engine.setLayerDelay('voice', .5);
   engine.setLayerReverb('voice', .5);
