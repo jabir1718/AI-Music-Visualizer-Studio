@@ -85,3 +85,14 @@ body.wf-dashboard-app .instrument-source-picker>b{flex:0 0 100%;font-size:12px;c
 body.wf-dashboard-app .instrument-source-picker .btn{min-height:34px;border:1px solid #45659d;background:linear-gradient(145deg,#1a2d55,#0b1731);color:#d9eaff}
 body.wf-dashboard-app .instrument-source-picker .btn[aria-pressed="true"]{border-color:#54eaff;background:linear-gradient(110deg,#692bc1,#126a9f);box-shadow:0 0 13px #38cfff44;color:#fff}
 body.wf-dashboard-app .music-master-link{margin:10px 0 0;padding:10px 12px;border-left:3px solid #3edfff;background:#0d1a34;color:#b8d8ff;border-radius:0 8px 8px 0}
+
+
+/* Dashboard timeline now mirrors imported Auto Cut segments. */
+body.wf-dashboard-app .wf-clip-placeholder{display:flex;align-items:center;gap:8px;overflow-x:auto;justify-content:flex-start;min-width:0}
+body.wf-dashboard-app .wf-clip-placeholder>span{flex:0 0 auto;color:#8ca8d7;font-size:9px;letter-spacing:.08em}
+body.wf-dashboard-app .wf-clip-placeholder> b{flex:0 0 auto;font-size:10px;color:#b9c9e9}
+body.wf-dashboard-app .wf-mini-clip{position:relative;flex:0 0 82px;width:82px;height:52px;padding:0;overflow:hidden;border:1px solid #5275ae;border-radius:9px;background:#101a35;box-shadow:0 0 9px #4c44ff25}
+body.wf-dashboard-app .wf-mini-clip img{display:block;width:100%;height:100%;object-fit:cover}
+body.wf-dashboard-app .wf-mini-clip-glyph{display:grid;place-items:center;width:100%;height:100%;color:#70eaff;background:linear-gradient(140deg,#172a56,#10122c);font-size:20px}
+body.wf-dashboard-app .wf-mini-clip small{position:absolute;left:0;right:0;bottom:0;padding:3px 4px;background:#050817c9;color:#eaf3ff;font-size:8px;text-align:left}
+body.wf-dashboard-app .wf-mini-clip:focus-visible{outline:2px solid #61eaff;outline-offset:2px}
