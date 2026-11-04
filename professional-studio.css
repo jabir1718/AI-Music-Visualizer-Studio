@@ -77,3 +77,11 @@ body.wf-dashboard-app .wf-header-icon:hover{border-color:#61eaff;box-shadow:0 0 
 body.wf-dashboard-app .app-shell.wf-sidebar-collapsed .sidebar{display:none}
 body.wf-dashboard-app .app-shell.wf-sidebar-collapsed .workspace{grid-template-columns:minmax(0,1fr)}
 @media(max-width:700px){body.wf-dashboard-app .wf-header-icon{width:32px;height:32px;min-width:32px;font-size:15px}}
+
+
+/* Music workspace: compact instrument source selector and master-track notice. */
+body.wf-dashboard-app .instrument-source-picker{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 2px;padding:12px;border:1px solid #344e80;border-radius:12px;background:linear-gradient(130deg,#101d3b,#0a1228)}
+body.wf-dashboard-app .instrument-source-picker>b{flex:0 0 100%;font-size:12px;color:#c9d9ff;letter-spacing:.04em}
+body.wf-dashboard-app .instrument-source-picker .btn{min-height:34px;border:1px solid #45659d;background:linear-gradient(145deg,#1a2d55,#0b1731);color:#d9eaff}
+body.wf-dashboard-app .instrument-source-picker .btn[aria-pressed="true"]{border-color:#54eaff;background:linear-gradient(110deg,#692bc1,#126a9f);box-shadow:0 0 13px #38cfff44;color:#fff}
+body.wf-dashboard-app .music-master-link{margin:10px 0 0;padding:10px 12px;border-left:3px solid #3edfff;background:#0d1a34;color:#b8d8ff;border-radius:0 8px 8px 0}
