@@ -1,14 +1,14 @@
 (function(){
   class AudioEngine {
-    constructor(audio){this.audio=audio;this.context=null;this.analyser=null;this.source=null;this.gain=null;this.mainSoloGain=null;this.exportDestination=null;this.monitorGain=null;this.masterVolume=.85;this.data=null;this.lastBeat=0;this.energy=0;this.ready=false;this.layers=new Map();this.reverbBuffer=null;this.mainLow=null;this.mainHigh=null;this.mainPanner=null;this.mainDelay=null;this.mainFeedback=null;this.mainDelaySend=null;this.mainConvolver=null;this.mainReverbSend=null;this.mainShaper=null;this.SoundTouchNode=null;this.soundTouchLoadPromise=null;this.soundTouchRegistered=false;this.FormantCorrectionNode=null;this.formantLoadPromise=null;this.formantRegistered=false;}
+    constructor(audio){this.audio=audio;this.context=null;this.analyser=null;this.source=null;this.gain=null;this.mainSoloGain=null;this.exportDestination=null;this.monitorGain=null;this.masterVolume=.85;this.data=null;this.lastBeat=0;this.energy=0;this.ready=false;this.layers=new Map();this.reverbBuffer=null;this.mainLow=null;this.mainHigh=null;this.mainPanner=null;this.mainDelay=null;this.mainFeedback=null;this.mainDelaySend=null;this.mainConvolver=null;this.mainReverbSend=null;this.mainShaper=null;this.mainCompressor=null;this.SoundTouchNode=null;this.soundTouchLoadPromise=null;this.soundTouchRegistered=false;this.FormantCorrectionNode=null;this.formantLoadPromise=null;this.formantRegistered=false;}
     async connect(){
       if(this.ready)return;const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)throw new Error('Web Audio is not supported in this browser.');
       this.context=new Ctx();this.analyser=this.context.createAnalyser();this.analyser.fftSize=2048;this.analyser.smoothingTimeConstant=.78;
       this.gain=this.context.createGain();this.gain.gain.value=this.masterVolume;this.mainSoloGain=this.context.createGain();this.mainSoloGain.gain.value=1;this.audio.volume=1;this.source=this.context.createMediaElementSource(this.audio);
       this.exportDestination=this.context.createMediaStreamDestination();this.monitorGain=this.context.createGain();this.monitorGain.gain.value=0;
       this.source.connect(this.analyser);this.analyser.connect(this.monitorGain);this.monitorGain.connect(this.context.destination);
-      this.mainLow=this.context.createBiquadFilter();this.mainLow.type='lowshelf';this.mainLow.frequency.value=160;this.mainHigh=this.context.createBiquadFilter();this.mainHigh.type='highshelf';this.mainHigh.frequency.value=6500;this.mainPanner=typeof this.context.createStereoPanner==='function'?this.context.createStereoPanner():this.context.createGain();this.mainDelay=this.context.createDelay(1);this.mainDelay.delayTime.value=.24;this.mainFeedback=this.context.createGain();this.mainFeedback.gain.value=.18;this.mainDelaySend=this.context.createGain();this.mainDelaySend.gain.value=0;this.mainConvolver=this.context.createConvolver();this.mainConvolver.buffer=this.makeReverbBuffer();this.mainReverbSend=this.context.createGain();this.mainReverbSend.gain.value=0;this.mainShaper=this.context.createWaveShaper();this.mainShaper.curve=null;this.mainShaper.oversample='2x';
-      this.source.connect(this.gain);this.gain.connect(this.mainLow);this.mainLow.connect(this.mainHigh);this.mainHigh.connect(this.mainShaper);this.mainShaper.connect(this.mainPanner);this.mainPanner.connect(this.mainSoloGain);this.mainSoloGain.connect(this.context.destination);this.mainSoloGain.connect(this.exportDestination);this.mainHigh.connect(this.mainDelay);this.mainDelay.connect(this.mainFeedback);this.mainFeedback.connect(this.mainDelay);this.mainDelay.connect(this.mainDelaySend);this.mainDelaySend.connect(this.mainPanner);this.mainHigh.connect(this.mainConvolver);this.mainConvolver.connect(this.mainReverbSend);this.mainReverbSend.connect(this.mainPanner);
+      this.mainLow=this.context.createBiquadFilter();this.mainLow.type='lowshelf';this.mainLow.frequency.value=160;this.mainHigh=this.context.createBiquadFilter();this.mainHigh.type='highshelf';this.mainHigh.frequency.value=6500;this.mainPanner=typeof this.context.createStereoPanner==='function'?this.context.createStereoPanner():this.context.createGain();this.mainDelay=this.context.createDelay(1);this.mainDelay.delayTime.value=.24;this.mainFeedback=this.context.createGain();this.mainFeedback.gain.value=.18;this.mainDelaySend=this.context.createGain();this.mainDelaySend.gain.value=0;this.mainConvolver=this.context.createConvolver();this.mainConvolver.buffer=this.makeReverbBuffer();this.mainReverbSend=this.context.createGain();this.mainReverbSend.gain.value=0;this.mainShaper=this.context.createWaveShaper();this.mainShaper.curve=null;this.mainShaper.oversample='2x';this.mainCompressor=this.context.createDynamicsCompressor();this.mainCompressor.threshold.value=0;this.mainCompressor.knee.value=0;this.mainCompressor.ratio.value=1;this.mainCompressor.attack.value=.003;this.mainCompressor.release.value=.25;
+      this.source.connect(this.gain);this.gain.connect(this.mainLow);this.mainLow.connect(this.mainHigh);this.mainHigh.connect(this.mainCompressor);this.mainCompressor.connect(this.mainShaper);this.mainShaper.connect(this.mainPanner);this.mainPanner.connect(this.mainSoloGain);this.mainSoloGain.connect(this.context.destination);this.mainSoloGain.connect(this.exportDestination);this.mainCompressor.connect(this.mainDelay);this.mainDelay.connect(this.mainFeedback);this.mainFeedback.connect(this.mainDelay);this.mainDelay.connect(this.mainDelaySend);this.mainDelaySend.connect(this.mainPanner);this.mainCompressor.connect(this.mainConvolver);this.mainConvolver.connect(this.mainReverbSend);this.mainReverbSend.connect(this.mainPanner);
       this.data=new Uint8Array(this.analyser.frequencyBinCount);this.ready=true;
     }
     async resume(){if(this.context&&this.context.state==='suspended')await this.context.resume();}
@@ -41,9 +41,9 @@
       return this.formantLoadPromise;
     }
     routeLayerPitchNode(layer,node,type){
-      if(layer.pitchNode){try{layer.high.disconnect(layer.pitchNode);}catch(e){}try{layer.pitchNode.disconnect();}catch(e){}}
-      else{layer.high.disconnect(layer.pan);layer.high.disconnect(layer.delay);layer.high.disconnect(layer.convolver);}
-      layer.high.connect(node);node.connect(layer.pan);node.connect(layer.delay);node.connect(layer.convolver);
+      if(layer.pitchNode){try{layer.compressor.disconnect(layer.pitchNode);}catch(e){}try{layer.pitchNode.disconnect();}catch(e){}}
+      else{layer.compressor.disconnect(layer.pan);layer.compressor.disconnect(layer.delay);layer.compressor.disconnect(layer.convolver);}
+      layer.compressor.connect(node);node.connect(layer.pan);node.connect(layer.delay);node.connect(layer.convolver);
       layer.pitchNode=node;layer.pitchNodeType=type;
     }
     async enableLayerPitchPreserving(id,semitones=0,rate=1){
@@ -76,7 +76,7 @@
     setLayerFormantStrength(id,strength){const layer=this.layers.get(id);if(layer&&layer.pitchNode&&layer.pitchNodeType==='formant')layer.pitchNode.formantStrength.setTargetAtTime(Math.max(0,Math.min(1,Number(strength)||0)),this.context.currentTime,.025);}
     disableLayerPitchPreserving(id,rate=1){
       const layer=this.layers.get(id);if(!layer)return;
-      if(layer.pitchNode){try{layer.high.disconnect(layer.pitchNode);}catch(e){}try{layer.pitchNode.disconnect();}catch(e){}layer.pitchNode=null;layer.pitchNodeType=null;layer.high.connect(layer.pan);layer.high.connect(layer.delay);layer.high.connect(layer.convolver);}
+      if(layer.pitchNode){try{layer.high.disconnect(layer.pitchNode);}catch(e){}try{layer.pitchNode.disconnect();}catch(e){}layer.pitchNode=null;layer.pitchNodeType=null;layer.compressor.connect(layer.pan);layer.compressor.connect(layer.delay);layer.compressor.connect(layer.convolver);}
       layer.audio.preservesPitch=false;layer.audio.playbackRate=rate;
     }
     setLayerPitch(id,semitones){const layer=this.layers.get(id);if(!layer)return;layer.pitchSemitones=Math.max(-12,Math.min(12,Number(semitones)||0));if(layer.pitchNode)layer.pitchNode.pitchSemitones.setTargetAtTime(layer.pitchSemitones,this.context.currentTime,.025);}
@@ -84,6 +84,7 @@
     setMainSoloMute(muted){if(this.mainSoloGain&&this.context)this.mainSoloGain.gain.setTargetAtTime(muted?0:1,this.context.currentTime,.025);}
     setVolume(v){this.masterVolume=v;if(this.gain)this.gain.gain.setTargetAtTime(v,this.context.currentTime,.025);else this.audio.volume=v;}
     setMainEQ(bass,treble){if(!this.context||!this.mainLow)return;this.mainLow.gain.setTargetAtTime(bass,this.context.currentTime,.025);this.mainHigh.gain.setTargetAtTime(treble,this.context.currentTime,.025);}
+    setMainCompression(value){if(!this.mainCompressor||!this.context)return;const amount=Math.max(0,Math.min(100,Number(value)||0)),t=this.context.currentTime;this.mainCompressor.threshold.setTargetAtTime(-amount*.36,t,.03);this.mainCompressor.knee.setTargetAtTime(amount*.24,t,.03);this.mainCompressor.ratio.setTargetAtTime(1+amount*.11,t,.03);this.mainCompressor.attack.setTargetAtTime(.003+amount*.00012,t,.03);this.mainCompressor.release.setTargetAtTime(.08+amount*.003,t,.03);}
     setMainPan(value){if(!this.context||!this.mainPanner||!this.mainPanner.pan)return;this.mainPanner.pan.setTargetAtTime(Math.max(-1,Math.min(1,value)),this.context.currentTime,.025);}
     setMainDelay(value){if(this.mainDelaySend&&this.context)this.mainDelaySend.gain.setTargetAtTime(Math.max(0,Math.min(100,value))*.0042,this.context.currentTime,.04);}
     setMainReverb(value){if(this.mainReverbSend&&this.context)this.mainReverbSend.gain.setTargetAtTime(Math.max(0,Math.min(100,value))*.0048,this.context.currentTime,.06);}
@@ -95,22 +96,23 @@
       const c=this.context,source=c.createMediaElementSource(audio),gain=c.createGain(),low=c.createBiquadFilter(),high=c.createBiquadFilter();
       low.type='lowshelf';low.frequency.value=160;high.type='highshelf';high.frequency.value=6500;
       const hasPan=typeof c.createStereoPanner==='function',panner=hasPan?c.createStereoPanner():c.createGain();
-      const delay=c.createDelay(1),feedback=c.createGain(),delaySend=c.createGain(),shaper=c.createWaveShaper();delay.delayTime.value=.24;feedback.gain.value=.18;delaySend.gain.value=0;shaper.curve=null;shaper.oversample='2x';
+      const delay=c.createDelay(1),feedback=c.createGain(),delaySend=c.createGain(),shaper=c.createWaveShaper(),compressor=c.createDynamicsCompressor();delay.delayTime.value=.24;feedback.gain.value=.18;delaySend.gain.value=0;shaper.curve=null;shaper.oversample='2x';compressor.threshold.value=0;compressor.knee.value=0;compressor.ratio.value=1;compressor.attack.value=.003;compressor.release.value=.25;
       const convolver=c.createConvolver(),reverbSend=c.createGain();convolver.buffer=this.makeReverbBuffer();reverbSend.gain.value=0;gain.gain.value=volume;
-      source.connect(this.analyser);source.connect(gain);gain.connect(low);low.connect(high);high.connect(panner);panner.connect(shaper);shaper.connect(c.destination);shaper.connect(this.exportDestination);
-      high.connect(delay);delay.connect(feedback);feedback.connect(delay);delay.connect(delaySend);delaySend.connect(panner);
-      high.connect(convolver);convolver.connect(reverbSend);reverbSend.connect(panner);
-      const layer={audio,source,gain,low,high,pan:panner,hasPan,delay,feedback,delaySend,convolver,reverbSend,shaper,pitchNode:null,pitchSemitones:Number(settings.pitch)||0};this.layers.set(id,layer);
-      this.setLayerEQ(id,settings.bass||0,settings.treble||0);this.setLayerPan(id,settings.pan||0);this.setLayerDelay(id,settings.delay||0);this.setLayerReverb(id,settings.reverb||0);this.setLayerDistortion(id,(settings.distortion||0)*100);
+      source.connect(this.analyser);source.connect(gain);gain.connect(low);low.connect(high);high.connect(compressor);compressor.connect(panner);panner.connect(shaper);shaper.connect(c.destination);shaper.connect(this.exportDestination);
+      compressor.connect(delay);delay.connect(feedback);feedback.connect(delay);delay.connect(delaySend);delaySend.connect(panner);
+      compressor.connect(convolver);convolver.connect(reverbSend);reverbSend.connect(panner);
+      const layer={audio,source,gain,low,high,compressor,pan:panner,hasPan,delay,feedback,delaySend,convolver,reverbSend,shaper,pitchNode:null,pitchSemitones:Number(settings.pitch)||0};this.layers.set(id,layer);
+      this.setLayerEQ(id,settings.bass||0,settings.treble||0);this.setLayerCompression(id,settings.compression||0);this.setLayerPan(id,settings.pan||0);this.setLayerDelay(id,settings.delay||0);this.setLayerReverb(id,settings.reverb||0);this.setLayerDistortion(id,(settings.distortion||0)*100);
     }
     setLayerVolume(id,v){const l=this.layers.get(id);if(l)l.gain.gain.setTargetAtTime(v,this.context.currentTime,.02);}
     setLayerRate(id,v){const l=this.layers.get(id);if(!l)return;const rate=Math.max(.5,Math.min(2,Number(v)||1));l.audio.playbackRate=rate;if(l.pitchNode)l.pitchNode.playbackRate.setTargetAtTime(rate,this.context.currentTime,.025);}
     setLayerPan(id,v){const l=this.layers.get(id);if(l&&l.hasPan)l.pan.pan.setTargetAtTime(v,this.context.currentTime,.025);}
     setLayerEQ(id,bass,treble){const l=this.layers.get(id);if(!l)return;l.low.gain.setTargetAtTime(bass,this.context.currentTime,.025);l.high.gain.setTargetAtTime(treble,this.context.currentTime,.025);}
+    setLayerCompression(id,value){const l=this.layers.get(id);if(!l||!l.compressor)return;const amount=Math.max(0,Math.min(100,Number(value)||0)),t=this.context.currentTime;l.compressor.threshold.setTargetAtTime(-amount*.36,t,.03);l.compressor.knee.setTargetAtTime(amount*.24,t,.03);l.compressor.ratio.setTargetAtTime(1+amount*.11,t,.03);l.compressor.attack.setTargetAtTime(.003+amount*.00012,t,.03);l.compressor.release.setTargetAtTime(.08+amount*.003,t,.03);}
     setLayerDelay(id,v){const l=this.layers.get(id);if(l)l.delaySend.gain.setTargetAtTime(v*.42,this.context.currentTime,.04);}
     setLayerReverb(id,v){const l=this.layers.get(id);if(l)l.reverbSend.gain.setTargetAtTime(v*.48,this.context.currentTime,.06);}
     setLayerDistortion(id,value){const l=this.layers.get(id);if(!l||!l.shaper)return;const amount=Math.max(0,Math.min(100,Number(value)||0));if(amount===0){l.shaper.curve=null;return;}const samples=44100,curve=new Float32Array(samples),k=amount*.32;for(let i=0;i<samples;i++){const x=i*2/samples-1;curve[i]=(1+k)*x/(1+k*Math.abs(x));}l.shaper.curve=curve;}
-    removeLayer(id){const l=this.layers.get(id);if(!l)return;l.audio.pause();['source','gain','low','high','pan','delay','feedback','delaySend','convolver','reverbSend','shaper','pitchNode'].forEach(k=>{try{if(l[k])l[k].disconnect();}catch(e){}});this.layers.delete(id);}
+    removeLayer(id){const l=this.layers.get(id);if(!l)return;l.audio.pause();['source','gain','low','high','compressor','pan','delay','feedback','delaySend','convolver','reverbSend','shaper','pitchNode'].forEach(k=>{try{if(l[k])l[k].disconnect();}catch(e){}});this.layers.delete(id);}
     getExportStream(){return this.exportDestination?this.exportDestination.stream:null;}
     getFrequency(){if(!this.analyser)return new Uint8Array(128);this.analyser.getByteFrequencyData(this.data);return this.data;}
     getWaveform(){const a=new Uint8Array(this.analyser?this.analyser.fftSize:128);if(this.analyser)this.analyser.getByteTimeDomainData(a);return a;}
