@@ -349,6 +349,8 @@ function beginWordSync(index){
 }
 function markSyncWord(){
  if(!wordSync)return;
+ if(!audioFile){$('wordSyncStatus').textContent='Import a song before syncing word timing.';return;}
+ if(audio.paused){$('wordSyncStatus').textContent='Play the song, then tap Mark word as each word begins.';return;}
  const line=lyrics[wordSync.lineIndex],time=audio.currentTime||0,last=wordSync.marks[wordSync.marks.length-1];
  if(time<line.start||time>=line.end){$('wordSyncStatus').textContent='Move playback inside this lyric line ('+fmt(line.start)+'–'+fmt(line.end)+').';return;}
  if(last&&time<=last.time){$('wordSyncStatus').textContent='Play forward before marking the next word.';return;}
