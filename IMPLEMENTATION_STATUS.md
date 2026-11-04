@@ -2,7 +2,7 @@
 
 This file is the delivery checklist for the 31 groups in `ROADMAP.md`. It is deliberately conservative: **Partial** means some working code exists, not that the complete request is finished. **Not started** means there is no verified implementation in the current source.
 
-Last source audit: 2026-11-04 (after editable object layers, media persistence, image import and 50-filter studio).
+Last source audit: 2026-11-04 (after editable object layers, image import, 50 filters, master-track effects, video audio extraction, word-sync karaoke, tap tempo and chroma key).
 
 ## Status definitions
 - **Partial** — working foundation exists, but one or more requested capabilities are missing or unverified.
