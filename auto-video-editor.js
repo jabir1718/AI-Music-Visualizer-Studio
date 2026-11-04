@@ -1,6 +1,6 @@
 'use strict';
 (function(root){
- const MAX_CLIPS=8,MAX_FILE=200*1024*1024,MAX_TOTAL=600*1024*1024,MAX_DURATION=180;
+ const MAX_CLIPS=8,MAX_FILE=120*1024*1024,MAX_TOTAL=180*1024*1024,MAX_DURATION=180;
  const PRESETS={
   social:{label:'Fast social montage',beats:1},
   cinematic:{label:'Cinematic',beats:4},
@@ -32,8 +32,8 @@
    [['↑',()=>move(index,-1),'Move earlier'],['↓',()=>move(index,1),'Move later'],['Remove',()=>removeSegment(segment.id),'Remove segment']].forEach(([label,fn,title])=>{const b=document.createElement('button');b.type='button';b.className='btn small';b.textContent=label;b.title=title;b.disabled=(label==='↑'&&index===0)||(label==='↓'&&index===segments.length-1);b.addEventListener('click',fn);actions.appendChild(b);});
    card.append(actions);
    const trim=document.createElement('label');trim.className='auto-video-trim';const trimText=document.createElement('span');trimText.textContent='Segment length · '+(segment.sourceEnd-segment.sourceStart).toFixed(1)+' sec';
-   const range=document.createElement('input');range.type='range';range.min='.5';range.max=Math.max(.5,Math.min(20,segment.sourceEnd-segment.sourceStart));range.step='.1';range.value=Math.max(.5,segment.sourceEnd-segment.sourceStart);
-   range.addEventListener('input',()=>{const len=clamp(range.value,.5,Math.max(.5,segment.sourceEnd-segment.sourceStart));segment.sourceEnd=segment.sourceStart+len;trimText.textContent='Segment length · '+len.toFixed(1)+' sec';relayout();persist();});
+   const range=document.createElement('input');range.type='range';range.min='.2';range.max=Math.max(.2,Math.min(20,segment.sourceEnd-segment.sourceStart));range.step='.1';range.value=Math.max(.2,segment.sourceEnd-segment.sourceStart);
+   range.addEventListener('input',()=>{const len=clamp(range.value,.2,Math.max(.2,segment.sourceEnd-segment.sourceStart));segment.sourceEnd=segment.sourceStart+len;trimText.textContent='Segment length · '+len.toFixed(1)+' sec';relayout();persist();});
    trim.append(trimText,range);card.append(trim);list.appendChild(card);
   });
   const count=$('autoVideoCount');if(count)count.textContent=segments.length+' editable segment(s) · '+totalDuration().toFixed(1)+' sec';
@@ -70,9 +70,9 @@
  async function generateAutoCut(options={}){
   if(!assets.size)throw new Error('Import video clips first.');
   const bpm=clamp(options.bpm||120,30,240),beat=60/bpm,preset=PRESETS[style]||PRESETS.social;
-  const beatsPerCut=Math.max(.5,preset.beats*(1.2-intensity*.15)),cutLength=Math.max(.35,beat*beatsPerCut);
+  const beatsPerCut=Math.max(.5,preset.beats*(1.2-intensity*.15)),totalSource=Array.from(assets.values()).reduce((n,a)=>n+durationOf(a),0),cutLength=Math.max(.35,beat*beatsPerCut,totalSource/300);
   const sources=Array.from(assets.values()),cursors=sources.map(()=>0),out=[];let active=0,guard=0;
-  while(guard++<300){
+  while(guard++<1200&&out.length<300){
    let found=-1;for(let k=0;k<sources.length;k++){const ix=(active+k)%sources.length;if(cursors[ix]<durationOf(sources[ix])-.15){found=ix;break;}}
    if(found<0)break;
    const source=sources[found],start=cursors[found],end=Math.min(durationOf(source),start+cutLength);
