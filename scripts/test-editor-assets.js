@@ -18,6 +18,8 @@ assert(/d\.objectSettings/.test(app),'Object settings are not restored');
 assert(/objectSettings\.title\.visible/.test(app)&&/objectSettings\.subtitle\.visible/.test(app),'Text visibility not applied to canvas');
 assert(/objectSettings\.lyric\.visible/.test(app)&&/objectSettings\.logo\.visible/.test(app),'Lyric/logo visibility not applied to canvas');
 assert(/function beginWordSync/.test(app)&&/function markSyncWord/.test(app)&&/function finishWordSync/.test(app),'Manual word-level karaoke timing workflow missing');
+assert(/WaveForgeBPM\.fromTaps/.test(app)&&/tapTempoBtn/.test(app)&&/tapBeatOffset/.test(app),'Tap tempo and aligned beat grid are not connected');
+assert(/fromTaps\(times\)/.test(fs.readFileSync('bpm-engine.js','utf8')),'Tap tempo estimator API is missing');
 assert(/line\.words=wordSync\.words\.map/.test(app),'Word timing data is not stored on lyric lines');
 assert(/wordSyncMark/.test(index)&&/wordSyncPanel/.test(index),'Word timing controls are not present in the lyric UI');
 assert(/getMediaAsset\('logo'\)/.test(app)&&/saveMediaAsset\('logo',f\)/.test(app),'Logo media is not restored and persisted');
