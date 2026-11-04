@@ -128,6 +128,8 @@ function initMixerUI(){
  '<button type="button" class="music-category" data-category="Harmony">Harmonies</button>'+
  '<button type="button" class="music-category" data-category="Instruments">Instruments</button>'+
  '<button type="button" class="music-category" data-category="Sound effect">Sound effects</button>'+
+ '<button type="button" class="music-category" data-category="Engine">Engine sounds</button>'+
+ '<button type="button" class="music-category" data-category="Character">Character sounds</button>'+
  '<button type="button" class="music-category" data-category="Voice FX">Voice FX</button>'+
  '<button type="button" class="music-category" data-category="Separation">AI separation</button>'+
  '<button type="button" class="music-category" data-category="Cleanup">Noise cleanup</button></div>'+
@@ -180,7 +182,9 @@ function selectMusicCategory(category){
   'Humming':{role:'Humming',title:'Humming layers',desc:'Import or record a humming layer separately. Humming generation is not connected yet.',available:true},
   'Harmony':{role:'Harmony',title:'Harmonies & backing vocals',desc:'Import harmony/backing-vocal stems as separate tracks. Automatic harmony generation is not connected yet.',available:true},
   'Instruments':{role:'Bass stem',title:'Instrument stems',desc:'Choose bass, drums, piano, guitar or instrumental in the source selector. Each imported stem gets its own controls.',available:true},
-  'Sound effect':{role:'Sound effect',title:'Sound effects',desc:'Import a clean effect clip and position it independently over your song.',available:true},
+  'Sound effect':{role:'Sound effect',title:'Sound effects library',desc:'Search open audio files, preview them and add licensed/attributed effects as independent mixer layers.',available:true},
+  'Engine':{role:'Sound effect',title:'Engine & racing sound library',desc:'Search open engine/rev recordings. Verify each file licence and whether the recording is clean before publishing.',available:true},
+  'Character':{role:'Voice FX',title:'Character sound library',desc:'Search open character-style laughs and vocal clips. These are source recordings, not generated voice transformations.',available:true},
   'Voice FX':{role:'Voice FX',title:'Voice changer & character effects',desc:'Import a processed voice layer. Built-in character generation and advanced formant processing are not connected yet.',available:true},
   'Separation':{role:'Instrumental',title:'AI vocal & instrument separation',desc:'This operation is planned but not implemented yet. The current app cannot extract vocals or instruments from a mixed MP3 automatically.',available:false},
   'Cleanup':{role:'Voice',title:'Noise cleanup',desc:'Noise removal and voice isolation are planned but not implemented yet. Original audio is left unchanged.',available:false}
@@ -189,6 +193,7 @@ function selectMusicCategory(category){
  role.value=item.role;
  detail.innerHTML='<div class="music-detail-title"><div><span class="eyebrow">SELECTED WORKSPACE</span><h3>'+item.title+'</h3></div><span class="music-detail-state">'+(item.available?'IMPORT READY':'NOT IMPLEMENTED')+'</span></div><p>'+item.desc+'</p>';
  add.disabled=!item.available;file.disabled=!item.available;
+ if(item.available&&window.WaveForgeSoundLibrary&&['Sound effect','Engine','Character'].includes(category)){const query=category==='Engine'?'race car engine':category==='Character'?'evil laugh cartoon':'sound effect';window.WaveForgeSoundLibrary.mount(detail,query,file=>addMixerLayer(file,item.role));}
  renderMixerLayers();
 }
 function addMixerLayer(file,role,restore={},persist=true){
