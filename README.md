@@ -22,6 +22,7 @@ Open `index.html` in a modern browser. For best results, serve the folder from a
 ## Independent audio mixer (Phase 1)
 - The mixer accepts additional local audio files as separate Voice, Ad-lib, Sound effect, Bass stem, Drums, Piano, Guitar, Instrumental or Other layers.
 - Each added layer has independent volume, pitch/rate, start offset, stereo pan, bass/treble EQ, echo and reverb controls, plus mute, solo and remove.
+- The original background music also has its own bass/treble EQ, stereo pan, echo, convolution reverb and distortion controls. These effects are separate from imported mixer layers and are included in the audio/video export path.
 - Mixer settings and imported audio files are restored from local browser storage on the same browser installation when IndexedDB data remains available.
 - Background music remains on its own gain path; changing a voice/effect layer's volume or per-layer effects does not change the background music path. Soloing a mixer layer also mutes the original background track, then restores it when Solo is turned off.
 - Pitch shifting currently uses playback-rate changes and therefore also changes speed; independent pitch-preserving DSP is not implemented yet. This foundation mixes separately supplied stems; it does not split vocals/instruments out of one mixed song.
