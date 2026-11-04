@@ -248,6 +248,23 @@
 - Noise reduction/cleanup for noisy source clips, with quality dependent on the original recording.
 - Adding or changing a Joker/voice effect must not change or replace the existing background music.
 
+
+## 26. Realistic 3D scene, PNG and visualizer object studio
+- Every imported or generated PNG/artwork object used in the visualizer should be transformable in a realistic 3D-style scene, not limited to a flat static overlay.
+- Full 3-axis rotation (X/Y/Z), free movement (left/right, up/down, forward/backward), depth/distance and perspective controls.
+- Independent scale, position, anchor/pivot, opacity and orientation for every object.
+- 3D camera controls for angle, framing, zoom and perspective.
+- Realistic scene integration controls: lighting direction/intensity/color, cast shadows, highlights/reflections where supported, ambient shading, depth/occlusion and matching color tone.
+- Motion controls: continuous rotation, floating, orbiting, drifting, zooming, entrance/exit and custom paths.
+- Keyframe timeline to set exact start/end positions, rotation, scale and animation timing.
+- Beat/BPM-reactive movement, rotation, pulse and other object animation, independently configurable per layer.
+- Touch editing: drag to move, gesture to rotate/scale, and precise numeric controls for 3D transforms.
+- Apply the same scene/object controls to PNGs, logos, text, symbols, generated artwork and supported visualizer elements.
+- Aim for convincing compositing into the video so objects appear to belong inside the scene: match perspective, lighting, shadows, depth and motion blur where technically supported.
+- Where supported, use video motion/camera tracking so an object can stay attached to a moving surface or scene position.
+- Important limitation: a flat PNG can be rotated, moved and composited in 3D space, but it does not become a fully volumetric 3D model automatically. True all-angle 3D geometry requires a 3D asset/model or a separately generated/reconstructed 3D version.
+- Keep each object's transforms and animation independent; editing one object must not unexpectedly change other layers.
+
 ---
 
 ## Suggested delivery order
