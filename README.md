@@ -11,6 +11,7 @@ A browser-based, local-first music visualizer editor. Version 1.0 foundation.
 - 100-family typography studio with independent title/subtitle/lyrics fonts, weight, spacing, outline, glow and layered 2D extrusion depth.
 - Touch selection outlines and resize/rotate handles for native text, current lyric and logo objects.
 - Per-layer generic voice styles (Telephone, Radio, Monster, Chipmunk, Robot and Alien) with independent EQ, echo, reverb and distortion.
+- Local spectral noise reduction for short voice/audio clips using a selected noise-only sample; cleaned audio is exported as a separate WAV layer.
 - Mixer clip in/out trimming, looping and split-at-playhead controls.
 - Bounded undo/redo for text, lyrics, object transforms, typography, visual filters, chroma key, AI cutout toggle and master effects.
 - Local audio playback, seeking and volume.
@@ -47,7 +48,7 @@ Open `index.html` in a modern browser. For best results, serve the folder from a
 - Main-track fade-in and fade-out controls are applied to the master audio gain during playback/export. More advanced automation curves are not included.
 
 ## Not included yet
-AI vocal/instrument separation, generated humming/ad-libs, a full voice-character model suite, formant-preserving/pitch-preserving DSP, a full visual multi-track timeline with undo/redo, volumetric 3D scene editing, general-purpose AI object segmentation beyond person cutout, Google Images API credentials/provider access, a licensed 2,000+ artwork library, YouTube-authorized media integration, a bundled curated 5,000+ sound-effects catalogue, GPU acceleration and 4K/8K/16K export. These need dedicated implementation and/or optional models/services. Copyright risk is only a user checklist, not a copyright scan.
+AI vocal/instrument separation, model-based AI denoising, generated humming/ad-libs, a full voice-character model suite, formant-preserving/pitch-preserving DSP, a full visual multi-track timeline with undo/redo, volumetric 3D scene editing, general-purpose AI object segmentation beyond person cutout, Google Images API credentials/provider access, a licensed 2,000+ artwork library, YouTube-authorized media integration, a bundled curated 5,000+ sound-effects catalogue, GPU acceleration and 4K/8K/16K export. These need dedicated implementation and/or optional models/services. Copyright risk is only a user checklist, not a copyright scan.
 
 ## Automatic lyrics
 - The app uses Transformers.js with an ONNX Whisper model downloaded from Hugging Face on first use; transcription runs in the browser/WebView and the selected audio is not uploaded to a WaveForge server.
