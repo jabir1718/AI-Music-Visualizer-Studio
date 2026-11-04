@@ -3,7 +3,7 @@ const assert=require('assert');
 const symbols=require('../symbol-library.js');
 const item=symbols.normalizeEntry({hexcode:'1F3B5',annotation:'Musical Note',tags:['music','sound'],group:'Activities'});
 assert.deepStrictEqual(item,{hexcode:'1F3B5',annotation:'Musical Note',tags:['music','sound'],group:'Activities',subgroup:''});
-assert.deepStrictEqual(symbols.normalizeEntry({hexcode:'1F3B5',annotation:'Music note',tags:'music, sound'}).tags,['music','sound']);
+assert.deepStrictEqual(symbols.normalizeEntry({hexcode:'1F3B5',annotation:'Music note',tags:'music, sound',openmoji_tags:'melody'}).tags,['music','sound','melody']);
 assert.strictEqual(symbols.normalizeEntry({hexcode:'not-hex',annotation:'Bad'}),null);
 assert.strictEqual(symbols.filterEntries([item], 'music').length,1);
 assert.strictEqual(symbols.filterEntries([item], 'camera').length,0);
