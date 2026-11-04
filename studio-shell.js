@@ -11,6 +11,14 @@ function init(){
   menu.addEventListener('click',()=>{const collapsed=document.querySelector('.app-shell').classList.toggle('wf-sidebar-collapsed');menu.setAttribute('aria-expanded',String(!collapsed));});
   settings.addEventListener('click',()=>document.querySelector('.wf-bottom-dock [data-dock="settings"]')?.click());
  }
+ const topbar=document.querySelector('.topbar'),topActions=topbar&&topbar.querySelector('.top-actions');
+ if(topActions&&!document.getElementById('wfMenuToggle')){
+  const menu=document.createElement('button');menu.type='button';menu.id='wfMenuToggle';menu.className='btn ghost wf-header-icon';menu.textContent='☰';menu.setAttribute('aria-label','Toggle navigation');
+  const settings=document.createElement('button');settings.type='button';settings.id='wfHeaderSettings';settings.className='btn ghost wf-header-icon';settings.textContent='⚙';settings.setAttribute('aria-label','Open settings');
+  topActions.insertBefore(menu,topActions.firstChild);topActions.insertBefore(settings,menu.nextSibling);
+  menu.addEventListener('click',()=>{const collapsed=document.querySelector('.app-shell').classList.toggle('wf-sidebar-collapsed');menu.setAttribute('aria-expanded',String(!collapsed));});
+  settings.addEventListener('click',()=>document.querySelector('.wf-bottom-dock [data-dock="settings"]')?.click());
+ }
  const panels=Array.from(editor.querySelectorAll(':scope > .panel'));
  const inspector=document.querySelector('.inspector');
  const panelMap=new Map(panels.map(p=>[p.id,p]));
