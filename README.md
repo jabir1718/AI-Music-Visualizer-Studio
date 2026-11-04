@@ -22,7 +22,7 @@ A browser-based, local-first music visualizer editor. Version 1.0 foundation.
 - Local audio playback, seeking and volume.
 - Text, subtitle, color, font and PNG logo overlays.
 - On-device Whisper-based audio transcription into timed lyric lines (model downloads on first use).
-- Manual word-by-word karaoke timing: tap each word start during playback, then save the word-level highlight timings.
+- Automatic Whisper word-level timestamps are stored for karaoke highlighting when returned by the speech model. Manual word-by-word sync remains available to correct timing by tapping each word start during playback.
 - TikTok-style lyric/poetry templates, editable subtitle imports, and touch-drag text positioning.
 - 9:16, 16:9 and 1:1 preview canvases.
 - Real-time canvas recording using MediaRecorder; the browser's supported codec determines MP4 vs WebM.
