@@ -18,7 +18,7 @@
       if(!this.ready)throw new Error('Start the main audio engine before adding a mixer layer.');if(this.layers.has(id))return;
       const c=this.context,source=c.createMediaElementSource(audio),gain=c.createGain(),low=c.createBiquadFilter(),high=c.createBiquadFilter();
       low.type='lowshelf';low.frequency.value=160;high.type='highshelf';high.frequency.value=6500;
-      const panner=c.createStereoPanner?c.createStereoPanner():c.createGain(),hasPan=!!c.createStereoPanner();
+      const hasPan=typeof c.createStereoPanner==='function',panner=hasPan?c.createStereoPanner():c.createGain();
       const delay=c.createDelay(1),feedback=c.createGain(),delaySend=c.createGain();delay.delayTime.value=.24;feedback.gain.value=.18;delaySend.gain.value=0;
       const convolver=c.createConvolver(),reverbSend=c.createGain();convolver.buffer=this.makeReverbBuffer();reverbSend.gain.value=0;gain.gain.value=volume;
       source.connect(this.analyser);source.connect(gain);gain.connect(low);low.connect(high);high.connect(panner);panner.connect(c.destination);panner.connect(this.exportDestination);
