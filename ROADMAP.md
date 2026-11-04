@@ -395,3 +395,11 @@ This is an order for development, not a reduction of the full scope:
 - Export at the highest genuinely supported resolution/frame rate/codec for the source and Android device. Do not advertise 16K unless the entire render/encoder pipeline supports it and tests verify it.
 - Provide a manual-edit path when AI services, transcription models or advanced effects are unavailable. Clearly identify cloud-based features and any usage charges.
 - Run automated timeline/audio/render tests and physical Android tests for playback, frame timing, memory, touch editing, export, cancellation and recovery before marking the feature device-tested.
+
+## 2026-11-05 delivery notes — free Infinix ZERO 40 path
+
+- Start the Auto Video Editor with a local-only, deterministic beat-cut workflow using the existing BPM detector/grid. Do not require paid APIs or accounts for basic montage creation.
+- Initial implementation now includes 8 local source clips, storage/length guardrails, five original cut styles, editable segment order/length/removal, playhead-synchronized canvas preview, and portable project metadata.
+- Direct cuts are the only implemented transition behavior in this milestone. Scene analysis, speech-pause cuts, AI captions, transition effects, speed ramps and advanced compositing remain future work and must be clearly marked unavailable until built and tested.
+- Tune previews and storage for the user's Infinix ZERO 40 (X6860 / 4G configuration), while detecting actual browser/codec support at runtime. Never force 4K/16K export or keep all video sources decoding simultaneously.
+- Free local editing assistant is preferred over any billable ChatGPT API integration. Keep paid/cloud AI disabled unless the user explicitly opts in later.
