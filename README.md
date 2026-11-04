@@ -18,6 +18,13 @@ A browser-based, local-first music visualizer editor. Version 1.0 foundation.
 ## Run
 Open `index.html` in a modern browser. For best results, serve the folder from a local static web server (for example, `python -m http.server 8000`) and open `http://localhost:8000`.
 
+## Independent audio mixer (Phase 1)
+- The mixer accepts additional local audio files as separate Voice, Ad-lib, Sound effect, Bass stem, Drums, Piano, Guitar, Instrumental or Other layers.
+- Each added layer has independent volume, pitch/rate and start offset controls, plus mute/remove.
+- Background music remains on its own gain path; changing a voice/effect layer's volume does not change the background music volume.
+- Pitch shifting uses playback-rate changes and therefore also changes speed. This foundation mixes separately supplied stems; it does not split vocals/instruments out of one mixed song.
+- Extra layers follow the main track timeline and are included in the mixed audio export stream. Real-device and exported-file verification is still required.
+
 ## Export limitations
 - Export records in real time, approximately the length of the audio track.
 - MP4 is used only if the browser reports a supported MP4 MediaRecorder codec; otherwise WebM is used. This is not a universal MP4 encoder.
