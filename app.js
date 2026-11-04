@@ -156,8 +156,8 @@ function syncMixerLayers(){
   if(layer.audio.paused)layer.audio.play().catch(()=>{});
  });
 }
-function readMainEffects(){const value=(id,fallback=0)=>$(id)?Number($(id).value):fallback;return{bass:value('mainBass'),treble:value('mainTreble'),pan:value('mainPan'),echo:value('mainEcho'),reverb:value('mainReverb'),distortion:value('mainDistortion')};}
-function applyMainEffects(){if(!engine||!engine.ready)return;const f=readMainEffects();engine.setMainEQ(f.bass,f.treble);engine.setMainPan(f.pan/100);engine.setMainDelay(f.echo);engine.setMainReverb(f.reverb);engine.setMainDistortion(f.distortion);}
+function readMainEffects(){const value=(id,fallback=0)=>$(id)?Number($(id).value):fallback;return{bass:value('mainBass'),treble:value('mainTreble'),pan:value('mainPan'),echo:value('mainEcho'),reverb:value('mainReverb'),distortion:value('mainDistortion'),compression:value('mainCompression')};}
+function applyMainEffects(){if(!engine||!engine.ready)return;const f=readMainEffects();engine.setMainEQ(f.bass,f.treble);engine.setMainPan(f.pan/100);engine.setMainDelay(f.echo);engine.setMainReverb(f.reverb);engine.setMainDistortion(f.distortion);engine.setMainCompression(f.compression);}
 function initMixerUI(){
  const host=$('audioPanel'),audioEl=$('audio');
  mixerPanel=document.createElement('section');mixerPanel.className='mixer-panel music-studio';
@@ -184,7 +184,8 @@ function initMixerUI(){
  '<label>Pan <output id="mainPanValue">Center</output><input id="mainPan" type="range" min="-100" max="100" value="0"></label>'+
  '<label>Echo <output id="mainEchoValue">0%</output><input id="mainEcho" type="range" min="0" max="100" value="0"></label>'+
  '<label>Reverb <output id="mainReverbValue">0%</output><input id="mainReverb" type="range" min="0" max="100" value="0"></label>'+
- '<label>Distortion <output id="mainDistortionValue">0%</output><input id="mainDistortion" type="range" min="0" max="100" value="0"></label></div><button type="button" class="btn small" id="mainEffectsReset">Reset music effects</button></section>'+
+ '<label>Distortion <output id="mainDistortionValue">0%</output><input id="mainDistortion" type="range" min="0" max="100" value="0"></label>'+
+ '<label>Compression <output id="mainCompressionValue">0%</output><input id="mainCompression" type="range" min="0" max="100" value="0"></label></div><button type="button" class="btn small" id="mainEffectsReset">Reset music effects</button></section>'+
  '<div id="mixerList" class="mixer-list"><p class="hint">No extra layers yet. Your original song remains the background music.</p></div>'+
  '<p class="hint mixer-footnote">Imported layers are independently adjustable. A mixed MP3 does not contain separately editable stems automatically. AI separation and generated vocal effects are not connected yet.</p>';
  host.insertBefore(mixerPanel,audioEl);
@@ -193,8 +194,8 @@ function initMixerUI(){
  const file=$('mixerFile');
  $('mixerAddBtn').onclick=()=>file.click();
  file.onchange=e=>{const f=e.target.files&&e.target.files[0];if(f)addMixerLayer(f,$('mixerRole').value);file.value='';};
- const effectNames=['bass','treble','pan','echo','reverb','distortion'];
- const updateMainEffectLabels=()=>{const f=readMainEffects();$('mainBassValue').textContent=f.bass+' dB';$('mainTrebleValue').textContent=f.treble+' dB';$('mainPanValue').textContent=f.pan===0?'Center':(f.pan<0?'L ':'R ')+Math.abs(f.pan);$('mainEchoValue').textContent=f.echo+'%';$('mainReverbValue').textContent=f.reverb+'%';$('mainDistortionValue').textContent=f.distortion+'%';};
+ const effectNames=['bass','treble','pan','echo','reverb','distortion','compression'];
+ const updateMainEffectLabels=()=>{const f=readMainEffects();$('mainBassValue').textContent=f.bass+' dB';$('mainTrebleValue').textContent=f.treble+' dB';$('mainPanValue').textContent=f.pan===0?'Center':(f.pan<0?'L ':'R ')+Math.abs(f.pan);$('mainEchoValue').textContent=f.echo+'%';$('mainReverbValue').textContent=f.reverb+'%';$('mainDistortionValue').textContent=f.distortion+'%';$('mainCompressionValue').textContent=f.compression+'%';};
  effectNames.forEach(key=>$('main'+key.charAt(0).toUpperCase()+key.slice(1)).addEventListener('input',()=>{updateMainEffectLabels();applyMainEffects();saveSettings();}));
  $('mainEffectsReset').onclick=()=>{effectNames.forEach(key=>$('main'+key.charAt(0).toUpperCase()+key.slice(1)).value=0);updateMainEffectLabels();applyMainEffects();saveSettings();};updateMainEffectLabels();
  $('mainPitch').oninput=e=>{
@@ -243,7 +244,7 @@ function addMixerLayer(file,role,restore={},persist=true){
  if(!file.type.startsWith('audio/')){alert('Choose a supported audio file.');return;}
  const id=restore.id||('mix-'+Date.now()+'-'+Math.random().toString(36).slice(2,7)),url=URL.createObjectURL(file);
  const el=document.createElement('audio');el.preload='auto';el.hidden=true;el.src=url;el.preservesPitch=false;
- const layer={id,file,url,audio:el,role,volume:.85,rate:1,pitch:0,offset:0,muted:false,solo:false,pan:0,bass:0,treble:0,delay:0,reverb:0,distortion:0,voiceStyle:'natural',pitchPreserving:false,formantStrength:['Voice','Ad-lib','Humming','Harmony','Voice FX'].includes(role)?100:0,trimStart:0,trimEnd:0,loop:false,connected:false,...restore,id,file,url,audio:el,role};
+ const layer={id,file,url,audio:el,role,volume:.85,rate:1,pitch:0,offset:0,muted:false,solo:false,pan:0,bass:0,treble:0,delay:0,reverb:0,distortion:0,compression:0,voiceStyle:'natural',pitchPreserving:false,formantStrength:['Voice','Ad-lib','Humming','Harmony','Voice FX'].includes(role)?100:0,trimStart:0,trimEnd:0,loop:false,connected:false,...restore,id,file,url,audio:el,role};
  el.playbackRate=layer.rate||1;mixerLayers.push(layer);mixerPanel.appendChild(el);renderMixerLayers();
  if(engine&&engine.ready){engine.addLayer(id,el,layer.volume,layer);layer.connected=true;if(layer.pitchPreserving)enableLayerPitchNode(layer,engine).catch(error=>{layer.pitchPreserving=false;layer.rate=Math.pow(2,layer.pitch/12);layer.audio.playbackRate=layer.rate;renderMixerLayers();setStatus('Pitch-preserving DSP unavailable: '+error.message);});applyMixerSoloState();}
  syncMixerLayers();if(persist)saveMediaAsset(id,file);saveSettings();setStatus('Audio layer added');
@@ -305,7 +306,7 @@ function renderMixerLayers(){
   function addRange(labelText,key,min,max,step,unit,apply){
    const wrap=document.createElement('label');wrap.textContent=labelText;const input=document.createElement('input');input.type='range';input.min=String(min);input.max=String(max);input.step=String(step);input.value=String(layer[key]??0);const readout=document.createElement('small');
    const show=()=>{const v=Number(input.value);readout.textContent=(v>0&&min<0?'+':'')+v+unit;};
-   input.oninput=()=>{layer[key]=Number(input.value);show();if(['pitch','pan','bass','treble','delay','reverb','distortion','rate','formantStrength'].includes(key)){layer.voiceStyle='custom';voiceStyle.value='custom';}apply(layer[key]);saveSettings();};show();wrap.append(input,readout);controls.append(wrap);return wrap;
+   input.oninput=()=>{layer[key]=Number(input.value);show();if(['pitch','pan','bass','treble','delay','reverb','distortion','compression','rate','formantStrength'].includes(key)){layer.voiceStyle='custom';voiceStyle.value='custom';}apply(layer[key]);saveSettings();};show();wrap.append(input,readout);controls.append(wrap);return wrap;
   }
   addRange('Volume','volume',0,1,.01,'',()=>applyMixerSoloState());
   addRange('Pitch (semitones)','pitch',-12,12,1,' st',v=>{if(layer.pitchPreserving&&engine&&layer.connected)engine.setLayerPitch(layer.id,v);else{layer.rate=Math.pow(2,v/12);layer.audio.playbackRate=layer.rate;layer.audio.preservesPitch=false;}syncMixerLayers();});
@@ -321,6 +322,7 @@ function renderMixerLayers(){
   addRange('Echo','delay',0,1,.05,'',v=>{if(engine&&layer.connected)engine.setLayerDelay(layer.id,v);});
   addRange('Reverb','reverb',0,1,.05,'',v=>{if(engine&&layer.connected)engine.setLayerReverb(layer.id,v);});
   addRange('Distortion','distortion',0,1,.05,'',v=>{if(engine&&layer.connected)engine.setLayerDistortion(layer.id,v*100);});
+  addRange('Compression','compression',0,100,1,'%',v=>{if(engine&&layer.connected)engine.setLayerCompression(layer.id,v);});
   const offsetWrap=document.createElement('label');offsetWrap.textContent='Timeline position (seconds)';const offset=document.createElement('input');offset.type='number';offset.min='0';offset.max='3600';offset.step='.1';offset.value=layer.offset;offset.onchange=()=>{layer.offset=Math.max(0,Number(offset.value)||0);syncMixerLayers();saveSettings();if(timelineView)timelineView.render();};offsetWrap.append(offset);controls.append(offsetWrap);
   const clipTools=document.createElement('div');clipTools.className='mixer-clip-tools';
   const startWrap=document.createElement('label');startWrap.textContent='Clip in (seconds)';const trimStart=document.createElement('input');trimStart.type='number';trimStart.min='0';trimStart.max='3600';trimStart.step='.05';trimStart.value=layer.trimStart||0;trimStart.onchange=()=>{const result=window.WaveForgeTimeline.setTrim(layer,trimStart.value,layer.trimEnd,layer.audio.duration);if(!result.valid){trimStart.value=layer.trimStart||0;setStatus('Clip start must be before clip end.');return;}syncMixerLayers();saveSettings();if(timelineView)timelineView.render();};startWrap.append(trimStart);
@@ -514,7 +516,7 @@ function initHistoryUI(){
  history.seed(captureUndoState());
 }
 function saveSettings(){
- const data={mainPitch:$('mainPitch')?$('mainPitch').value:0,mainEffects:readMainEffects(),typography:window.WaveForgeTypography?window.WaveForgeTypography.getAll():null,layers:mixerLayers.map(l=>({id:l.id,role:l.role,volume:l.volume,rate:l.rate,pitch:l.pitch,offset:l.offset,muted:l.muted,solo:l.solo,pan:l.pan,bass:l.bass,treble:l.treble,delay:l.delay,reverb:l.reverb,distortion:l.distortion||0,voiceStyle:l.voiceStyle||'natural',pitchPreserving:!!l.pitchPreserving,formantStrength:Number(l.formantStrength)||0,trimStart:l.trimStart||0,trimEnd:l.trimEnd||0,loop:!!l.loop,preset:l.preset||'clean'})),title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,lyricPosition:$('lyricPosition').value,positions,objectSettings,objectKeyframes,manualBpm,tapBeatOffset,filterPreset:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterPreset:'f01',filterIntensity:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterIntensity:100,chromaKey:window.WaveForgeChromaKey?window.WaveForgeChromaKey.getSettings():null,aiSegmentation:window.WaveForgeSegmentation?window.WaveForgeSegmentation.getSettings():null,threeStudio:window.WaveForge3D?window.WaveForge3D.getSettings():null,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
+ const data={mainPitch:$('mainPitch')?$('mainPitch').value:0,mainEffects:readMainEffects(),typography:window.WaveForgeTypography?window.WaveForgeTypography.getAll():null,layers:mixerLayers.map(l=>({id:l.id,role:l.role,volume:l.volume,rate:l.rate,pitch:l.pitch,offset:l.offset,muted:l.muted,solo:l.solo,pan:l.pan,bass:l.bass,treble:l.treble,delay:l.delay,reverb:l.reverb,distortion:l.distortion||0,compression:l.compression||0,voiceStyle:l.voiceStyle||'natural',pitchPreserving:!!l.pitchPreserving,formantStrength:Number(l.formantStrength)||0,trimStart:l.trimStart||0,trimEnd:l.trimEnd||0,loop:!!l.loop,preset:l.preset||'clean'})),title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,lyricPosition:$('lyricPosition').value,positions,objectSettings,objectKeyframes,manualBpm,tapBeatOffset,filterPreset:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterPreset:'f01',filterIntensity:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterIntensity:100,chromaKey:window.WaveForgeChromaKey?window.WaveForgeChromaKey.getSettings():null,aiSegmentation:window.WaveForgeSegmentation?window.WaveForgeSegmentation.getSettings():null,threeStudio:window.WaveForge3D?window.WaveForge3D.getSettings():null,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
  try{localStorage.setItem('waveforge-v1',JSON.stringify(data));setStatus('Saved locally');}catch(e){setStatus('Ready');}
  if(history&&!historyRestoring)history.record(captureUndoState());
 }
