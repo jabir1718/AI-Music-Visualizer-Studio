@@ -69,7 +69,7 @@ function draw(){
  const shade=ctx.createLinearGradient(0,0,0,h);shade.addColorStop(0,'#080d2420');shade.addColorStop(1,'#080d24bb');ctx.fillStyle=shade;ctx.fillRect(0,0,w,h);
  const colors=palette[$('visualColor').value]||palette.aurora;
  const data=engine?engine.getFrequency():new Uint8Array(128),wave=engine?engine.getWaveform():new Uint8Array(128).fill(128);
- if(engine&&playing){const beat=engine.detectBeat(Number($('sensitivity').value));if(beat.hit)beatPulse=1;$('beatStatus').textContent=beat.hit?'Beat detected · audio energy pulse':'Listening for beat energy…';}if(playing&&manualBpm&&tapBeatOffset!==null){const gridBeat=WaveForgeBPM.gridIndexAt(audio.currentTime,manualBpm,tapBeatOffset,beatSubdivision);if(gridBeat<lastGridBeat)lastGridBeat=gridBeat-1;if(gridBeat>lastGridBeat){beatPulse=1;lastGridBeat=gridBeat;}}
+ if(engine&&playing){const beat=engine.detectBeat(Number($('sensitivity').value));if(beat.hit)beatPulse=1;$('beatStatus').textContent=beat.hit?'Beat detected · audio energy pulse':'Listening for beat energy…';}if(playing&&manualBpm&&tapBeatOffset!==null){const gridBeat=WaveForgeBPM.gridIndexAt(audio.currentTime,manualBpm,tapBeatOffset,beatSubdivision);if(gridBeat<0)lastGridBeat=-1;else{if(gridBeat<lastGridBeat)lastGridBeat=gridBeat-1;if(gridBeat>lastGridBeat){beatPulse=1;lastGridBeat=gridBeat;}}}
  beatPulse*=.92;const intensity=Number($('intensity').value)/100,base=Math.min(w,h)*.16;
  ctx.save();ctx.translate(w/2,h*.56);ctx.lineWidth=Math.max(2,w*.004);ctx.lineCap='round';ctx.strokeStyle=colors[0];ctx.fillStyle=colors[0];ctx.shadowBlur=18+beatPulse*24;ctx.shadowColor=colors[0];
  if(style==='bars'){
