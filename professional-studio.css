@@ -126,3 +126,21 @@ body.wf-dashboard-app .wf-project-info span{min-width:0}
 
 body.wf-dashboard-app .wf-waveform{position:relative;overflow:hidden}
 body.wf-dashboard-app .wf-waveform:after{content:"";position:absolute;inset:0 auto 0 0;width:var(--wf-audio-progress,0%);background:linear-gradient(90deg,#e23cff22,#20dfff44);border-right:1px solid #b7f7ff;box-shadow:0 0 10px #25dcff88;pointer-events:none}
+
+/* Music workspace: show the original-song controls inside its selected tab. */
+body.wf-dashboard-app .music-category-detail .mixer-main-pitch,
+body.wf-dashboard-app .music-category-detail .main-effects-panel{display:block;width:100%;margin:10px 0;padding:12px;border:1px solid #334d80;border-radius:14px;background:linear-gradient(145deg,#111d39,#0a1227);color:#eaf1ff}
+body.wf-dashboard-app .music-category-detail .mixer-main-pitch>label{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;font-weight:700}
+body.wf-dashboard-app .music-category-detail .mixer-main-pitch input[type=range]{grid-column:1/-1;width:100%;accent-color:#a78bfa}
+body.wf-dashboard-app .music-category-detail .main-effects-panel .mixer-heading{margin:0 0 10px}
+body.wf-dashboard-app .music-category-detail .main-effects-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+body.wf-dashboard-app .music-category-detail .main-effects-grid label{display:grid;gap:6px;min-width:0;padding:9px;border:1px solid #263c68;border-radius:10px;background:#0b142a;font-size:12px}
+body.wf-dashboard-app .music-category-detail .main-effects-grid output{color:#7eeaff;font-variant-numeric:tabular-nums}
+body.wf-dashboard-app .music-category-detail .main-effects-grid input[type=range]{width:100%;min-width:0;accent-color:#b18aff}
+body.wf-dashboard-app .music-selected-source{margin:8px 0 0;color:#80eaff;font-size:12px}
+body.wf-dashboard-app .music-category-detail .music-detail-desc{line-height:1.55}
+@media(max-width:700px){
+ body.wf-dashboard-app .music-category-detail .main-effects-grid{grid-template-columns:1fr}
+ body.wf-dashboard-app .music-category-detail .main-effects-grid label{grid-template-columns:1fr auto}
+ body.wf-dashboard-app .music-category-detail .main-effects-grid input[type=range]{grid-column:1/-1}
+}
