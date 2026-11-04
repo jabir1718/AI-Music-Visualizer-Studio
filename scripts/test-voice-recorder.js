@@ -1,0 +1,17 @@
+'use strict';
+const assert=require('assert');
+global.window={File:class FileMock{constructor(parts,name,options){this.parts=parts;this.name=name;this.type=options.type;this.size=parts.reduce((n,p)=>n+p.size,0);}}};
+const recorder=require('../voice-recorder.js');
+const supported=recorder.chooseMimeType({isTypeSupported:type=>type==='audio/ogg;codecs=opus'});
+assert.strictEqual(supported,'audio/ogg;codecs=opus');
+assert.strictEqual(recorder.chooseMimeType({isTypeSupported:()=>false}),'');
+assert.strictEqual(recorder.extensionForMime('audio/ogg;codecs=opus'),'ogg');
+assert.strictEqual(recorder.extensionForMime('audio/mp4'),'m4a');
+assert.strictEqual(recorder.extensionForMime('audio/webm;codecs=opus'),'webm');
+assert.strictEqual(recorder.formatTime(125),'02:05');
+const file=recorder.makeRecordingFile({size:10,type:'audio/ogg'},'Ad-lib',123,global.window.File);
+assert.strictEqual(file.name,'waveforge-ad-lib-123.ogg');
+assert.strictEqual(file.type,'audio/ogg');
+assert.throws(()=>recorder.makeRecordingFile({size:0,type:'audio/webm'},'Voice',1,global.window.File),/empty recording/);
+assert.throws(()=>recorder.makeRecordingFile({size:recorder.MAX_BYTES+1,type:'audio/webm'},'Voice',1,global.window.File),/100 MB/);
+console.log('Voice recorder MIME, file and safety tests passed.');
