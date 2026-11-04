@@ -498,8 +498,8 @@ function restoreUndoState(state){
  if(window.WaveForgeChromaKey&&state.chromaKey)window.WaveForgeChromaKey.set(state.chromaKey);
  if(window.WaveForgeSegmentation&&state.aiSegmentation){window.WaveForgeSegmentation.setSettings(state.aiSegmentation);if($('aiSegmentationEnabled'))$('aiSegmentationEnabled').checked=state.aiSegmentation.enabled;}
  if(Array.isArray(state.lyrics))lyrics=JSON.parse(JSON.stringify(state.lyrics));
- if(Number.isFinite(state.manualBpm))manualBpm=state.manualBpm;
- if(Number.isFinite(state.tapBeatOffset))tapBeatOffset=state.tapBeatOffset;if(Number.isFinite(state.beatSubdivision))beatSubdivision=state.beatSubdivision;updateBeatGridInputs();
+ manualBpm=Number.isFinite(state.manualBpm)?state.manualBpm:null;
+ tapBeatOffset=Number.isFinite(state.tapBeatOffset)?state.tapBeatOffset:null;beatSubdivision=[1,2,4,8].includes(Number(state.beatSubdivision))?Number(state.beatSubdivision):1;updateBeatGridInputs();
  $('intensity').value=state.intensity||65;$('sensitivity').value=state.sensitivity||55;
  if($('mainPitch')){$('mainPitch').value=state.mainPitch||0;$('mainPitch').dispatchEvent(new Event('input'));audio.playbackRate=Math.pow(2,Number(state.mainPitch||0)/12);audio.preservesPitch=false;}
  if(state.mainEffects)Object.keys(state.mainEffects).forEach(k=>{const input=$('main'+k.charAt(0).toUpperCase()+k.slice(1));if(input){input.value=state.mainEffects[k];input.dispatchEvent(new Event('input'));}});
