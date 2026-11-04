@@ -263,3 +263,10 @@ button[data-action-icon]:disabled{opacity:.45;cursor:not-allowed}
 .bpm-grid-controls label{display:grid;gap:5px;color:var(--muted);font-size:.72rem}
 .bpm-grid-controls input,.bpm-grid-controls select{width:100%;min-width:0}
 @media(max-width:620px){.bpm-grid-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.bpm-grid-controls button{grid-column:1/-1}}
+
+.voice-recorder-panel{margin-top:14px;padding:15px;border:1px solid var(--line);border-radius:15px;background:var(--panel-soft,rgba(255,255,255,.025));display:grid;gap:10px}
+.voice-recorder-panel h3{margin:2px 0;font-size:1rem}
+.voice-recorder-panel p,.voice-recorder-note{margin:0;color:var(--muted);font-size:.76rem;line-height:1.5}
+.voice-recorder-actions{display:flex;gap:8px;flex-wrap:wrap}
+.voice-recorder-panel audio{width:100%;max-width:100%}
+.voice-recorder-panel .voice-recorder-note{font-size:.7rem}
