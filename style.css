@@ -148,3 +148,15 @@ button[data-action-icon]:disabled{opacity:.45;cursor:not-allowed}
 .typography-actions{display:flex;flex-wrap:wrap;gap:8px}
 .typography-note{padding-top:4px}
 @media(max-width:560px){.typography-grid{grid-template-columns:1fr}}
+
+
+/* Direct canvas object selection and touch transforms */
+.stage{position:relative}
+.object-selection-overlay{position:absolute;inset:0;pointer-events:none;z-index:8}
+.object-selection-box{position:absolute;border:1.5px dashed var(--accent);border-radius:5px;pointer-events:none;box-shadow:0 0 0 1px rgba(255,255,255,.18),0 0 12px rgba(125,110,255,.18)}
+.object-selection-box[hidden]{display:none}
+.object-transform-handle{position:absolute;width:28px;height:28px;border:2px solid #fff;border-radius:50%;background:var(--accent);box-shadow:0 2px 12px #0008;pointer-events:auto;touch-action:none;padding:0}
+.object-transform-handle.resize{right:-14px;bottom:-14px;cursor:nwse-resize}
+.object-transform-handle.rotate{left:50%;top:-34px;transform:translateX(-50%);cursor:grab}
+.object-transform-handle.rotate:after{content:"↻";color:#fff;font-size:17px;line-height:24px}
+.object-transform-handle.resize:after{content:"↘";color:#fff;font-size:16px;line-height:24px}
