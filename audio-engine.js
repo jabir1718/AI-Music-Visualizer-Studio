@@ -7,7 +7,7 @@
       this.gain=this.context.createGain();this.gain.gain.value=this.masterVolume;this.source=this.context.createMediaElementSource(this.audio);
       this.exportDestination=this.context.createMediaStreamDestination();this.monitorGain=this.context.createGain();this.monitorGain.gain.value=0;
       this.source.connect(this.analyser);this.analyser.connect(this.monitorGain);this.monitorGain.connect(this.context.destination);
-      this.source.connect(this.gain);this.gain.connect(this.context.destination);this.gain.connect(this.exportDestination);
+      this.source.connect(this.gain);this.gain.connect(this.mainSoloGain);this.mainSoloGain.connect(this.context.destination);this.mainSoloGain.connect(this.exportDestination);
       this.data=new Uint8Array(this.analyser.frequencyBinCount);this.ready=true;
     }
     async resume(){if(this.context&&this.context.state==='suspended')await this.context.resume();}
