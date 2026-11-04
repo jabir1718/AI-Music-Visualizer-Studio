@@ -90,6 +90,10 @@ class FakeDecodeAudioContext {
   const result = await bpmWindow.WaveForgeBPM.detect(audioFile);
   assert.ok(Math.abs(result.bpm - 120) <= 2, `expected approximately 120 BPM, received ${result.bpm}`);
   assert.ok(result.confidence >= 0 && result.confidence <= 1, 'BPM confidence must be normalized');
+  const tapped=bpmWindow.WaveForgeBPM.fromTaps([0,.5,1,1.5,2]);
+  assert.equal(tapped.bpm,120,'tap tempo should calculate 120 BPM');
+  assert.ok(tapped.confidence>.99,'steady taps should have high consistency');
+  assert.throws(()=>bpmWindow.WaveForgeBPM.fromTaps([0,.5]),/three beats/);
   await assert.rejects(
     bpmWindow.WaveForgeBPM.detect({ type: 'text/plain', async arrayBuffer() { return new ArrayBuffer(0); } }),
     /Import an audio track/
