@@ -233,7 +233,7 @@ function selectMusicCategory(category){
  const mainPitchPanel=document.querySelector('.mixer-main-pitch');
  const mainFxPanel=document.querySelector('.main-effects-panel');
  const mixerListHost=$('mixerList');
- if(mainPitchPanel&&mainFxPanel&&mixerListHost&&category!=='Background music'){
+ if(mainPitchPanel&&mainFxPanel&&mixerListHost&&(mainPitchPanel.parentNode===detailHost||mainFxPanel.parentNode===detailHost)){
   mixerListHost.parentNode.insertBefore(mainPitchPanel,mixerListHost);
   mixerListHost.parentNode.insertBefore(mainFxPanel,mixerListHost);
  }
