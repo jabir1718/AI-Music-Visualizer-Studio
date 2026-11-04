@@ -429,3 +429,7 @@ This is an order for development, not a reduction of the full scope:
 ## 36. Local quiet-gap suggestions
 - Added an optional local audio-track analysis for imported videos using Web Audio decoding. It detects sustained low-energy gaps (not speech recognition) and stores their midpoint times alongside detected visual scene boundaries.
 - Auto Cut can use both visual scene-change and quiet-gap points as boundaries when generating the next draft. Background music or noisy recordings can mask speech pauses; the UI explicitly warns about this limitation.
+
+
+### Offline helper video-edit commands
+- The English/Roman Urdu Quick Edit Assistant can now set the selected Auto Cut segment's transition and start/end speed ramp after the user selects a segment and previews the commands. It remains a limited local parser and does not claim general AI understanding.
