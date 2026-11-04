@@ -1,6 +1,6 @@
 (function(){
   class AudioEngine {
-    constructor(audio){this.audio=audio;this.context=null;this.analyser=null;this.source=null;this.gain=null;this.mainSoloGain=null;this.exportDestination=null;this.monitorGain=null;this.masterVolume=.85;this.data=null;this.lastBeat=0;this.energy=0;this.ready=false;this.layers=new Map();this.reverbBuffer=null;this.mainLow=null;this.mainHigh=null;this.mainPanner=null;this.mainDelay=null;this.mainFeedback=null;this.mainDelaySend=null;this.mainConvolver=null;this.mainReverbSend=null;this.mainShaper=null;}
+    constructor(audio){this.audio=audio;this.context=null;this.analyser=null;this.source=null;this.gain=null;this.mainSoloGain=null;this.exportDestination=null;this.monitorGain=null;this.masterVolume=.85;this.data=null;this.lastBeat=0;this.energy=0;this.ready=false;this.layers=new Map();this.reverbBuffer=null;this.mainLow=null;this.mainHigh=null;this.mainPanner=null;this.mainDelay=null;this.mainFeedback=null;this.mainDelaySend=null;this.mainConvolver=null;this.mainReverbSend=null;this.mainShaper=null;this.SoundTouchNode=null;this.soundTouchLoadPromise=null;this.soundTouchRegistered=false;}
     async connect(){
       if(this.ready)return;const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)throw new Error('Web Audio is not supported in this browser.');
       this.context=new Ctx();this.analyser=this.context.createAnalyser();this.analyser.fftSize=2048;this.analyser.smoothingTimeConstant=.78;
@@ -12,6 +12,37 @@
       this.data=new Uint8Array(this.analyser.frequencyBinCount);this.ready=true;
     }
     async resume(){if(this.context&&this.context.state==='suspended')await this.context.resume();}
+    async loadSoundTouch(){
+      if(this.soundTouchRegistered)return true;
+      if(!this.context||!this.context.audioWorklet)throw new Error('Pitch-preserving processing requires AudioWorklet support in a secure browser context.');
+      if(!this.soundTouchLoadPromise){
+        this.soundTouchLoadPromise=(async()=>{
+          const mod=await import('https://cdn.jsdelivr.net/npm/@soundtouchjs/audio-worklet@2.1.1/+esm');
+          const Node=mod.SoundTouchNode||(mod.default&&mod.default.SoundTouchNode);
+          if(!Node)throw new Error('SoundTouch processor module did not expose SoundTouchNode.');
+          await Node.register(this.context,'https://cdn.jsdelivr.net/npm/@soundtouchjs/audio-worklet@2.1.1/.dist/soundtouch-processor.js');
+          this.SoundTouchNode=Node;this.soundTouchRegistered=true;return true;
+        })().catch(error=>{this.soundTouchLoadPromise=null;throw error;});
+      }
+      return this.soundTouchLoadPromise;
+    }
+    async enableLayerPitchPreserving(id,semitones=0,rate=1){
+      const layer=this.layers.get(id);if(!layer)throw new Error('Mixer layer not found.');
+      await this.loadSoundTouch();
+      if(layer.pitchNode){this.setLayerPitch(id,semitones);this.setLayerRate(id,rate);return true;}
+      const node=new this.SoundTouchNode({context:this.context});
+      layer.high.disconnect(layer.pan);layer.high.connect(node);node.connect(layer.pan);layer.pitchNode=node;
+      node.pitchSemitones.value=Math.max(-12,Math.min(12,Number(semitones)||0));
+      node.playbackRate.value=Math.max(.5,Math.min(2,Number(rate)||1));
+      layer.audio.preservesPitch=false;layer.audio.playbackRate=node.playbackRate.value;return true;
+    }
+    disableLayerPitchPreserving(id,rate=1){
+      const layer=this.layers.get(id);if(!layer)return;
+      if(layer.pitchNode){try{layer.high.disconnect(layer.pitchNode);}catch(e){}try{layer.pitchNode.disconnect();}catch(e){}layer.pitchNode=null;layer.high.connect(layer.pan);}
+      layer.audio.preservesPitch=false;layer.audio.playbackRate=rate;
+    }
+    setLayerPitch(id,semitones){const layer=this.layers.get(id);if(layer&&layer.pitchNode)layer.pitchNode.pitchSemitones.setTargetAtTime(Math.max(-12,Math.min(12,Number(semitones)||0)),this.context.currentTime,.025);}
+
     setMainSoloMute(muted){if(this.mainSoloGain&&this.context)this.mainSoloGain.gain.setTargetAtTime(muted?0:1,this.context.currentTime,.025);}
     setVolume(v){this.masterVolume=v;if(this.gain)this.gain.gain.setTargetAtTime(v,this.context.currentTime,.025);else this.audio.volume=v;}
     setMainEQ(bass,treble){if(!this.context||!this.mainLow)return;this.mainLow.gain.setTargetAtTime(bass,this.context.currentTime,.025);this.mainHigh.gain.setTargetAtTime(treble,this.context.currentTime,.025);}
@@ -31,17 +62,17 @@
       source.connect(this.analyser);source.connect(gain);gain.connect(low);low.connect(high);high.connect(panner);panner.connect(shaper);shaper.connect(c.destination);shaper.connect(this.exportDestination);
       high.connect(delay);delay.connect(feedback);feedback.connect(delay);delay.connect(delaySend);delaySend.connect(panner);
       high.connect(convolver);convolver.connect(reverbSend);reverbSend.connect(panner);
-      const layer={audio,source,gain,low,high,pan:panner,hasPan,delay,feedback,delaySend,convolver,reverbSend,shaper};this.layers.set(id,layer);
+      const layer={audio,source,gain,low,high,pan:panner,hasPan,delay,feedback,delaySend,convolver,reverbSend,shaper,pitchNode:null};this.layers.set(id,layer);
       this.setLayerEQ(id,settings.bass||0,settings.treble||0);this.setLayerPan(id,settings.pan||0);this.setLayerDelay(id,settings.delay||0);this.setLayerReverb(id,settings.reverb||0);this.setLayerDistortion(id,(settings.distortion||0)*100);
     }
     setLayerVolume(id,v){const l=this.layers.get(id);if(l)l.gain.gain.setTargetAtTime(v,this.context.currentTime,.02);}
-    setLayerRate(id,v){const l=this.layers.get(id);if(l)l.audio.playbackRate=v;}
+    setLayerRate(id,v){const l=this.layers.get(id);if(!l)return;l.audio.playbackRate=v;if(l.pitchNode)l.pitchNode.playbackRate.setTargetAtTime(Math.max(.5,Math.min(2,Number(v)||1)),this.context.currentTime,.025);}
     setLayerPan(id,v){const l=this.layers.get(id);if(l&&l.hasPan)l.pan.pan.setTargetAtTime(v,this.context.currentTime,.025);}
     setLayerEQ(id,bass,treble){const l=this.layers.get(id);if(!l)return;l.low.gain.setTargetAtTime(bass,this.context.currentTime,.025);l.high.gain.setTargetAtTime(treble,this.context.currentTime,.025);}
     setLayerDelay(id,v){const l=this.layers.get(id);if(l)l.delaySend.gain.setTargetAtTime(v*.42,this.context.currentTime,.04);}
     setLayerReverb(id,v){const l=this.layers.get(id);if(l)l.reverbSend.gain.setTargetAtTime(v*.48,this.context.currentTime,.06);}
     setLayerDistortion(id,value){const l=this.layers.get(id);if(!l||!l.shaper)return;const amount=Math.max(0,Math.min(100,Number(value)||0));if(amount===0){l.shaper.curve=null;return;}const samples=44100,curve=new Float32Array(samples),k=amount*.32;for(let i=0;i<samples;i++){const x=i*2/samples-1;curve[i]=(1+k)*x/(1+k*Math.abs(x));}l.shaper.curve=curve;}
-    removeLayer(id){const l=this.layers.get(id);if(!l)return;l.audio.pause();['source','gain','low','high','pan','delay','feedback','delaySend','convolver','reverbSend','shaper'].forEach(k=>{try{l[k].disconnect();}catch(e){}});this.layers.delete(id);}
+    removeLayer(id){const l=this.layers.get(id);if(!l)return;l.audio.pause();['source','gain','low','high','pan','delay','feedback','delaySend','convolver','reverbSend','shaper','pitchNode'].forEach(k=>{try{if(l[k])l[k].disconnect();}catch(e){}});this.layers.delete(id);}
     getExportStream(){return this.exportDestination?this.exportDestination.stream:null;}
     getFrequency(){if(!this.analyser)return new Uint8Array(128);this.analyser.getByteFrequencyData(this.data);return this.data;}
     getWaveform(){const a=new Uint8Array(this.analyser?this.analyser.fftSize:128);if(this.analyser)this.analyser.getByteTimeDomainData(a);return a;}
