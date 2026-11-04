@@ -13,6 +13,7 @@ assert.strictEqual(split.first.trimEnd,5);
 assert.strictEqual(split.second.trimStart,5);
 assert.strictEqual(split.second.offset,4);
 assert.strictEqual(timeline.splitLayer(layer,2,12),null,'cannot split before clip begins');
+assert.strictEqual(timeline.splitLayer(layer,4,NaN),null,'cannot split until media metadata is loaded');
 const edited={trimStart:0,trimEnd:0};
 const b=timeline.setTrim(edited,2,7,10);
 assert.strictEqual(b.start,2);assert.strictEqual(b.end,7);
