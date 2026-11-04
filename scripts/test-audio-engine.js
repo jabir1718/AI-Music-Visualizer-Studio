@@ -55,11 +55,15 @@ const mainAudio = { volume: .85, currentTime: 2, duration: 30, playbackRate: 1 }
   engine.setLayerPan('voice', .25);
   engine.setLayerDelay('voice', .5);
   engine.setLayerReverb('voice', .5);
+  engine.setLayerDistortion('voice', 50);
+  assert.equal(engine.layers.get('voice').shaper.curve.length,44100,'per-layer distortion should use its own waveshaper');
+  engine.setLayerDistortion('voice',0);assert.equal(engine.layers.get('voice').shaper.curve,null,'per-layer distortion bypasses at zero');
   assert.equal(engine.layers.get('voice').gain.gain.value, .4);
   assert.equal(layerAudio.playbackRate, 1.2);
   assert.equal(engine.layers.get('voice').low.gain.value, 3);
   assert.equal(engine.layers.get('voice').high.gain.value, -2);
   assert.equal(engine.layers.get('voice').pan.pan.value, .25);
+  assert.ok(engine.layers.get('voice').pan.connections.includes(engine.layers.get('voice').shaper),'each mixer layer must route through its own distortion node');
   engine.removeLayer('voice');
   assert.equal(engine.layers.has('voice'), false);
   await engine.destroy();
