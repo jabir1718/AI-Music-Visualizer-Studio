@@ -56,7 +56,7 @@ function mount(host,options={}){
   if(recorder&&recorder.state==='recording')return;
   if(!root.navigator||!root.navigator.mediaDevices||typeof root.navigator.mediaDevices.getUserMedia!=='function'){status.textContent='Microphone access is unavailable. Open the app in a secure browser or supported Android WebView.';return;}
   if(typeof root.MediaRecorder!=='function'){status.textContent='MediaRecorder is not supported on this device.';return;}
-  releaseOutput();chunks=[];bytes=0;discard=false;const currentRequest=++requestId;
+  releaseOutput();add.disabled=false;chunks=[];bytes=0;discard=false;const currentRequest=++requestId;
   start.disabled=true;status.textContent='Requesting microphone permission…';
   try{
    stream=await root.navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
