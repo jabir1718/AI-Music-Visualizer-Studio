@@ -96,3 +96,6 @@ button[data-action-icon]:disabled{opacity:.45;cursor:not-allowed}
 .bpm-tool b{display:block;font-size:11px}.bpm-tool small{display:block;color:var(--muted);font-size:9px;line-height:1.5;margin-top:4px}
 .bpm-tool output{grid-column:1/-1;color:var(--mint);font-size:10px;line-height:1.5;min-height:15px}
 @media(max-width:440px){.bpm-tool{grid-template-columns:1fr}.bpm-tool button{width:100%}}
+
+.mixer-preset{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;color:var(--muted);font-size:9px}
+.mixer-preset select{min-width:150px;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:8px;font:10px 'DM Sans'}
