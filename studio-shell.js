@@ -156,6 +156,23 @@ function init(){
  timeline.addEventListener('click',e=>{const b=e.target.closest('[data-transport]');if(!b)return;const a=document.getElementById('audio');if(a){if(b.dataset.transport==='play')document.getElementById('playBtn')?.click();if(b.dataset.transport==='prev')a.currentTime=Math.max(0,a.currentTime-5);if(b.dataset.transport==='next')a.currentTime=Math.min(a.duration||0,a.currentTime+5);}if(b.dataset.transport==='undo')document.getElementById('historyUndo')?.click();if(b.dataset.transport==='redo')document.getElementById('historyRedo')?.click();if(b.dataset.transport==='fullscreen'){const st=document.getElementById('stage');if(st?.requestFullscreen)st.requestFullscreen().catch(()=>{});}});
  const time=document.getElementById('timeLabel'),duration=document.getElementById('trackMeta');
  if(time)new MutationObserver(()=>{timeline.querySelector('#wfTimeReadout').textContent=time.textContent;}).observe(time,{childList:true,characterData:true,subtree:true});
+ const titleInput=document.getElementById('titleInput'),projectName=dashboard.querySelector('#wfProjectName');
+ if(titleInput&&projectName){const syncTitle=()=>projectName.textContent=titleInput.value.trim()||'My Music Project';titleInput.addEventListener('input',syncTitle);syncTitle();}
+ const ratioSelect=document.getElementById('exportRatio'),qualitySelect=document.getElementById('quality');
+ function syncProjectInfo(){
+  const ratio=ratioSelect&&ratioSelect.value||'9:16';
+  const canvas=dashboard.querySelector('.wf-project-info span:nth-child(3) b');
+  if(canvas)canvas.textContent=ratio;
+  const quality=qualitySelect&&qualitySelect.value||'1080';
+  const resolution=dashboard.querySelector('#wfResolution');
+  if(resolution)resolution.textContent=quality+'P';
+ }
+ ratioSelect?.addEventListener('change',syncProjectInfo);qualitySelect?.addEventListener('change',syncProjectInfo);syncProjectInfo();
+ const audioElement=document.getElementById('audio'),wave=timeline.querySelector('.wf-waveform');
+ if(audioElement&&wave){
+  const updateWave=()=>{const duration=Number.isFinite(audioElement.duration)&&audioElement.duration>0?audioElement.duration:0;const progress=duration?Math.max(0,Math.min(100,audioElement.currentTime/duration*100)):0;wave.style.setProperty('--wf-audio-progress',progress+'%');};
+  audioElement.addEventListener('timeupdate',updateWave);audioElement.addEventListener('loadedmetadata',updateWave);audioElement.addEventListener('seeked',updateWave);updateWave();
+ }
  const play=document.getElementById('playBtn');if(play)new MutationObserver(()=>{const p=timeline.querySelector('[data-transport="play"]');if(p)p.textContent=play.textContent.trim()==='❚❚'?'❚❚':'▶';}).observe(play,{childList:true,characterData:true,subtree:true});
  if(duration)new MutationObserver(()=>{const m=duration.textContent.match(/(\d{1,2}:\d{2})/);if(m)timeline.querySelector('#wfDuration').textContent=m[1];}).observe(duration,{childList:true,characterData:true,subtree:true});
  const ratio=document.querySelector('.ratio.active');if(ratio)timeline.querySelector('#wfResolution').textContent=ratio.dataset.ratio==='9:16'?'1080P':ratio.dataset.ratio;
