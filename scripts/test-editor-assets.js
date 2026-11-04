@@ -19,6 +19,8 @@ assert(/objectSettings,manualBpm,tapBeatOffset,filterPreset:/.test(app),'Object 
 assert(/d\.objectSettings/.test(app),'Object settings are not restored');
 assert(/objectSettings\.title\.visible/.test(app)&&/objectSettings\.subtitle\.visible/.test(app),'Text visibility not applied to canvas');
 assert(/objectSettings\.lyric\.visible/.test(app)&&/objectSettings\.logo\.visible/.test(app),'Lyric/logo visibility not applied to canvas');
+assert(/beginObjectTransform/.test(app)&&/moveObjectTransform/.test(app)&&/endObjectTransform/.test(app),'Touch resize and rotate handles are missing');
+assert(/object-selection-overlay/.test(app)&&/updateSelectionOverlay/.test(app),'Canvas selection outline is not connected');
 assert(/function beginWordSync/.test(app)&&/function markSyncWord/.test(app)&&/function finishWordSync/.test(app),'Manual word-level karaoke timing workflow missing');
 assert(/WaveForgeBPM\.fromTaps/.test(app)&&/tapTempoBtn/.test(app)&&/tapBeatOffset/.test(app),'Tap tempo and aligned beat grid are not connected');
 assert(/fromTaps\(times\)/.test(fs.readFileSync('bpm-engine.js','utf8')),'Tap tempo estimator API is missing');
@@ -47,7 +49,7 @@ assert(/WaveForgeMediaTools\.mount/.test(app),'Video extractor UI is not mounted
 assert(/onMain:loadAudio/.test(app)&&/addMixerLayer\(file,'Other'\)/.test(app),'Extracted audio import actions are not connected');
 assert(/MediaRecorder/.test(mediaTools)&&/createMediaElementSource/.test(mediaTools),'Video audio extraction must use real media capture');
 assert(/WaveForgeChromaKey\.mount/.test(app)&&/WaveForgeChromaKey\.process/.test(app),'Chroma key processor is not integrated');
-assert(app.includes('loadSettings();audio.volume=.85;initObjectEditor();initMixerUI();initMediaTools();initFilterStudio();initChromaKey();'),'All saved editor state and audio controls must initialize before filter UI callbacks save settings');
+assert(app.includes('loadSettings();audio.volume=.85;initObjectEditor();initTypographyStudio();initMixerUI();initMediaTools();initFilterStudio();initChromaKey();'),'All saved editor state and audio controls must initialize before filter UI callbacks save settings');
 assert(/chromaKey:window\.WaveForgeChromaKey/.test(app),'Chroma key settings are not saved');
 assert(/chroma-key\.js/.test(index)&&/processPixels/.test(chroma),'Chroma key module or UI is missing');
 assert(/WaveForgeSoundLibrary\.mount/.test(app)&&/addMixerLayer\(file,item\.role\)/.test(app),'Open audio library is not connected to the mixer');
