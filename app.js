@@ -191,13 +191,14 @@ function selectMusicCategory(category){
   'Character':{role:'Voice FX',title:'Character sound library',desc:'Search open character-style laughs and vocal clips. These are source recordings, not generated voice transformations.',available:true},
   'Voice FX':{role:'Voice FX',title:'Voice changer & character effects',desc:'Each imported layer now has Natural, Telephone, Radio, Monster, Chipmunk, Robot and Alien styles with independent EQ, echo, reverb and distortion. Pitch-based styles also change speed; formant-preserving voice conversion is not included.',available:true},
   'Separation':{role:'Instrumental',title:'AI vocal & instrument separation',desc:'This operation is planned but not implemented yet. The current app cannot extract vocals or instruments from a mixed MP3 automatically.',available:false},
-  'Cleanup':{role:'Voice',title:'Noise cleanup',desc:'Noise removal and voice isolation are planned but not implemented yet. Original audio is left unchanged.',available:false}
+  'Cleanup':{role:'Voice',title:'Noise cleanup',desc:'Run local spectral noise reduction on an imported voice clip using a noise-only sample. The original stays untouched; AI source separation is still separate and not implemented.',available:true}
  };
  const item=config[category]||config.Voice;
  role.value=item.role;
  detail.innerHTML='<div class="music-detail-title"><div><span class="eyebrow">SELECTED WORKSPACE</span><h3>'+item.title+'</h3></div><span class="music-detail-state">'+(item.available?'IMPORT READY':'NOT IMPLEMENTED')+'</span></div><p>'+item.desc+'</p>';
  add.disabled=!item.available;file.disabled=!item.available;
  if(item.available&&window.WaveForgeSoundLibrary&&['Sound effect','Engine','Character'].includes(category)){const query=category==='Engine'?'race car engine':category==='Character'?'evil laugh cartoon':'sound effect';window.WaveForgeSoundLibrary.mount(detail,query,file=>addMixerLayer(file,item.role));}
+ if(category==='Cleanup'&&window.WaveForgeCleanup)window.WaveForgeCleanup.mount(detail,{onLayer:file=>addMixerLayer(file,'Voice')});
  renderMixerLayers();
 }
 function addMixerLayer(file,role,restore={},persist=true){
