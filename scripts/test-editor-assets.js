@@ -61,6 +61,7 @@ assert(/aiSegmentation:window\.WaveForgeSegmentation/.test(app),'AI segmentation
 assert(/WaveForgeSoundLibrary\.mount/.test(app)&&/addMixerLayer\(file,item\.role\)/.test(app),'Open audio library is not connected to the mixer');
 assert(/WaveForgeTimeline\.resolveLayerTime/.test(app)&&/Split at playhead/.test(app),'Mixer timeline trim/split controls are missing');
 assert(/Pitch preserving/.test(app)&&/Speed','rate'/.test(app)&&/pitchPreserving:!!l\.pitchPreserving/.test(app),'Independent pitch/speed controls or persistence are missing');
+assert(/Formant preservation/.test(app)&&/formantStrength:Number\(l\.formantStrength\)/.test(app)&&/enableLayerFormantCorrection/.test(app),'Voice formant preservation control or persistence is missing');
 assert(/historyUndo/.test(app)&&/historyRedo/.test(app)&&/captureUndoState/.test(app),'Visual editor undo/redo controls are missing');
 assert(/history-engine\.js/.test(index)&&/WaveForgeHistory\.create/.test(app),'History engine is not loaded and initialized');
 assert(/keyframe-engine\.js/.test(index)&&/WaveForgeKeyframes\.upsert/.test(app)&&/objectKeyframeAdd/.test(app),'Object keyframe animation controls are missing');
