@@ -83,6 +83,7 @@ const mainAudio = { volume: .85, currentTime: 2, duration: 30, playbackRate: 1 }
   engine.disableLayerPitchPreserving('voice',1.25);
   assert.equal(engine.layers.get('voice').pitchNode,null,'disable should remove pitch processor');
   assert.ok(engine.layers.get('voice').compressor.connections.includes(engine.layers.get('voice').pan),'disable should restore compressor-to-mixer route');
+  assert.ok(!engine.layers.get('voice').compressor.connections.includes(activePitchProcessor),'disabled pitch processor must be disconnected from compressor');
   engine.setLayerVolume('voice', .4);
   engine.setLayerRate('voice', 1.2);
   engine.setLayerEQ('voice', 3, -2);
