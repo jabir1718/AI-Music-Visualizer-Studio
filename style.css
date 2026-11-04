@@ -197,3 +197,8 @@ button[data-action-icon]:disabled{opacity:.45;cursor:not-allowed}
 @media(max-width:560px){.noise-cleanup-grid{grid-template-columns:1fr}}
 
 .noise-cleanup-result[hidden]{display:none}
+
+.object-keyframe-tools{display:grid;gap:10px;margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel-soft,rgba(255,255,255,.025))}
+.object-keyframe-tools>div:first-child{display:grid;gap:4px}
+.object-keyframe-tools b{font-size:.88rem}
+.object-keyframe-tools small{color:var(--muted);font-size:.74rem}

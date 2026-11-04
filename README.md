@@ -10,6 +10,7 @@ A browser-based, local-first music visualizer editor. Version 1.0 foundation.
 - 50 adjustable photo/video color filters across cinema, vintage, monochrome, vibrant, cool, warm, dreamy, night, analog and editorial looks; filters are included in canvas export.
 - 100-family typography studio with independent title/subtitle/lyrics fonts, weight, spacing, outline, glow and layered 2D extrusion depth.
 - Touch selection outlines and resize/rotate handles for native text, current lyric and logo objects.
+- Per-object position/scale/rotation/opacity keyframes synchronized to the main audio playhead, with smooth interpolation and project persistence.
 - Per-layer generic voice styles (Telephone, Radio, Monster, Chipmunk, Robot and Alien) with independent EQ, echo, reverb and distortion.
 - Local spectral noise reduction for short voice/audio clips using a selected noise-only sample; cleaned audio is exported as a separate WAV layer.
 - Mixer clip in/out trimming, looping and split-at-playhead controls.
@@ -37,7 +38,7 @@ Open `index.html` in a modern browser. For best results, serve the folder from a
 - Background music remains on its own gain path; changing a voice/effect layer's volume or per-layer effects does not change the background music path. Soloing a mixer layer also mutes the original background track, then restores it when Solo is turned off.
 - Pitch shifting currently uses playback-rate changes and therefore also changes speed; independent pitch-preserving DSP and formant-preserving voice conversion are not implemented yet.
 - The character-style presets are generic DSP chains, not generated voice models or real-person voice cloning.
-- Mixer clip trimming, looping and splitting are supported; a full visual multi-track video timeline is not yet implemented. Undo/redo covers editor/visual settings; media and mixer-layer add/remove actions are not included. This foundation mixes separately supplied stems; it does not split vocals/instruments out of one mixed song.
+- Mixer clip trimming, looping and splitting are supported; a full visual multi-track video clip timeline and keyframed compositing of arbitrary imported media are not yet implemented. Undo/redo covers editor/visual settings; media and mixer-layer add/remove actions are not included. This foundation mixes separately supplied stems; it does not split vocals/instruments out of one mixed song.
 - Extra layers follow the main track timeline and are included in the mixed audio export stream. Real-device and exported-file verification is still required.
 
 ## Export limitations
