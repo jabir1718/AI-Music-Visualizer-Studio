@@ -611,7 +611,7 @@ function loadLogoFile(file){
  });
 }
 function initSymbolLibrary(){if(window.WaveForgeSymbols)window.WaveForgeSymbols.mount($('overlayPanel'),{onLogo:loadLogoFile});}
-function initThreeStudio(){if(window.WaveForge3D)window.WaveForge3D.mount($('overlayPanel'),{onLogo:loadLogoFile});}
+function initThreeStudio(){if(window.WaveForge3D)window.WaveForge3D.mount($('overlayPanel'),{onLogo:loadLogoFile,onChange:saveSettings});}
  $('logoInput').onchange=e=>loadLogoFile(e.target.files[0]).catch(error=>setStatus(error.message));
 $('clearLogo').onclick=()=>{$('stageLogo').innerHTML='';if(logoUrl)URL.revokeObjectURL(logoUrl);logoUrl=null;logoImage=null;deleteMediaAsset('logo');saveSettings();};
 $('mediaInput').onchange=e=>{
