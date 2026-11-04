@@ -153,3 +153,10 @@ Last source audit: 2026-11-05 (after connecting image-search and OpenMoji import
 - Video files are stored locally in the existing IndexedDB media store. Auto-video source and segment metadata are included in local editor settings and portable .waveforge project packaging.
 - Automated tests are being added for imports, beat-cut planning, playback mapping and manual segment edits. The APK build and physical Infinix device behavior must be confirmed separately.
 - **Not yet implemented:** scene-change detection, speech-pause cuts, AI-generated captions, crossfade/transition library, speed ramps, zoom/motion effects, multi-layer video compositing, cloud AI, and device-verified export codec/resolution. This first Auto Cut implementation makes direct cuts only; do not advertise the remaining items as available.
+
+## Free offline editing helper — 2026-11-05
+
+- Added a local Quick Edit Assistant that parses a small, explicitly supported command set for visualizer style/color, output ratio, title/subtitle, music bass/treble/volume/pitch, lyric size, Auto Cut style and cut intensity.
+- Every request is previewed before applying. Unsupported requests are not guessed or executed. All processing stays on the device; there is no ChatGPT connection, API key, cloud upload or usage charge.
+- This is a deterministic rules-based helper, **not ChatGPT and not a general AI editor**. Broader natural-language understanding and advanced edit actions remain unimplemented.
+- Added parser regression tests; final CI confirmation and physical-device UI testing remain pending.
