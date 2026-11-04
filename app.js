@@ -235,7 +235,7 @@ function applyLayerPreset(layer,preset){
  };
  const p=presets[preset]||presets.clean;Object.assign(layer,p,{preset});
  layer.audio.playbackRate=layer.rate;layer.audio.preservesPitch=false;
- if(engine&&layer.connected){engine.setLayerEQ(layer.id,layer.bass,layer.treble);engine.setLayerPan(layer.id,layer.pan);engine.setLayerDelay(layer.id,layer.delay);engine.setLayerReverb(layer.id,layer.reverb);engine.setLayerDistortion(layer.id,layer.distortion);}
+ if(engine&&layer.connected){engine.setLayerEQ(layer.id,layer.bass,layer.treble);engine.setLayerPan(layer.id,layer.pan);engine.setLayerDelay(layer.id,layer.delay);engine.setLayerReverb(layer.id,layer.reverb);engine.setLayerDistortion(layer.id,layer.distortion*100);}
  renderMixerLayers();saveSettings();setStatus('Applied '+preset+' audio preset');
 }
 function renderMixerLayers(){
