@@ -577,7 +577,7 @@ function loadLogoFile(file){
   if(logoUrl)URL.revokeObjectURL(logoUrl);
   logoUrl=URL.createObjectURL(file);
   const img=new Image();
-  img.onload=async()=>{try{logoImage=img;$('stageLogo').innerHTML='';await saveMediaAsset('logo',file);saveSettings();setStatus('Logo loaded');resolve(true);}catch(error){reject(error);}};
+  img.onload=async()=>{try{logoImage=img;$('stageLogo').innerHTML='';const stored=await saveMediaAsset('logo',file);saveSettings();setStatus(stored?'Logo loaded':'Logo loaded for this session; media storage is unavailable.');resolve(stored);}catch(error){reject(error);}};
   img.onerror=()=>{if(logoUrl)URL.revokeObjectURL(logoUrl);logoUrl=null;logoImage=null;const error=new Error('Could not decode this logo image.');setStatus(error.message);reject(error);};
   img.src=logoUrl;
  });
