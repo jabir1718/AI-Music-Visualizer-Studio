@@ -2,7 +2,7 @@
 
 This file is the delivery checklist for the 31 groups in `ROADMAP.md`. It is deliberately conservative: **Partial** means some working code exists, not that the complete request is finished. **Not started** means there is no verified implementation in the current source.
 
-Last source audit: 2026-11-04.
+Last source audit: 2026-11-04 (after mixer, lyric-edit and export reliability fixes).
 
 ## Status definitions
 - **Partial** — working foundation exists, but one or more requested capabilities are missing or unverified.
@@ -49,9 +49,13 @@ Last source audit: 2026-11-04.
 
 - Added nested Music Studio category navigation in `app.js` and styling in `style.css`.
 - Added independent per-layer Web Audio processing nodes for stereo pan, low/high shelf EQ, echo and convolution reverb in `audio-engine.js`.
-- Added per-layer Solo/Mute and controls for volume, pitch/rate, start offset, pan, bass, treble, echo and reverb.
+- Added per-layer Solo/Mute and controls for volume, pitch/rate, start offset, pan, bass, treble, echo and reverb. Solo now routes the main background track through a dedicated mute gain node so it is actually silenced while a layer is soloed.
 - Added local IndexedDB storage for the main audio file and added mixer layers; editor metadata is saved in localStorage. Restoration depends on the same browser profile retaining its site data and available storage quota.
-- JavaScript syntax checks passed for `app.js`, `audio-engine.js`, `lyrics-engine.js` and `export.js`. A mocked Web Audio smoke test passed for connect/add-layer/EQ/pan/echo/reverb/remove.
+- Fixed a missing main solo-gain node initialization that would have broken AudioContext setup, and normalized the HTML audio element volume to prevent double attenuation by the Web Audio master gain.
+- Lyric text edits now preserve existing line timing and discard stale per-word timing for changed text; edited lines sync back to the manual lyrics field. Lyric position now persists.
+- Hardened video export validation, recorder startup errors, empty-output detection and stream cleanup.
+- Added a Node-based mocked AudioEngine regression test to the APK workflow (`npm test`); it checks master/solo routing, volume, layer EQ/pan/effects and removal.
+- JavaScript syntax checks are run for `app.js`, `audio-engine.js`, `lyrics-engine.js` and `export.js`; the Android workflow now also runs `npm test` before building. A mocked Web Audio test is source-level verification only, not real playback.
 - These are source-level checks, not Android device tests. The latest APK workflow must finish and publish its artifact before this checkpoint can be called build-verified.
 
 ## Important accuracy rules

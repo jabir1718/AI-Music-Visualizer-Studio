@@ -53,5 +53,5 @@ const mainAudio = { volume: .85, currentTime: 2, duration: 30, playbackRate: 1 }
   engine.removeLayer('voice');
   assert.equal(engine.layers.has('voice'), false);
   await engine.destroy();
-  process.stdout.write('AudioEngine tests passed.\\n');
+  process.stdout.write('AudioEngine tests passed.\n');
 })().catch(error => { console.error(error); process.exitCode = 1; });

@@ -22,7 +22,7 @@ Open `index.html` in a modern browser. For best results, serve the folder from a
 - The mixer accepts additional local audio files as separate Voice, Ad-lib, Sound effect, Bass stem, Drums, Piano, Guitar, Instrumental or Other layers.
 - Each added layer has independent volume, pitch/rate, start offset, stereo pan, bass/treble EQ, echo and reverb controls, plus mute, solo and remove.
 - Mixer settings and imported audio files are restored from local browser storage on the same browser installation when IndexedDB data remains available.
-- Background music remains on its own gain path; changing a voice/effect layer's volume or per-layer effects does not change the background music path.
+- Background music remains on its own gain path; changing a voice/effect layer's volume or per-layer effects does not change the background music path. Soloing a mixer layer also mutes the original background track, then restores it when Solo is turned off.
 - Pitch shifting currently uses playback-rate changes and therefore also changes speed; independent pitch-preserving DSP is not implemented yet. This foundation mixes separately supplied stems; it does not split vocals/instruments out of one mixed song.
 - Extra layers follow the main track timeline and are included in the mixed audio export stream. Real-device and exported-file verification is still required.
 
@@ -31,7 +31,7 @@ Open `index.html` in a modern browser. For best results, serve the folder from a
 - MP4 is used only if the browser reports a supported MP4 MediaRecorder codec; otherwise WebM is used. This is not a universal MP4 encoder.
 - 1080p and frame rate depend on available device memory, browser support and performance. 4K/8K/16K are not promised in this foundation.
 - The video recording path captures the canvas and audio track. Browser/device codec support varies.
-- Fades are exposed as controls in this foundation; automated fade automation is not yet wired into the rendered audio output.
+- Main-track fade-in and fade-out controls are applied to the master audio gain during playback/export. More advanced automation curves are not included.
 
 ## Not included yet
 AI vocal/instrument separation, generated humming/ad-libs, a full voice-character model suite, independent pitch-preserving DSP, a multi-track visual timeline, project-file export/import, full 3D scene editing, chroma-key/background removal, Google Images provider integration, a licensed 2,000+ artwork library, 50+ photo/video filters, YouTube-authorized media integration, sound-effect catalogues, GPU acceleration and 4K/8K/16K export. These need dedicated implementation and/or optional models/services. Copyright risk is only a user checklist, not a copyright scan.
