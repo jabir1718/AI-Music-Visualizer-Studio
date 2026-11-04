@@ -48,6 +48,7 @@
    trim.append(trimText,range);card.append(trim);list.appendChild(card);
   });
   const count=$('autoVideoCount');if(count)count.textContent=segments.length+' editable segments · '+totalDuration().toFixed(1)+' sec';
+  if(root.document)root.document.dispatchEvent(new root.CustomEvent('waveforge:video-timeline-change',{detail:{assets:Array.from(assets.values()).map(a=>({id:a.id,name:a.name,kind:a.kind,previewUrl:a.kind==='image'?a.media.src:''})),segments:segments.map(s=>({...s}))}}));
  }
  function createVideo(file){
   const video=document.createElement('video');video.muted=true;video.playsInline=true;video.preload='metadata';video.setAttribute('playsinline','');video.src=URL.createObjectURL(file);
