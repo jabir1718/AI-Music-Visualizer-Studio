@@ -27,7 +27,7 @@ const file=(name,type,size=1024)=>Object.assign({name,type,size,arrayBuffer:asyn
  assert.strictEqual(Object.keys(api.PRESETS).length,10,'exactly ten editing templates should be available');
  const first=api.getState().segments[0];assert.strictEqual(api.setSpeedRamp(first.id,.7,1.5),true,'speed ramp should be editable');assert.ok(api.getState().segments[0].rateStart===.7&&api.getState().segments[0].rateEnd===1.5);
  assert.strictEqual(api.setTransition(first.id,'fade'),true,'transition should be editable');assert.strictEqual(api.getVisualEffect(first.timelineStart).type,'fade');
- assert.ok(api.getMotion(first.timelineStart).scale>1,'zoom transition should scale video/photo preview');
+ assert.strictEqual(api.setTransition(first.id,'zoom'),true);assert.ok(api.getMotion(first.timelineStart).scale>1,'zoom transition should scale video/photo preview');
  api.move(1,-1);const before=api.getCount();assert.strictEqual(api.splitSegment(api.getState().segments[0].id),true);assert.strictEqual(api.getCount(),before+1);
  const videoAsset=api.getState().assets.find(a=>a.kind==='video');const sceneCuts=await api.detectScenes(videoAsset.id);assert.ok(sceneCuts.includes(3),'local frame-difference scene detection should find a visible cut');
  const frame=api.sync(0,false);assert.ok(frame instanceof MockVideo||frame instanceof MockImage,'playhead should resolve active video or photo');
