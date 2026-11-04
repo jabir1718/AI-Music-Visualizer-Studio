@@ -58,21 +58,21 @@
         const ts=chunk.timestamp||[];
         if(!text)return;
         const start=Number.isFinite(ts[0])?ts[0]:0;
-        const end=Number.isFinite(ts[1])?ts[1]:Math.min(decoded.duration,start+4);
-        const pieces=text.match(/[^.!?;،۔]+[.!?;،۔]?/g)||[text];
+        const end=Number.isFinite(ts[1])?ts[1]:Math.min(decoded.duration,start+5);
+        const words=text.split(/\\s+/).filter(Boolean);
+        const groupSize=6;
+        const groups=[];
+        for(let i=0;i<words.length;i+=groupSize)groups.push(words.slice(i,i+groupSize).join(' '));
         const span=Math.max(.8,end-start);
-        pieces.map(x=>x.trim()).filter(Boolean).forEach((piece,i)=>{
-          const a=start+span*i/pieces.length,b=start+span*(i+1)/pieces.length;
-          lines.push({start:a,end:Math.max(a+.5,b),text:piece});
+        groups.forEach((piece,i)=>{
+          const a=start+span*i/groups.length,b=start+span*(i+1)/groups.length;
+          lines.push({start:a,end:Math.max(a+.55,b),text:piece});
         });
       });
     }else if(result&&result.text){
-      const pieces=result.text.match(/[^.!?;،۔]+[.!?;،۔]?/g)||[result.text];
-      pieces.map(x=>x.trim()).filter(Boolean).forEach((piece,i)=>lines.push({
-        start:decoded.duration*i/pieces.length,
-        end:decoded.duration*(i+1)/pieces.length,
-        text:piece
-      }));
+      const words=result.text.trim().split(/\\s+/).filter(Boolean),groups=[];
+      for(let i=0;i<words.length;i+=6)groups.push(words.slice(i,i+6).join(' '));
+      groups.forEach((piece,i)=>lines.push({start:decoded.duration*i/groups.length,end:decoded.duration*(i+1)/groups.length,text:piece}));
     }
     if(onProgress)onProgress({status:'Lyrics ready — review the words and timing',progress:100});
     return lines;
