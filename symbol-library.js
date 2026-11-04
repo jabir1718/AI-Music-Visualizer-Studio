@@ -6,7 +6,7 @@ const SVG_BASE='https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@'+VERSION+'/colo
 let entries=null,loading=null,selected=null;
 function normalizeEntry(item){
  if(!item||!/^[0-9A-F-]{4,32}$/i.test(String(item.hexcode||'')))return null;
- return{hexcode:String(item.hexcode).toUpperCase(),annotation:String(item.annotation||item.name||item.hexcode),tags:Array.isArray(item.tags)?item.tags:[],group:String(item.group||''),subgroup:String(item.subgroups||item.subgroup||'')};
+ return{hexcode:String(item.hexcode).toUpperCase(),annotation:String(item.annotation||item.name||item.hexcode),tags:Array.isArray(item.tags)?item.tags:String(item.tags||'').split(/[ ,]+/).filter(Boolean),group:String(item.group||''),subgroup:String(item.subgroups||item.subgroup||'')};
 }
 function filterEntries(items,query='',group='All'){
  const q=String(query||'').trim().toLowerCase();
@@ -27,7 +27,7 @@ async function getSvgFile(item){
 function mount(host,options={}){
  if(!host||root.document.getElementById('openMojiLibrary'))return;
  const panel=root.document.createElement('section');panel.id='openMojiLibrary';panel.className='openmoji-library';
- panel.innerHTML='<div class="openmoji-head"><div><span class="eyebrow">OPEN SYMBOL COLLECTION</span><h3>4,000+ searchable symbols</h3><p>Search the OpenMoji catalogue by name, tag or group. Only the selected SVG is downloaded.</p></div><span id="openmojiCount" class="font-count">…</span></div><div class="openmoji-search"><input id="openmojiSearch" type="search" placeholder="Search symbols: music, heart, camera…"><select id="openmojiGroup"><option>All</option></select></div><div id="openmojiGrid" class="openmoji-grid"></div><div class="openmoji-actions"><button type="button" class="btn small primary" id="openmojiUse" disabled>Use selected as logo</button><span id="openmojiStatus" class="hint" aria-live="polite">Loading symbol catalogue…</span></div><small class="openmoji-license">OpenMoji graphics are CC BY-SA 4.0. Attribution and ShareAlike obligations apply; check the upstream licence before commercial redistribution.</small>';
+ panel.innerHTML='<div class="openmoji-head"><div><span class="eyebrow">OPEN SYMBOL COLLECTION</span><h3>4,000+ searchable symbols</h3><p>Search the OpenMoji catalogue by name, tag or group. Previews load on demand; only the selected SVG is added to the project.</p></div><span id="openmojiCount" class="font-count">…</span></div><div class="openmoji-search"><input id="openmojiSearch" type="search" placeholder="Search symbols: music, heart, camera…"><select id="openmojiGroup"><option>All</option></select></div><div id="openmojiGrid" class="openmoji-grid"></div><div class="openmoji-actions"><button type="button" class="btn small primary" id="openmojiUse" disabled>Use selected as logo</button><span id="openmojiStatus" class="hint" aria-live="polite">Loading symbol catalogue…</span></div><small class="openmoji-license">OpenMoji graphics are CC BY-SA 4.0. Attribution and ShareAlike obligations apply; check the upstream licence before commercial redistribution.</small>';
  host.appendChild(panel);
  const $=id=>panel.querySelector('#'+id),grid=$('openmojiGrid');let filtered=[];
  function render(){
