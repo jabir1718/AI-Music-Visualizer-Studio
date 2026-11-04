@@ -27,10 +27,10 @@ function resizeCanvas(){
  document.querySelectorAll('.ratio').forEach(b=>b.classList.toggle('active',b.dataset.ratio===$('exportRatio').value));
 }
 function roundRect(x,y,w,h,r){ctx.beginPath();ctx.roundRect?ctx.roundRect(x,y,w,h,r):(ctx.rect(x,y,w,h));}
-function drawWrapped(text,x,y,maxWidth,lineHeight){
+function drawWrapped(text,x,y,maxWidth,lineHeight,typeKey){
  const words=String(text||'').split(/\s+/),lines=[];let line='';
  words.forEach(word=>{const test=line?line+' '+word:word;if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=word;}else line=test;});
- if(line)lines.push(line);lines.slice(0,3).forEach((v,i)=>ctx.fillText(v,x,y+i*lineHeight,maxWidth));return lines.length*lineHeight;
+ if(line)lines.push(line);lines.slice(0,3).forEach((v,i)=>{if(typeKey&&window.WaveForgeTypography)window.WaveForgeTypography.drawGlyph(ctx,typeKey,v,x,y+i*lineHeight,maxWidth);else ctx.fillText(v,x,y+i*lineHeight,maxWidth);});return lines.length*lineHeight;
 }
 function currentLyric(){
  const t=audio.currentTime||0;
@@ -67,12 +67,12 @@ function draw(){
  }
  ctx.restore();ctx.shadowBlur=0;ctx.globalAlpha=1;ctx.textAlign='center';ctx.textBaseline='middle';
  const title=$('titleInput').value||'',subtitle=$('subtitleInput').value||'';
- if(objectSettings.title.visible){const o=objectSettings.title;ctx.save();ctx.globalAlpha=o.opacity;ctx.translate(positions.title.x*w,positions.title.y*h);ctx.rotate(o.rotation*Math.PI/180);ctx.fillStyle=o.color||$('textColor').value;ctx.font='800 '+Math.round(w*.052*o.scale)+'px '+($('fontStyle').value==='serif'?'Georgia':$('fontStyle').value==='mono'?'monospace':'sans-serif');ctx.shadowColor='#000';ctx.shadowBlur=14;drawWrapped(title,0,0,w*.82,Math.round(w*.06*o.scale));ctx.restore();}
- if(objectSettings.subtitle.visible){const o=objectSettings.subtitle;ctx.save();ctx.globalAlpha=o.opacity;ctx.translate(positions.subtitle.x*w,positions.subtitle.y*h);ctx.rotate(o.rotation*Math.PI/180);ctx.font='500 '+Math.round(w*.025*o.scale)+'px sans-serif';ctx.fillStyle=o.color||'#ffffffed';drawWrapped(subtitle,0,0,w*.82,Math.round(w*.035*o.scale));ctx.restore();}
+ if(objectSettings.title.visible){const o=objectSettings.title;ctx.save();ctx.globalAlpha=o.opacity;ctx.translate(positions.title.x*w,positions.title.y*h);ctx.rotate(o.rotation*Math.PI/180);ctx.fillStyle=o.color||$('textColor').value;ctx.font='800 '+Math.round(w*.052*o.scale)+'px '+($('fontStyle').value==='serif'?'Georgia':$('fontStyle').value==='mono'?'monospace':'sans-serif');ctx.shadowColor='#000';ctx.shadowBlur=14;if(window.WaveForgeTypography)window.WaveForgeTypography.apply(ctx,'title',Math.round(w*.052*o.scale),'sans-serif');drawWrapped(title,0,0,w*.82,Math.round(w*.06*o.scale),'title');ctx.restore();}
+ if(objectSettings.subtitle.visible){const o=objectSettings.subtitle;ctx.save();ctx.globalAlpha=o.opacity;ctx.translate(positions.subtitle.x*w,positions.subtitle.y*h);ctx.rotate(o.rotation*Math.PI/180);ctx.font='500 '+Math.round(w*.025*o.scale)+'px sans-serif';ctx.fillStyle=o.color||'#ffffffed';if(window.WaveForgeTypography)window.WaveForgeTypography.apply(ctx,'subtitle',Math.round(w*.025*o.scale),'sans-serif');drawWrapped(subtitle,0,0,w*.82,Math.round(w*.035*o.scale),'subtitle');ctx.restore();}
  const lyric=currentLyric();
  if(lyric&&lyric.text&&objectSettings.lyric.visible){
   const o=objectSettings.lyric,size=Math.round(w*Number($('lyricSize').value)/1000*o.scale),max=w*.84;
-  ctx.save();ctx.globalAlpha=o.opacity;ctx.translate(positions.lyric.x*w,positions.lyric.y*h);ctx.rotate(o.rotation*Math.PI/180);ctx.textAlign='left';ctx.textBaseline='middle';ctx.font=(template==='poetry'?'italic 700 ':'900 ')+size+'px '+(template==='poetry'?'Georgia,serif':template==='minimal'?'Georgia,serif':'sans-serif');
+  ctx.save();ctx.globalAlpha=o.opacity;ctx.translate(positions.lyric.x*w,positions.lyric.y*h);ctx.rotate(o.rotation*Math.PI/180);ctx.textAlign='left';ctx.textBaseline='middle';ctx.font=(template==='poetry'?'italic 700 ':'900 ')+size+'px '+(template==='poetry'?'Georgia,serif':template==='minimal'?'Georgia,serif':'sans-serif');if(window.WaveForgeTypography)window.WaveForgeTypography.apply(ctx,'lyric',size,template==='poetry'||template==='minimal'?'Georgia,serif':'sans-serif');
   const words=Array.isArray(lyric.words)&&lyric.words.length?lyric.words:lyric.text.split(' ').map((text,i,a)=>({text,start:lyric.start+(lyric.end-lyric.start)*i/a.length,end:lyric.start+(lyric.end-lyric.start)*(i+1)/a.length}));
   const rows=[[]],rowWidths=[0],space=ctx.measureText(' ').width;
   words.forEach(word=>{const width=ctx.measureText(word.text).width,idx=rows.length-1;if(rowWidths[idx]+(rows[idx].length?space:0)+width>max*.9&&rows[idx].length){rows.push([]);rowWidths.push(0);}const n=rows.length-1;rows[n].push({word,width});rowWidths[n]+=width+(rows[n].length>1?space:0);});
@@ -88,7 +88,7 @@ function draw(){
     row.forEach(item=>{
       const active=audio.currentTime>=item.word.start&&audio.currentTime<item.word.end;
       if(template==='karaoke')ctx.fillStyle=active?'#fff36b':'#bafff0';
-      ctx.fillText(item.word.text,px,yy);px+=item.width+space;
+      if(window.WaveForgeTypography)window.WaveForgeTypography.drawGlyph(ctx,'lyric',item.word.text,px,yy,max);else ctx.fillText(item.word.text,px,yy);px+=item.width+space;
     });
   });
   ctx.restore();
@@ -257,6 +257,7 @@ function renderMixerLayers(){
 }
 function updateText(){ $('previewTitle').textContent=$('titleInput').value||' ';$('previewSubtitle').textContent=$('subtitleInput').value||'';$('stageCopy').style.color=$('textColor').value;$('stageCopy').style.fontFamily=$('fontStyle').value==='serif'?'Georgia,serif':$('fontStyle').value==='mono'?'monospace':'Manrope,sans-serif';}
 
+function initTypographyStudio(){if(window.WaveForgeTypography)window.WaveForgeTypography.mount($('overlayPanel'),saveSettings);}
 function initFilterStudio(){if(window.WaveForgeFilters)window.WaveForgeFilters.mount($('visualPanel'),saveSettings);}
 function initChromaKey(){if(window.WaveForgeChromaKey)window.WaveForgeChromaKey.mount($('visualPanel'),saveSettings);}
 function initMediaTools(){if(window.WaveForgeMediaTools)window.WaveForgeMediaTools.mount($('audioPanel'),{onMain:loadAudio,onLayer:file=>addMixerLayer(file,'Other')});}
@@ -323,11 +324,11 @@ async function restoreSavedMedia(){
 }
 
 function saveSettings(){
- const data={mainPitch:$('mainPitch')?$('mainPitch').value:0,mainEffects:readMainEffects(),layers:mixerLayers.map(l=>({id:l.id,role:l.role,volume:l.volume,rate:l.rate,pitch:l.pitch,offset:l.offset,muted:l.muted,solo:l.solo,pan:l.pan,bass:l.bass,treble:l.treble,delay:l.delay,reverb:l.reverb,preset:l.preset||'clean'})),title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,lyricPosition:$('lyricPosition').value,positions,objectSettings,manualBpm,tapBeatOffset,filterPreset:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterPreset:'f01',filterIntensity:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterIntensity:100,chromaKey:window.WaveForgeChromaKey?window.WaveForgeChromaKey.getSettings():null,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
+ const data={mainPitch:$('mainPitch')?$('mainPitch').value:0,mainEffects:readMainEffects(),typography:window.WaveForgeTypography?window.WaveForgeTypography.getAll():null,layers:mixerLayers.map(l=>({id:l.id,role:l.role,volume:l.volume,rate:l.rate,pitch:l.pitch,offset:l.offset,muted:l.muted,solo:l.solo,pan:l.pan,bass:l.bass,treble:l.treble,delay:l.delay,reverb:l.reverb,preset:l.preset||'clean'})),title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,lyricPosition:$('lyricPosition').value,positions,objectSettings,manualBpm,tapBeatOffset,filterPreset:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterPreset:'f01',filterIntensity:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterIntensity:100,chromaKey:window.WaveForgeChromaKey?window.WaveForgeChromaKey.getSettings():null,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
  try{localStorage.setItem('waveforge-v1',JSON.stringify(data));setStatus('Saved locally');}catch(e){setStatus('Ready');}
 }
 function loadSettings(){
- try{const d=JSON.parse(localStorage.getItem('waveforge-v1')||'{}');if(d.title!==undefined)$('titleInput').value=d.title;if(d.subtitle!==undefined)$('subtitleInput').value=d.subtitle;if(d.caption!==undefined)$('captionInput').value=d.caption;if(d.color)$('visualColor').value=d.color;if(d.ratio)$('exportRatio').value=d.ratio;if(d.quality)$('quality').value=d.quality;if(d.font)$('fontStyle').value=d.font;if(d.textColor)$('textColor').value=d.textColor;if(Number.isFinite(d.manualBpm))manualBpm=d.manualBpm;if(Number.isFinite(d.tapBeatOffset))tapBeatOffset=d.tapBeatOffset;if(window.WaveForgeFilters)window.WaveForgeFilters.set(d.filterPreset||'f01',d.filterIntensity===undefined?100:d.filterIntensity);if(window.WaveForgeChromaKey&&d.chromaKey)window.WaveForgeChromaKey.set(d.chromaKey);if(d.style)style=d.style;if(d.template)template=d.template;savedProjectData=d;if(d.lyricSize)$('lyricSize').value=d.lyricSize;if(d.lyricPosition)$('lyricPosition').value=d.lyricPosition;if(d.positions)Object.assign(positions,d.positions);if(d.objectSettings)Object.keys(objectDefaults).forEach(k=>objectSettings[k]={...objectDefaults[k],...(d.objectSettings[k]||{})});if(Array.isArray(d.lyrics))lyrics=d.lyrics;savedTrackName=d.trackName||'';}catch(e){}
+ try{const d=JSON.parse(localStorage.getItem('waveforge-v1')||'{}');if(d.title!==undefined)$('titleInput').value=d.title;if(d.subtitle!==undefined)$('subtitleInput').value=d.subtitle;if(d.caption!==undefined)$('captionInput').value=d.caption;if(d.color)$('visualColor').value=d.color;if(d.ratio)$('exportRatio').value=d.ratio;if(d.quality)$('quality').value=d.quality;if(d.font)$('fontStyle').value=d.font;if(d.textColor)$('textColor').value=d.textColor;if(window.WaveForgeTypography&&d.typography)window.WaveForgeTypography.setAll(d.typography);if(Number.isFinite(d.manualBpm))manualBpm=d.manualBpm;if(Number.isFinite(d.tapBeatOffset))tapBeatOffset=d.tapBeatOffset;if(window.WaveForgeFilters)window.WaveForgeFilters.set(d.filterPreset||'f01',d.filterIntensity===undefined?100:d.filterIntensity);if(window.WaveForgeChromaKey&&d.chromaKey)window.WaveForgeChromaKey.set(d.chromaKey);if(d.style)style=d.style;if(d.template)template=d.template;savedProjectData=d;if(d.lyricSize)$('lyricSize').value=d.lyricSize;if(d.lyricPosition)$('lyricPosition').value=d.lyricPosition;if(d.positions)Object.assign(positions,d.positions);if(d.objectSettings)Object.keys(objectDefaults).forEach(k=>objectSettings[k]={...objectDefaults[k],...(d.objectSettings[k]||{})});if(Array.isArray(d.lyrics))lyrics=d.lyrics;savedTrackName=d.trackName||'';}catch(e){}
  updateText();selectTemplate(template);renderLyricList();resizeCanvas();
 }
 function selectTemplate(value){template=value;document.querySelectorAll('.template-card').forEach(b=>b.classList.toggle('selected',b.dataset.template===template));}
@@ -448,6 +449,6 @@ async function doExport(){
  finally{$('exportBtn').disabled=false;$('exportBtnSide').disabled=false;}
 }
 $('exportBtn').onclick=doExport;$('exportBtnSide').onclick=doExport;
-loadSettings();audio.volume=.85;initObjectEditor();initMixerUI();initMediaTools();initFilterStudio();initChromaKey();restoreSavedMedia();decorateButtonIcons();startDraw();
+loadSettings();audio.volume=.85;initObjectEditor();initTypographyStudio();initMixerUI();initMediaTools();initFilterStudio();initChromaKey();restoreSavedMedia();decorateButtonIcons();startDraw();
 window.addEventListener('beforeunload',()=>{if(mediaUrl)URL.revokeObjectURL(mediaUrl);if(logoUrl)URL.revokeObjectURL(logoUrl);if(audio.src)URL.revokeObjectURL(audio.src);});
 })();
