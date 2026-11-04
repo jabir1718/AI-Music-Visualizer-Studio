@@ -6,6 +6,7 @@ A browser-based, local-first music visualizer editor. Version 1.0 foundation.
 - Import a local audio track (browser-supported audio formats).
 - Add a photo or video as the visual background.
 - Live canvas visualizer: equalizer bars, waveform, circular spectrum and neon pulse.
+- 50 adjustable photo/video color filters across cinema, vintage, monochrome, vibrant, cool, warm, dreamy, night, analog and editorial looks; filters are included in canvas export.
 - Local audio playback, seeking and volume.
 - Text, subtitle, color, font and PNG logo overlays.
 - On-device Whisper-based audio transcription into timed lyric lines (model downloads on first use).
