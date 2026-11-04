@@ -370,7 +370,7 @@ function initObjectEditor(){
   $o('objectX').value=Math.round(p.x*100);$o('objectY').value=Math.round(p.y*100);
   $o('objectScale').value=Math.round(o.scale*100);$o('objectRotation').value=o.rotation;
   $o('objectOpacity').value=Math.round(o.opacity*100);$o('objectColor').value=o.color||'#ffffff';$o('objectVisible').checked=o.visible;
-  ['X','Y','Scale','Rotation','Opacity'].forEach(key=>{$o('object'+key+'Value').textContent=key==='X'||key==='Y'?$o('object'+key).value+'%':key==='Scale'?$o('object'+key).value+'%':key==='Rotation'?$o('object'+key).value+'°':$o('object'+key).value+'%';});updateSelectionOverlay();
+  ['X','Y','Scale','Rotation','Opacity'].forEach(key=>{$o('object'+key+'Value').textContent=key==='X'||key==='Y'?$o('object'+key).value+'%':key==='Scale'?$o('object'+key).value+'%':key==='Rotation'?$o('object'+key).value+'°':$o('object'+key).value+'%';});updateSelectionOverlay();updateKeyframeControls();
  }
  function commit(){if((objectKeyframes[selectedObject]||[]).length)objectKeyframes[selectedObject]=window.WaveForgeKeyframes.upsert(objectKeyframes[selectedObject],audio.currentTime,getBaseKeyframe(selectedObject));sync();saveSettings();}
  $o('objectSelect').onchange=e=>{selectedObject=e.target.value;sync();};panel.querySelectorAll('[data-object]').forEach(b=>b.onclick=()=>{selectedObject=b.dataset.object;sync();});
@@ -598,7 +598,7 @@ canvas.addEventListener('pointerdown',e=>{
  const p=point(e),near=(pos,rx,ry)=>Math.abs(p.x-pos.x)<rx&&Math.abs(p.y-pos.y)<ry;
  const lyricPos=getObjectState('lyric',audio.currentTime).position,titlePos=getObjectState('title',audio.currentTime).position,subtitlePos=getObjectState('subtitle',audio.currentTime).position,logoPos=getObjectState('logo',audio.currentTime).position;
  dragTarget=near(lyricPos,.46,.12)&&currentLyric()?'lyric':near(titlePos,.46,.07)?'title':near(subtitlePos,.46,.06)?'subtitle':logoImage&&near(logoPos,.15,.1)?'logo':null;
- if(dragTarget){selectedObject=dragTarget;const sel=document.getElementById('objectSelect');if(sel){sel.value=dragTarget;sel.dispatchEvent(new Event('change'));}dragOffset={x:p.x-positions[dragTarget].x,y:p.y-positions[dragTarget].y};canvas.setPointerCapture(e.pointerId);$('dragHint').textContent='Moving '+dragTarget+' layer — release to place it.';updateSelectionOverlay();}
+ if(dragTarget){selectedObject=dragTarget;const sel=document.getElementById('objectSelect');if(sel){sel.value=dragTarget;sel.dispatchEvent(new Event('change'));}const selectedPos=getObjectState(dragTarget,audio.currentTime).position;dragOffset={x:p.x-selectedPos.x,y:p.y-selectedPos.y};canvas.setPointerCapture(e.pointerId);$('dragHint').textContent='Moving '+dragTarget+' layer — release to place it.';updateSelectionOverlay();}
 });
 canvas.addEventListener('pointermove',e=>{if(!dragTarget)return;const p=point(e);positions[dragTarget]={x:Math.max(.08,Math.min(.92,p.x-dragOffset.x)),y:Math.max(.05,Math.min(.94,p.y-dragOffset.y))};if((objectKeyframes[dragTarget]||[]).length)objectKeyframes[dragTarget]=window.WaveForgeKeyframes.upsert(objectKeyframes[dragTarget],audio.currentTime,getBaseKeyframe(dragTarget));updateSelectionOverlay();});
 canvas.addEventListener('pointerup',()=>{if(dragTarget){dragTarget=null;$('dragHint').textContent='Position saved. Touch another text layer to move it.';const x=document.getElementById('objectX'),y=document.getElementById('objectY');if(x){x.value=Math.round(positions[selectedObject].x*100);y.value=Math.round(positions[selectedObject].y*100);x.dispatchEvent(new Event('input'));}saveSettings();updateSelectionOverlay();}});
