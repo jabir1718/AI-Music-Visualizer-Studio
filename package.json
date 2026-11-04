@@ -5,7 +5,7 @@
   "description": "WaveForge Music Visualizer Studio Android wrapper",
   "scripts": {
     "build:web": "node scripts/build-web.js",
-    "test": "node scripts/test-audio-engine.js && node scripts/test-editor-assets.js && node scripts/test-filters.js && node scripts/test-video-extractor.js && node scripts/test-chroma-key.js && node scripts/test-sound-library.js && node scripts/test-build-web.js && node scripts/test-typography.js && node scripts/test-timeline-engine.js && node scripts/test-history-engine.js && node scripts/test-ai-segmentation.js && node scripts/test-audio-cleanup.js && node scripts/test-keyframe-engine.js && node scripts/test-symbol-library.js && node scripts/test-three-studio.js && node scripts/test-lyrics-engine.js && node scripts/test-timeline-view.js"
+    "test": "node scripts/test-audio-engine.js && node scripts/test-editor-assets.js && node scripts/test-filters.js && node scripts/test-video-extractor.js && node scripts/test-chroma-key.js && node scripts/test-sound-library.js && node scripts/test-build-web.js && node scripts/test-typography.js && node scripts/test-timeline-engine.js && node scripts/test-history-engine.js && node scripts/test-ai-segmentation.js && node scripts/test-audio-cleanup.js && node scripts/test-keyframe-engine.js && node scripts/test-symbol-library.js && node scripts/test-three-studio.js && node scripts/test-lyrics-engine.js && node scripts/test-timeline-view.js && node scripts/test-bpm-grid.js"
   },
   "dependencies": {
     "@capacitor/android": "6.2.0",
