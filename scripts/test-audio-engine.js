@@ -15,6 +15,7 @@ class FakeAudioContext {
   createStereoPanner() { return node({ pan: { value: 0, setTargetAtTime(v) { this.value = v; } } }); }
   createDelay() { return node({ delayTime: { value: 0 } }); }
   createConvolver() { return node({ buffer: null }); }
+  createWaveShaper() { return node({ curve: null, oversample: 'none' }); }
   createBuffer(channels, length) { return { getChannelData: () => new Float32Array(length) }; }
   async resume() {}
   async close() { this.state = 'closed'; }
@@ -37,6 +38,14 @@ const mainAudio = { volume: .85, currentTime: 2, duration: 30, playbackRate: 1 }
   assert.equal(engine.mainSoloGain.gain.value, 1, 'solo off must restore background track');
   engine.setVolume(.6);
   assert.equal(engine.gain.gain.value, .6);
+  engine.setMainEQ(4,-3);engine.setMainPan(.35);engine.setMainDelay(50);engine.setMainReverb(25);engine.setMainDistortion(40);
+  assert.equal(engine.mainLow.gain.value,4,'main bass EQ should be independent');
+  assert.equal(engine.mainHigh.gain.value,-3,'main treble EQ should be independent');
+  assert.equal(engine.mainPanner.pan.value,.35,'main pan should update');
+  assert.equal(engine.mainDelaySend.gain.value,.21,'main echo send should update');
+  assert.equal(engine.mainReverbSend.gain.value,.12,'main reverb send should update');
+  assert.equal(engine.mainShaper.curve.length,44100,'main distortion should apply a real waveshaper curve');
+  engine.setMainDistortion(0);assert.equal(engine.mainShaper.curve,null,'zero distortion should bypass waveshaper');
   const layerAudio = { playbackRate: 1, pause() {} };
   engine.addLayer('voice', layerAudio, .7, {});
   engine.setLayerVolume('voice', .4);
