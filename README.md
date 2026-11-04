@@ -25,6 +25,7 @@ Open `index.html` in a modern browser. For best results, serve the folder from a
 - The mixer accepts additional local audio files as separate Voice, Ad-lib, Sound effect, Bass stem, Drums, Piano, Guitar, Instrumental or Other layers.
 - Each added layer has independent volume, pitch/rate, start offset, stereo pan, bass/treble EQ, echo and reverb controls, plus mute, solo and remove.
 - The original background music also has its own bass/treble EQ, stereo pan, echo, convolution reverb and distortion controls. These effects are separate from imported mixer layers and are included in the audio/video export path.
+- Search Wikimedia Commons audio from the Sound Effects, Engine Sounds and Character Sounds Music Studio workspaces, preview results, review licence/source metadata and import them as independent mixer layers.
 - BPM can be estimated offline from the audio or calculated from manual taps. Tapping while playback is running anchors a beat pulse grid to the current song position.
 - Mixer settings and imported audio files are restored from local browser storage on the same browser installation when IndexedDB data remains available.
 - Background music remains on its own gain path; changing a voice/effect layer's volume or per-layer effects does not change the background music path. Soloing a mixer layer also mutes the original background track, then restores it when Solo is turned off.
