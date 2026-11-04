@@ -1,4 +1,4 @@
-# WaveForge Studio — Implementation Status
+| 31 | Expanded voice characters and high-resolution filter pack | Partial | 50 canvas filter looks and the 100-family typography studio are implemented, with generic voice styles on mixer layers. AI voice models, true high-resolution source assets and 16K export are not included. |
 
 This file is the delivery checklist for the 31 groups in `ROADMAP.md`. It is deliberately conservative: **Partial** means some working code exists, not that the complete request is finished. **Not started** means there is no verified implementation in the current source.
 
@@ -86,3 +86,9 @@ Last source audit: 2026-11-04 (after editable object layers, image import, 50 fi
 - Added a local chroma-key processor in `chroma-key.js` for imported photo/video backgrounds. Users can enable removal, pick a key color, adjust tolerance/edge softness and reduce color spill. The image is processed on a 540 px maximum working canvas before compositing so transparent pixels reveal the stage background; this is chroma keying, not AI segmentation. Node tests verify transparent key pixels, preserved foreground pixels, soft edges and spill reduction. Device performance/edge quality still need testing.
 
 - Added a searchable open audio library in `sound-library.js` inside the Sound Effects, Engine Sounds and Character Sounds Music Studio workspaces. It searches and paginates Wikimedia Commons audio files, previews results, displays source/licence metadata and imports files as independent mixer layers. Files over 25 MB are excluded. This is a live external index, not a bundled or verified 5,000-file catalogue; source licences and clean recording quality must be checked. CI tests cover MIME filtering, search URL construction and licence metadata.
+
+
+- Added a searchable 100-family typography studio with independent title, subtitle and lyric styles: family, weight, scale, letter spacing, outline, glow, and layered canvas extrusion depth. Styles persist in editor settings and portable .waveforge projects. Google Fonts are fetched only when selected; offline/system fallback is retained. The extrusion is a 2D canvas effect, not a volumetric 3D mesh.
+- Added a direct canvas selection outline with touch resize and rotate handles for native title, subtitle, current lyric and logo layers. The inspector continues to expose numeric position/scale/rotation controls. Selection bounds are approximate; background/visualizer selection and multi-select remain.
+- Added generic voice-character effects per imported mixer layer: Natural, Telephone, Radio, Monster/deep, Chipmunk/high, Robot and Alien. Each layer has an independent Waveshaper distortion node, EQ, echo, reverb and rate controls. Pitch-rate styles also change playback speed; this is not formant-preserving voice conversion.
+- Added timeline clip in/out trimming, looping and split-at-playhead for independent mixer layers. Clip timing/trim settings persist in local editor settings and portable .waveforge projects. This is a practical audio-layer timeline foundation, not the full multi-track video timeline requested.
