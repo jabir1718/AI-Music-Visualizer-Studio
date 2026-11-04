@@ -5,11 +5,11 @@ const root = path.resolve(__dirname, '..');
 const out = path.join(root, 'www');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const assets = new Set(['index.html']);
-const references = html.matchAll(/\\b(?:src|href)\\s*=\\s*["']([^"']+)["']/gi);
+const references = html.matchAll(/\b(?:src|href)\s*=\s*["']([^"']+)["']/gi);
 
 for (const match of references) {
   const reference = match[1].split(/[?#]/, 1)[0];
-  if (!reference || reference.startsWith('#') || /^(?:[a-z]+:)?\\/\\//i.test(reference) || reference.startsWith('/')) continue;
+  if (!reference || reference.startsWith('#') || /^(?:[a-z]+:)?\/\//i.test(reference) || reference.startsWith('/')) continue;
   const source = path.resolve(root, decodeURIComponent(reference));
   if (source !== root && !source.startsWith(root + path.sep)) {
     throw new Error('Asset path escapes project root: ' + reference);
