@@ -124,7 +124,7 @@
   assets.forEach(asset=>{if(asset.kind==='video'&&(!active||asset.id!==active.assetId)&&!asset.media.paused)asset.media.pause();});
   if(!active)return null;const asset=assets.get(active.assetId);if(!asset)return null;
   if(isPhoto(asset))return asset.media;
-  const video=asset.media,expected=sourceAt(active,time-active.timelineStart);
+  const video=asset.media,elapsed=time-active.timelineStart,progress=clamp(elapsed/Math.max(.001,segmentDuration(active)),0,1),speed=(Number(active.rateStart)||Number(active.rate)||1)+((Number(active.rateEnd)||Number(active.rate)||1)-(Number(active.rateStart)||Number(active.rate)||1))*progress,expected=sourceAt(active,elapsed);if(Math.abs((video.playbackRate||1)-speed)>.04)video.playbackRate=speed;
   if(Number.isFinite(expected)&&Math.abs(video.currentTime-expected)>.22){try{video.currentTime=clamp(expected,active.sourceStart,Math.max(active.sourceStart,active.sourceEnd-.03));}catch(e){}}
   if(isPlaying&&video.paused)video.play().catch(()=>{});if(!isPlaying&&!video.paused)video.pause();return video.readyState>=2&&video.videoWidth?video:null;
  }
