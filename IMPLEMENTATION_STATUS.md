@@ -69,7 +69,7 @@ Last source audit: 2026-11-04 (after editable object layers, image import, 50 fi
 ## Important accuracy rules
 
 - A roadmap entry or a UI category is not proof that the feature works.
-- Pitch currently uses playback-rate shifting, so it changes speed too. Independent pitch-preserving DSP is still outstanding.
+- Mixer-layer pitch can use optional SoundTouch AudioWorklet processing to separate pitch from speed, with optional LPC formant correction for vocal timbre. This requires first-use internet access and AudioWorklet support; fallback rate-based pitch changes speed too.
 - A mixed MP3 does not contain separately editable vocal/instrument stems. Separation needs a real model/engine.
 - “16K” must only be offered when source media, renderer, memory, GPU and encoder genuinely support it. Upscaling must be labelled as upscaling.
 - Google image results cannot all be fetched; use authorized provider access and respect source terms/licensing.
