@@ -417,3 +417,10 @@ This is an order for development, not a reduction of the full scope:
 
 ### Offline helper language support
 - The rules-based Quick Edit Assistant should accept short English and Roman Urdu commands for its supported local actions. It must preview changes and reject unsupported requests rather than pretending to understand arbitrary prompts.
+
+
+## 35. Local scene detection, speed ramps and transition controls
+- Added optional on-device scene-boundary detection by sampling each imported video at one-second intervals, downscaling frames to 32×18 and flagging large pixel changes. Detected boundaries are saved in project metadata and used as cut boundaries when the next Auto Cut draft is generated. This is a visual-change heuristic, not semantic/AI scene understanding.
+- Each segment now has independent start/end playback-speed controls (0.5×–2×), interpolated as a speed ramp. Segment timing and video seek mapping account for the ramp.
+- Each segment can choose hard cut, fade-through-black, white flash, wipe reveal or zoom reveal. These are canvas-rendered transition treatments, not true overlapping crossfades or a full compositing graph.
+- Speech-pause detection, automatic speech transcription, multi-layer video tracks and a full non-linear video compositor remain unimplemented; do not mark them complete.
