@@ -30,7 +30,8 @@ function setTrim(layer,start,end,duration){
  const total=Number.isFinite(duration)&&duration>0?duration:Infinity;
  const s=Math.max(0,Math.min(total,Number(start)||0));
  let e=Number(end)||0;
- if(e>0)e=Math.max(s+.03,Math.min(total,e));
+ if(e>0&&e<=s+.02)return{start:s,end:e,span:e-s,valid:false};
+ if(e>0)e=Math.min(total,e);
  layer.trimStart=s;layer.trimEnd=e>0?e:0;
  return bounds(layer,duration);
 }
