@@ -21,6 +21,7 @@ api.mount({querySelector:()=>null},bridge);
  assert.strictEqual(manual.assets.length,2);
  assert.strictEqual(manual.segments.length,2);
  const result=api.generateAutoCut({bpm:120});
+ assert.ok(!(result&&typeof result.then==='function'),'Auto Cut must return its plan synchronously for the click handler');
  assert.ok(result.count>2,'Auto Cut should split source videos into beat-sized segments');
  assert.ok(result.duration>10&&result.duration<13,'Auto Cut should preserve total source duration');
  assert.strictEqual(api.getState().segments.length,result.count);
