@@ -8,7 +8,7 @@ class MockVideo{
  addEventListener(n,fn){(this.listeners[n]||(this.listeners[n]=[])).push(fn);}removeEventListener(n,fn){this.listeners[n]=(this.listeners[n]||[]).filter(x=>x!==fn);}
 }
 class MockImage{constructor(){this.naturalWidth=1200;this.naturalHeight=800;this.src='';this.decoding='';}set src(v){this._src=v;queueMicrotask(()=>{if(this.onload)this.onload();});}get src(){return this._src;}}
-const root={document:{createElement:tag=>tag==='video'?new MockVideo():tag==='img'?new MockImage():null},URL:{createObjectURL:file=>'blob:'+file.name,revokeObjectURL(){}},setTimeout,clearTimeout};root.window=root;root.Image=MockImage;
+let lastSceneFrame=null;const root={document:{createElement:tag=>tag==='video'?new MockVideo():tag==='img'?new MockImage():tag==='canvas'?({width:0,height:0,getContext:()=>({drawImage:v=>{lastSceneFrame=v;},getImageData:()=>{const data=new Uint8ClampedArray(32*18*4);data.fill(lastSceneFrame&&lastSceneFrame.currentTime>=3?240:5);return{data};}})}):null},URL:{createObjectURL:file=>'blob:'+file.name,revokeObjectURL(){}},setTimeout,clearTimeout};root.window=root;root.Image=MockImage;
 const source=require('fs').readFileSync(require('path').join(__dirname,'..','auto-video-editor.js'),'utf8');
 new Function('window','document','URL','setTimeout','clearTimeout',source)(root,root.document,root.URL,setTimeout,clearTimeout);
 const api=root.WaveForgeAutoVideo,stored=new Map();
@@ -28,6 +28,7 @@ const file=(name,type,size=1024)=>Object.assign({name,type,size,arrayBuffer:asyn
  const first=api.getState().segments[0];assert.strictEqual(api.setSpeedRamp(first.id,.7,1.5),true,'speed ramp should be editable');assert.ok(api.getState().segments[0].rateStart===.7&&api.getState().segments[0].rateEnd===1.5);
  assert.strictEqual(api.setTransition(first.id,'fade'),true,'transition should be editable');assert.strictEqual(api.getVisualEffect(first.timelineStart).type,'fade');
  api.move(1,-1);const before=api.getCount();assert.strictEqual(api.splitSegment(api.getState().segments[0].id),true);assert.strictEqual(api.getCount(),before+1);
+ const videoAsset=api.getState().assets.find(a=>a.kind==='video');const sceneCuts=await api.detectScenes(videoAsset.id);assert.ok(sceneCuts.includes(3),'local frame-difference scene detection should find a visible cut');
  const frame=api.sync(0,false);assert.ok(frame instanceof MockVideo||frame instanceof MockImage,'playhead should resolve active video or photo');
  assert.ok(api.getMotion(0).scale>=1,'photo template should provide gentle motion');
  api.removeSegment(api.getState().segments[0].id);assert.strictEqual(api.getCount(),before);
