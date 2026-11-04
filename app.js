@@ -86,7 +86,81 @@ function draw(){
  raf=requestAnimationFrame(draw);
 }
 function startDraw(){if(!raf)draw();}
-async function ensureEngine(){if(!engine)engine=new AudioEngine(audio);await engine.connect();await engine.resume();}
+async function ensureEngine(){if(!engine)engine=new AudioEngine(audio);await engine.connect();await engine.resume();mixerLayers.forEach(layer=>{if(!layer.connected){engine.addLayer(layer.id,layer.audio,layer.muted?0:layer.volume);layer.connected=true;}});return engine;}
+
+let mixerLayers=[],mixerPanel=null;
+function syncMixerLayers(){
+ const now=audio.currentTime||0;
+ mixerLayers.forEach(layer=>{
+  const target=(now-layer.offset)*layer.rate;
+  if(audio.paused||target<0||(isFinite(layer.audio.duration)&&layer.audio.duration>0&&target>=layer.audio.duration)){
+   if(!layer.audio.paused)layer.audio.pause();
+   if(target<0&&layer.audio.currentTime!==0)layer.audio.currentTime=0;
+   return;
+  }
+  if(Math.abs(layer.audio.currentTime-target)>.35)try{layer.audio.currentTime=Math.max(0,target);}catch(e){}
+  if(layer.audio.paused)layer.audio.play().catch(()=>{});
+ });
+}
+function initMixerUI(){
+ const host=$('audioPanel'),audioEl=$('audio');
+ mixerPanel=document.createElement('section');mixerPanel.className='mixer-panel';
+ mixerPanel.innerHTML='<div class="mixer-heading"><div><b>Separate audio layers</b><small>Voice, ad-libs, instruments and sound effects stay independent from background music.</small></div><span class="mixer-live">MULTI-TRACK</span></div><div class="mixer-add"><label>Layer type<select id="mixerRole"><option>Voice</option><option>Ad-lib</option><option>Sound effect</option><option>Bass stem</option><option>Drums</option><option>Piano</option><option>Guitar</option><option>Instrumental</option><option>Other</option></select></label><label class="mixer-file">＋ Choose audio<input id="mixerFile" type="file" accept="audio/*" hidden></label><button class="btn small" id="mixerAddBtn" type="button">Add layer</button></div><div class="mixer-main-pitch"><label>Background music pitch <input id="mainPitch" type="range" min="-12" max="12" step="1" value="0"></label><span id="mainPitchValue">0 semitones</span></div><div id="mixerList" class="mixer-list"><p class="hint">No extra layers yet. Your main audio remains the background music.</p></div><p class="hint mixer-footnote">Pitch uses playback-rate shifting, so changing pitch also changes playback speed. Add separately prepared stems for independent instrument control; this does not automatically separate a mixed song.</p>';
+ host.insertBefore(mixerPanel,audioEl);
+ const file=$('mixerFile');
+ $('mixerAddBtn').onclick=()=>file.click();
+ file.onchange=e=>{const f=e.target.files&&e.target.files[0];if(f)addMixerLayer(f,$('mixerRole').value);file.value='';};
+ $('mainPitch').oninput=e=>{
+  const semitones=Number(e.target.value),rate=Math.pow(2,semitones/12);
+  audio.playbackRate=rate;audio.preservesPitch=false;
+  $('mainPitchValue').textContent=(semitones>0?'+':'')+semitones+' semitones';
+  saveSettings();
+ };
+ audio.addEventListener('timeupdate',syncMixerLayers);
+ audio.addEventListener('play',syncMixerLayers);
+ audio.addEventListener('seeking',syncMixerLayers);
+ audio.addEventListener('pause',()=>mixerLayers.forEach(layer=>layer.audio.pause()));
+ audio.addEventListener('ended',()=>mixerLayers.forEach(layer=>layer.audio.pause()));
+}
+function addMixerLayer(file,role){
+ if(!file.type.startsWith('audio/')){alert('Choose a supported audio file.');return;}
+ const id='mix-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),url=URL.createObjectURL(file);
+ const el=document.createElement('audio');el.preload='auto';el.src=url;el.preservesPitch=false;
+ const layer={id,file,url,audio:el,role,volume:.85,rate:1,offset:0,muted:false,connected:false};
+ mixerLayers.push(layer);mixerPanel.appendChild(el);renderMixerLayers();
+ if(engine&&engine.ready){engine.addLayer(id,el,layer.volume);layer.connected=true;}
+ syncMixerLayers();setStatus('Audio layer added');
+}
+function renderMixerLayers(){
+ const list=$('mixerList');list.innerHTML='';
+ if(!mixerLayers.length){list.innerHTML='<p class="hint">No extra layers yet. Your main audio remains the background music.</p>';return;}
+ mixerLayers.forEach(layer=>{
+  const row=document.createElement('div');row.className='mixer-track';
+  const head=document.createElement('div');head.className='mixer-track-head';
+  const info=document.createElement('div'),name=document.createElement('b'),meta=document.createElement('small');
+  name.textContent=layer.file.name;meta.textContent=layer.role;info.append(name,meta);
+  const mute=document.createElement('button');mute.className='btn small';mute.textContent=layer.muted?'Unmute':'Mute';
+  mute.onclick=()=>{layer.muted=!layer.muted;mute.textContent=layer.muted?'Unmute':'Mute';if(engine&&layer.connected)engine.setLayerVolume(layer.id,layer.muted?0:layer.volume);};
+  const remove=document.createElement('button');remove.className='btn small';remove.textContent='Remove';
+  remove.onclick=()=>{if(engine&&layer.connected)engine.removeLayer(layer.id);layer.audio.pause();layer.audio.removeAttribute('src');layer.audio.load();URL.revokeObjectURL(layer.url);mixerLayers=mixerLayers.filter(x=>x!==layer);renderMixerLayers();};
+  head.append(info,mute,remove);row.append(head);
+  const controls=document.createElement('div');controls.className='mixer-track-controls';
+  const volWrap=document.createElement('label');volWrap.textContent='Volume';
+  const vol=document.createElement('input');vol.type='range';vol.min='0';vol.max='1';vol.step='.01';vol.value=layer.volume;
+  vol.oninput=()=>{layer.volume=Number(vol.value);if(engine&&layer.connected)engine.setLayerVolume(layer.id,layer.muted?0:layer.volume);};
+  volWrap.append(vol);
+  const pitchWrap=document.createElement('label');pitchWrap.textContent='Pitch';
+  const pitch=document.createElement('input');pitch.type='range';pitch.min='-12';pitch.max='12';pitch.step='1';pitch.value='0';
+  const pitchText=document.createElement('small');pitchText.textContent='0 semitones';
+  pitch.oninput=()=>{const n=Number(pitch.value);layer.rate=Math.pow(2,n/12);layer.audio.playbackRate=layer.rate;layer.audio.preservesPitch=false;pitchText.textContent=(n>0?'+':'')+n+' semitones';syncMixerLayers();};
+  pitchWrap.append(pitch,pitchText);
+  const offsetWrap=document.createElement('label');offsetWrap.textContent='Start offset (seconds)';
+  const offset=document.createElement('input');offset.type='number';offset.min='0';offset.max='3600';offset.step='.1';offset.value='0';
+  offset.onchange=()=>{layer.offset=Math.max(0,Number(offset.value)||0);syncMixerLayers();};
+  offsetWrap.append(offset);controls.append(volWrap,pitchWrap,offsetWrap);row.append(controls);list.append(row);
+ });
+}
+
 function updateText(){ $('previewTitle').textContent=$('titleInput').value||' ';$('previewSubtitle').textContent=$('subtitleInput').value||'';$('stageCopy').style.color=$('textColor').value;$('stageCopy').style.fontFamily=$('fontStyle').value==='serif'?'Georgia,serif':$('fontStyle').value==='mono'?'monospace':'Manrope,sans-serif';}
 function saveSettings(){
  const data={title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,positions,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
@@ -176,6 +250,6 @@ async function doExport(){
  finally{$('exportBtn').disabled=false;$('exportBtnSide').disabled=false;}
 }
 $('exportBtn').onclick=doExport;$('exportBtnSide').onclick=doExport;
-loadSettings();audio.volume=.85;startDraw();
+loadSettings();audio.volume=.85;initMixerUI();startDraw();
 window.addEventListener('beforeunload',()=>{if(mediaUrl)URL.revokeObjectURL(mediaUrl);if(logoUrl)URL.revokeObjectURL(logoUrl);if(audio.src)URL.revokeObjectURL(audio.src);});
 })();
