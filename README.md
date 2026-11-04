@@ -12,6 +12,7 @@ A browser-based, local-first music visualizer editor. Version 1.0 foundation.
 - Touch selection outlines and resize/rotate handles for native text, current lyric and logo objects.
 - Per-layer generic voice styles (Telephone, Radio, Monster, Chipmunk, Robot and Alien) with independent EQ, echo, reverb and distortion.
 - Mixer clip in/out trimming, looping and split-at-playhead controls.
+- Bounded undo/redo for text, lyrics, object transforms, typography, visual filters, chroma key and master effects.
 - Local audio playback, seeking and volume.
 - Text, subtitle, color, font and PNG logo overlays.
 - On-device Whisper-based audio transcription into timed lyric lines (model downloads on first use).
@@ -35,7 +36,7 @@ Open `index.html` in a modern browser. For best results, serve the folder from a
 - Background music remains on its own gain path; changing a voice/effect layer's volume or per-layer effects does not change the background music path. Soloing a mixer layer also mutes the original background track, then restores it when Solo is turned off.
 - Pitch shifting currently uses playback-rate changes and therefore also changes speed; independent pitch-preserving DSP and formant-preserving voice conversion are not implemented yet.
 - The character-style presets are generic DSP chains, not generated voice models or real-person voice cloning.
-- Mixer clip trimming, looping and splitting are supported; a full visual multi-track video timeline and undo/redo history are not yet implemented. This foundation mixes separately supplied stems; it does not split vocals/instruments out of one mixed song.
+- Mixer clip trimming, looping and splitting are supported; a full visual multi-track video timeline is not yet implemented. Undo/redo covers editor/visual settings; media and mixer-layer add/remove actions are not included. This foundation mixes separately supplied stems; it does not split vocals/instruments out of one mixed song.
 - Extra layers follow the main track timeline and are included in the mixed audio export stream. Real-device and exported-file verification is still required.
 
 ## Export limitations
