@@ -60,13 +60,13 @@ async function importImage(item,target,button){
   const response=await fetch(item.url,{mode:'cors'});if(!response.ok)throw new Error('Image host did not allow direct import ('+response.status+'). Open the source page instead.');
   const blob=await response.blob();if(!blob.type.startsWith('image/'))throw new Error('The selected result is not a supported image.');
   if(blob.size>30*1024*1024)throw new Error('Image is larger than the 30 MB import limit.');
-  const file=new File([blob],safeName(item.title),{type:blob.type});
+  const file=new File([blob],safeName(item.title,blob.type),{type:blob.type});
   const input=document.getElementById(target==='background'?'mediaInput':'logoInput');
   const transfer=new DataTransfer();transfer.items.add(file);input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));
   status('Imported '+file.name+' as '+target+'. Source: '+item.source+'. '+(item.width&&item.height?'Original result: '+item.width+' × '+item.height+' px.':'Check original dimensions before export.'));
  }catch(e){status('Import failed: '+e.message)}
  finally{button.disabled=false;button.textContent=old}
 }
-function safeName(name){return (String(name||'image').replace(/[^a-z0-9._-]+/gi,'_').slice(0,70)||'image')+'.png'}
+function safeName(name,mime){const ext=({'image/png':'png','image/jpeg':'jpg','image/webp':'webp','image/gif':'gif','image/avif':'avif','image/svg+xml':'svg'}[mime]||'img');const base=String(name||'image').replace(/\.[a-z0-9]{2,5}$/i,'').replace(/[^a-z0-9._-]+/gi,'_').slice(0,70)||'image';return base+'.'+ext}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 })();
