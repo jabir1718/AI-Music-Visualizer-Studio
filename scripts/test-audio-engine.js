@@ -55,3 +55,34 @@ const mainAudio = { volume: .85, currentTime: 2, duration: 30, playbackRate: 1 }
   await engine.destroy();
   process.stdout.write('AudioEngine tests passed.\n');
 })().catch(error => { console.error(error); process.exitCode = 1; });
+
+
+// BPM analyser regression test: synthetic 120 BPM pulse train through the
+// same decodeAudioData path used by the browser implementation.
+class FakeDecodeAudioContext {
+  async decodeAudioData() {
+    const sampleRate = 16000, duration = 24, length = sampleRate * duration;
+    const samples = new Float32Array(length);
+    for (let i = 0; i < length; i++) {
+      const t = i / sampleRate, beatPhase = t % 0.5;
+      const envelope = beatPhase < 0.14 ? 0.85 * Math.exp(-beatPhase * 38) : 0.001;
+      samples[i] = envelope * Math.sin(2 * Math.PI * 220 * t);
+    }
+    return { sampleRate, duration, length, numberOfChannels: 1, getChannelData: () => samples };
+  }
+  async close() {}
+}
+(async () => {
+  const bpmWindow = { AudioContext: FakeDecodeAudioContext };
+  const bpmContext = vm.createContext({ window: bpmWindow, Float32Array, Math });
+  vm.runInContext(fs.readFileSync('bpm-engine.js', 'utf8'), bpmContext);
+  const audioFile = { type: 'audio/wav', async arrayBuffer() { return new ArrayBuffer(8); } };
+  const result = await bpmWindow.WaveForgeBPM.detect(audioFile);
+  assert.ok(Math.abs(result.bpm - 120) <= 2, `expected approximately 120 BPM, received ${result.bpm}`);
+  assert.ok(result.confidence >= 0 && result.confidence <= 1, 'BPM confidence must be normalized');
+  await assert.rejects(
+    bpmWindow.WaveForgeBPM.detect({ type: 'text/plain', async arrayBuffer() { return new ArrayBuffer(0); } }),
+    /Import an audio track/
+  );
+  process.stdout.write('BPM analyser tests passed.\\n');
+})().catch(error => { console.error(error); process.exitCode = 1; });
