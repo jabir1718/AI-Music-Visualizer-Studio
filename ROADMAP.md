@@ -265,6 +265,35 @@
 - Important limitation: a flat PNG can be rotated, moved and composited in 3D space, but it does not become a fully volumetric 3D model automatically. True all-angle 3D geometry requires a 3D asset/model or a separately generated/reconstructed 3D version.
 - Keep each object's transforms and animation independent; editing one object must not unexpectedly change other layers.
 
+
+## 27. Video project, timeline, autosave and export studio
+- Create, save, reopen, rename, duplicate and delete editing projects.
+- Autosave project state and recover the latest safe version after an unexpected close where platform storage permits.
+- Live preview while editing, with playback controls and timeline scrubbing.
+- Multi-layer timeline for audio, video, images, PNGs, logos, text, lyrics, visualizers and effects.
+- Undo/redo and edit history; preserve layer order and independent layer settings.
+- Trim, split, loop and arrange supported audio/video clips on the timeline.
+- Export video in common supported formats such as MP4, MOV and WebM, depending on Android/WebView/browser encoder support.
+- Export resolution choices from 1080p through higher resolutions up to the requested 16K target only when the device, renderer and source assets genuinely support them; show unavailable options rather than promising them.
+- Social-video aspect ratios and canvas presets, including vertical 9:16, square 1:1 and widescreen 16:9, plus other supported ratios.
+- Show platform safe zones/guides so captions, logos and important visuals are not hidden by app controls.
+- One-click export using the selected preset, with progress, cancel, error handling and a clear saved-file result.
+- Use hardware/GPU acceleration when available; fall back safely when unsupported and manage memory, heat, render time and device limits.
+- Preserve project editability separately from the final flattened video export.
+
+## 28. Visual effects, compositing, publishing aids and studio preferences
+- Music-video visual effects including particles, smoke, fire, rain, snow, lightning, lens flare, glow, motion blur, camera shake and zoom, with adjustable intensity and timing.
+- Background options and animated/parallax depth movement where supported.
+- Layer compositing tools including blend modes, masks, chroma key, opacity and independent keyframes.
+- Motion/object tracking where supported, including attaching an overlay to a tracked point in a video.
+- Save, load and reuse visualizer, effect, typography, color and export presets.
+- Extensible effect/plugin architecture where technically and safely supported; do not imply third-party plugins already exist.
+- Dark and light studio themes.
+- Thumbnail creation from the project/video, with text and artwork placement.
+- Suggested video title and hashtags as optional publishing aids.
+- Copyright-risk estimate/warning for user-selected media where a reliable authorized checking service is available; clearly label it as an estimate, not legal advice or a guarantee that a video is safe to publish.
+- Keep all effects and publishing aids optional and independently editable; do not silently add effects or change the user's source media.
+
 ---
 
 ## Suggested delivery order
