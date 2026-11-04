@@ -76,7 +76,7 @@
     setLayerFormantStrength(id,strength){const layer=this.layers.get(id);if(layer&&layer.pitchNode&&layer.pitchNodeType==='formant')layer.pitchNode.formantStrength.setTargetAtTime(Math.max(0,Math.min(1,Number(strength)||0)),this.context.currentTime,.025);}
     disableLayerPitchPreserving(id,rate=1){
       const layer=this.layers.get(id);if(!layer)return;
-      if(layer.pitchNode){try{layer.high.disconnect(layer.pitchNode);}catch(e){}try{layer.pitchNode.disconnect();}catch(e){}layer.pitchNode=null;layer.pitchNodeType=null;layer.compressor.connect(layer.pan);layer.compressor.connect(layer.delay);layer.compressor.connect(layer.convolver);}
+      if(layer.pitchNode){try{layer.compressor.disconnect(layer.pitchNode);}catch(e){}try{layer.pitchNode.disconnect();}catch(e){}layer.pitchNode=null;layer.pitchNodeType=null;layer.compressor.connect(layer.pan);layer.compressor.connect(layer.delay);layer.compressor.connect(layer.convolver);}
       layer.audio.preservesPitch=false;layer.audio.playbackRate=rate;
     }
     setLayerPitch(id,semitones){const layer=this.layers.get(id);if(!layer)return;layer.pitchSemitones=Math.max(-12,Math.min(12,Number(semitones)||0));if(layer.pitchNode)layer.pitchNode.pitchSemitones.setTargetAtTime(layer.pitchSemitones,this.context.currentTime,.025);}
