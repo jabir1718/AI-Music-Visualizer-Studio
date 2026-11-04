@@ -47,7 +47,7 @@ function init(){
   art.classList.remove('is-color','is-meter','is-sample');art.style.setProperty('--preview-fill','58%');glyph.textContent='✦';
   const old=art.querySelector('.wf-preview-sample');if(old)old.remove();
   if(source){
-   const sample=source.cloneNode(true);sample.className='wf-preview-sample';sample.removeAttribute('id');sample.setAttribute('aria-hidden','true');art.append(sample);art.classList.add('is-sample');
+   const sample=source.cloneNode(true);sample.classList.add('wf-preview-sample');sample.removeAttribute('id');sample.setAttribute('aria-hidden','true');art.append(sample);art.classList.add('is-sample');
    glyph.hidden=true;
   }else{glyph.hidden=false;}
  }
