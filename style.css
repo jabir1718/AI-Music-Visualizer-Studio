@@ -82,3 +82,11 @@ button[data-action-icon]::before{content:attr(data-action-icon);display:inline-g
 .ratio[data-action-icon]::before{width:15px;height:15px;flex-basis:15px;font-size:10px}
 button[data-action-icon]:disabled{opacity:.45;cursor:not-allowed}
 @media(max-width:700px){button[data-action-icon]{gap:6px}button[data-action-icon]::before{flex-basis:18px;width:18px;height:18px;font-size:11px}}
+
+/* Portable project save / restore */
+.project-file-panel{margin-top:20px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)}
+.project-file-panel h3{font:700 13px Manrope,sans-serif;margin:7px 0}
+.project-file-panel p{font-size:10px;line-height:1.6;color:var(--muted);margin:0 0 11px}
+.project-file-actions{display:flex;gap:8px;flex-wrap:wrap}
+.project-file-panel>small{display:block;color:var(--muted);font-size:9px;line-height:1.5;margin-top:10px}
+.project-file-panel button:disabled{opacity:.5;cursor:wait}
