@@ -72,4 +72,5 @@ assert(/objectKeyframes,manualBpm/.test(app),'Object keyframes are not persisted
 assert(/timeline-engine\.js/.test(index),'Timeline engine is not loaded');
 assert(/trimStart:l\.trimStart/.test(app)&&/trimEnd:l\.trimEnd/.test(app),'Timeline clip trim settings are not saved');
 assert(/sound-library\.js/.test(index)&&/Wikimedia Commons/.test(sounds),'Open sound library module is missing');
+assert(/timeline-view\.js/.test(index)&&/WaveForgeTimelineView\.mount/.test(app),'Visual multitrack timeline is not mounted');
 console.log('Object editor, image import, filters and media-tool integration tests passed.');
