@@ -69,3 +69,11 @@ body.wf-dashboard-app .wf-modal-content .music-category-detail{background:#0b153
  body.wf-dashboard-app .wf-tool-card{min-height:45px}
 }
 @media(prefers-reduced-motion:reduce){body.wf-dashboard-app .wf-tool-card{transition:none}}
+
+
+/* Functional header controls: navigation collapse and shared settings workspace. */
+body.wf-dashboard-app .wf-header-icon{width:38px;height:38px;min-width:38px;padding:0;border-radius:50%;font-size:17px;display:inline-grid;place-items:center;border:1px solid #3d75b5;background:linear-gradient(145deg,#172b52,#080f24);color:#8deaff;box-shadow:inset 0 1px #ffffff24,0 0 12px #1c9fff24}
+body.wf-dashboard-app .wf-header-icon:hover{border-color:#61eaff;box-shadow:0 0 16px #26cfff55}
+body.wf-dashboard-app .app-shell.wf-sidebar-collapsed .sidebar{display:none}
+body.wf-dashboard-app .app-shell.wf-sidebar-collapsed .workspace{grid-template-columns:minmax(0,1fr)}
+@media(max-width:700px){body.wf-dashboard-app .wf-header-icon{width:32px;height:32px;min-width:32px;font-size:15px}}
