@@ -1,0 +1,16 @@
+'use strict';
+const assert=require('assert');
+global.window={};
+const bpm=require('../bpm-engine.js');
+assert.strictEqual(bpm.gridStepSeconds(120,1),.5);
+assert.strictEqual(bpm.gridStepSeconds(120,2),.25);
+assert.strictEqual(bpm.gridStepSeconds(120,4),.125);
+assert.strictEqual(bpm.gridStepSeconds(120,8),.0625);
+assert.strictEqual(bpm.gridIndexAt(1,120,0,1),2);
+assert.strictEqual(bpm.gridIndexAt(.4,120,0,1),0);
+assert.strictEqual(bpm.gridIndexAt(1,120,1,1),0);
+assert.strictEqual(bpm.gridIndexAt(.9,120,1,1),-1);
+assert.strictEqual(bpm.gridIndexAt(1.51,120,1,2),2);
+assert.strictEqual(bpm.gridStepSeconds(20,1),null);
+assert.strictEqual(bpm.gridStepSeconds(120,3),null);
+console.log('Editable beat grid tests passed.');
