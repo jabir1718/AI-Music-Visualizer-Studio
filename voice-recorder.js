@@ -22,7 +22,7 @@ function filenameForRole(role,type,stamp=Date.now()){
 function mount(host,role,onLayer){
  if(!host||!root.document)return null;
  const panel=root.document.createElement('section');panel.className='voice-recorder-panel';
- panel.innerHTML='<div class="eyebrow">RECORD A NEW TRACK</div><h3>Record your own '+String(role||'voice')+' take</h3><p>Use the microphone to create a separate audio layer. This does not generate an AI voice or change your original background music.</p><div class="voice-recorder-actions"><button type="button" class="btn small primary" id="wfRecordStart">● Start recording</button><button type="button" class="btn small" id="wfRecordStop" disabled>Stop</button><button type="button" class="btn small" id="wfRecordDiscard" disabled>Discard take</button></div><p class="voice-recorder-status hint" id="wfRecordStatus" aria-live="polite">Microphone permission is required. Maximum recording: 3 minutes / 30 MB.</p><audio id="wfRecordPreview" controls hidden></audio><button type="button" class="btn small" id="wfRecordAdd" disabled>Add recording as a separate layer</button><small class="voice-recorder-note">Recording stays in this project until you add it as a layer. If microphone access is denied or unsupported, use Import audio instead.</small>';
+ panel.innerHTML='<div class="eyebrow">RECORD A NEW TRACK</div><h3>Record your own '+String(role||'voice')+' take</h3><p>Use the microphone to create a separate audio layer. Use headphones to keep the playing song out of the microphone. This does not generate an AI voice or change your original background music.</p><div class="voice-recorder-actions"><button type="button" class="btn small primary" id="wfRecordStart">● Start recording</button><button type="button" class="btn small" id="wfRecordStop" disabled>Stop</button><button type="button" class="btn small" id="wfRecordDiscard" disabled>Discard take</button></div><p class="voice-recorder-status hint" id="wfRecordStatus" aria-live="polite">Microphone permission is required. Maximum recording: 3 minutes / 30 MB.</p><audio id="wfRecordPreview" controls hidden></audio><button type="button" class="btn small" id="wfRecordAdd" disabled>Add recording as a separate layer</button><small class="voice-recorder-note">Recording stays in this project until you add it as a layer. If microphone access is denied or unsupported, use Import audio instead.</small>';
  host.appendChild(panel);
  const $=id=>panel.querySelector('#'+id);
  let stream=null,recorder=null,chunks=[],file=null,previewUrl=null,startedAt=0,elapsedTimer=null,disposed=false,totalBytes=0;
@@ -47,11 +47,12 @@ function mount(host,role,onLayer){
  }
  async function start(){
   if(disposed)return;
+  resetTake();
   if(!root.navigator||!root.navigator.mediaDevices||typeof root.navigator.mediaDevices.getUserMedia!=='function'){report('Microphone recording is unavailable in this browser or WebView. Use Import audio instead.');return;}
   if(typeof root.MediaRecorder!=='function'){report('MediaRecorder is not supported on this device. Use Import audio instead.');return;}
   $('wfRecordStart').disabled=true;report('Requesting microphone permission…');
   try{
-   stream=await root.navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+   stream=await root.navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
    if(disposed){stopTracks();return;}
    const mimeType=chooseMimeType();
    recorder=mimeType?new root.MediaRecorder(stream,{mimeType}):new root.MediaRecorder(stream);
@@ -87,10 +88,11 @@ function mount(host,role,onLayer){
   const chosen=file;onLayer(chosen);report('Recording added as a separate '+String(role||'voice').toLowerCase()+' layer.');$('wfRecordAdd').disabled=true;
  };
  const api={dispose(){
-  disposed=true;clearTimer();
+  disposed=true;root.removeEventListener('beforeunload',api.dispose);clearTimer();
   if(recorder&&recorder.state==='recording'){recorder.onstop=null;try{recorder.stop();}catch(e){}}
   stopTracks();releasePreview();panel.remove();
  }};
+ root.addEventListener('beforeunload',api.dispose);
  return api;
 }
 const api={MIME_TYPES,MAX_DURATION_MS,MAX_BYTES,chooseMimeType,extensionForMime,filenameForRole,mount};
