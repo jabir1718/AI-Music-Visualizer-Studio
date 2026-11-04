@@ -31,6 +31,7 @@ const file=(name,type,size=1024)=>Object.assign({name,type,size,arrayBuffer:asyn
  api.move(1,-1);const before=api.getCount();assert.strictEqual(api.splitSegment(api.getState().segments[0].id),true);assert.strictEqual(api.getCount(),before+1);
  const videoAsset=api.getState().assets.find(a=>a.kind==='video');const sceneCuts=await api.detectScenes(videoAsset.id);assert.ok(sceneCuts.includes(3),'local frame-difference scene detection should find a visible cut');
  const frame=api.sync(0,false);assert.ok(frame instanceof MockVideo||frame instanceof MockImage,'playhead should resolve active video or photo');
+ const videoFrame=api.getState().segments.find(s=>api.getState().assets.find(a=>a.id===s.assetId).kind==='video');if(videoFrame){api.setSpeedRamp(videoFrame.id,.6,1.4);api.sync(videoFrame.timelineStart,false);assert.ok(Math.abs(api.getState().assets.find(a=>a.id===videoFrame.assetId).media.playbackRate-.6)<.01,'video playbackRate should follow ramp start speed');}
  assert.ok(api.getMotion(0).scale>=1,'photo template should provide gentle motion');
  api.removeSegment(api.getState().segments[0].id);assert.strictEqual(api.getCount(),before);
  console.log('Auto Video tests passed: mixed media import, ten templates, song-length photo montage, beat cuts, speed ramps, transitions, preview mapping and segment edits.');
