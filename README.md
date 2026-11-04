@@ -4,7 +4,7 @@ A browser-based, local-first music visualizer editor. Version 1.0 foundation.
 
 ## Included in this starter
 - Import a local audio track (browser-supported audio formats).
-- Add a photo or video as the visual background, then optionally remove a solid-color green/blue screen with adjustable tolerance, edge softness and spill reduction.
+- Add a photo or video as the visual background, then optionally remove a solid-color green/blue screen or enable on-device AI person cutout. Chroma key has adjustable tolerance, edge softness and spill reduction; AI person segmentation downloads its model on first use.
 - Extract audio from a local video in real time, then use the extracted audio as the main track or an independent mixer layer, or download it.
 - Live canvas visualizer: equalizer bars, waveform, circular spectrum and neon pulse.
 - 50 adjustable photo/video color filters across cinema, vintage, monochrome, vibrant, cool, warm, dreamy, night, analog and editorial looks; filters are included in canvas export.
@@ -12,7 +12,7 @@ A browser-based, local-first music visualizer editor. Version 1.0 foundation.
 - Touch selection outlines and resize/rotate handles for native text, current lyric and logo objects.
 - Per-layer generic voice styles (Telephone, Radio, Monster, Chipmunk, Robot and Alien) with independent EQ, echo, reverb and distortion.
 - Mixer clip in/out trimming, looping and split-at-playhead controls.
-- Bounded undo/redo for text, lyrics, object transforms, typography, visual filters, chroma key and master effects.
+- Bounded undo/redo for text, lyrics, object transforms, typography, visual filters, chroma key, AI cutout toggle and master effects.
 - Local audio playback, seeking and volume.
 - Text, subtitle, color, font and PNG logo overlays.
 - On-device Whisper-based audio transcription into timed lyric lines (model downloads on first use).
@@ -47,7 +47,7 @@ Open `index.html` in a modern browser. For best results, serve the folder from a
 - Main-track fade-in and fade-out controls are applied to the master audio gain during playback/export. More advanced automation curves are not included.
 
 ## Not included yet
-AI vocal/instrument separation, generated humming/ad-libs, a full voice-character model suite, formant-preserving/pitch-preserving DSP, a full visual multi-track timeline with undo/redo, volumetric 3D scene editing, AI background segmentation beyond solid-color chroma key, Google Images API credentials/provider access, a licensed 2,000+ artwork library, YouTube-authorized media integration, a bundled curated 5,000+ sound-effects catalogue, GPU acceleration and 4K/8K/16K export. These need dedicated implementation and/or optional models/services. Copyright risk is only a user checklist, not a copyright scan.
+AI vocal/instrument separation, generated humming/ad-libs, a full voice-character model suite, formant-preserving/pitch-preserving DSP, a full visual multi-track timeline with undo/redo, volumetric 3D scene editing, general-purpose AI object segmentation beyond person cutout, Google Images API credentials/provider access, a licensed 2,000+ artwork library, YouTube-authorized media integration, a bundled curated 5,000+ sound-effects catalogue, GPU acceleration and 4K/8K/16K export. These need dedicated implementation and/or optional models/services. Copyright risk is only a user checklist, not a copyright scan.
 
 ## Automatic lyrics
 - The app uses Transformers.js with an ONNX Whisper model downloaded from Hugging Face on first use; transcription runs in the browser/WebView and the selected audio is not uploaded to a WaveForge server.
