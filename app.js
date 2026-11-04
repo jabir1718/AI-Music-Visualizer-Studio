@@ -81,7 +81,7 @@ function draw(){
   const count=style==='circle'?96:48;ctx.beginPath();ctx.arc(0,0,base+beatPulse*base*.14,0,Math.PI*2);ctx.globalAlpha=.5;ctx.stroke();
   for(let i=0;i<count;i++){const a=i/count*Math.PI*2,v=data[Math.floor(i*data.length/count)]/255,inner=base*.78,outer=inner+(style==='neon'?base*.45:base*(.14+v*.65*intensity+beatPulse*.12));ctx.globalAlpha=.35+v*.65;ctx.strokeStyle=colors[i%3];ctx.lineWidth=style==='neon'?Math.max(2,w*.006):Math.max(2,w*.003);ctx.beginPath();ctx.moveTo(Math.cos(a)*inner,Math.sin(a)*inner);ctx.lineTo(Math.cos(a)*outer,Math.sin(a)*outer);ctx.stroke();}
  }
- ctx.restore();if(window.WaveForge3D)window.WaveForge3D.drawToCanvas(ctx,w,h);ctx.shadowBlur=0;ctx.globalAlpha=1;ctx.textAlign='center';ctx.textBaseline='middle';
+ ctx.restore();if(window.WaveForge3D)window.WaveForge3D.drawToCanvas(ctx,w,h);if(window.WaveForgeArtworkLayers)window.WaveForgeArtworkLayers.draw(ctx,w,h);ctx.shadowBlur=0;ctx.globalAlpha=1;ctx.textAlign='center';ctx.textBaseline='middle';
  const title=$('titleInput').value||'',subtitle=$('subtitleInput').value||'';
  const titleState=getObjectState('title',audio.currentTime),subtitleState=getObjectState('subtitle',audio.currentTime);
  if(titleState.settings.visible){const o=titleState.settings;ctx.save();ctx.globalAlpha=o.opacity;ctx.translate(titleState.position.x*w,titleState.position.y*h);ctx.rotate(o.rotation*Math.PI/180);ctx.fillStyle=o.color||$('textColor').value;ctx.font='800 '+Math.round(w*.052*o.scale)+'px '+($('fontStyle').value==='serif'?'Georgia':$('fontStyle').value==='mono'?'monospace':'sans-serif');ctx.shadowColor='#000';ctx.shadowBlur=14;if(window.WaveForgeTypography)window.WaveForgeTypography.apply(ctx,'title',Math.round(w*.052*o.scale),'sans-serif');drawWrapped(title,0,0,w*.82,Math.round(w*.06*o.scale),'title');ctx.restore();}
@@ -647,17 +647,20 @@ function setBackgroundFile(f){
  });
 }
 window.WaveForgeAssetBridge={
+ saveMediaAsset,getMediaAsset,deleteMediaAsset,
  async importFile(file,target='artwork'){
   if(target==='background')return setBackgroundFile(file);
-  await loadLogoFile(file);
-  if(target==='text-decoration'){positions.logo={x:.5,y:.34};objectSettings.logo.scale=.65;}
-  else if(target==='artwork'){positions.logo={x:.5,y:.55};objectSettings.logo.scale=.9;}
-  else{positions.logo={x:.82,y:.08};objectSettings.logo.scale=1;}
-  selectedObject='logo';
+  if(target==='artwork'||target==='text-decoration'){
+   if(!window.WaveForgeArtworkLayers)throw new Error('Artwork layer engine is unavailable.');
+   return window.WaveForgeArtworkLayers.add(file,target);
+  }
+  await loadLogoFile(file);positions.logo={x:.82,y:.08};objectSettings.logo.scale=1;selectedObject='logo';
   const select=$('objectSelect');if(select){select.value='logo';select.dispatchEvent(new Event('change'));}
   updateSelectionOverlay();saveSettings();return true;
  }
 };
+function initArtworkLayers(){if(window.WaveForgeArtworkLayers)window.WaveForgeArtworkLayers.mount($('artworkLayerPanel'),{saveMediaAsset,getMediaAsset,deleteMediaAsset,onChange:saveSettings});}
+
 $('mediaInput').onchange=e=>{const f=e.target.files[0];if(f)setBackgroundFile(f).catch(error=>{setStatus(error.message);$('mediaStatus').textContent=error.message;});};
 $('clearMedia').onclick=()=>{if(mediaUrl)URL.revokeObjectURL(mediaUrl);deleteMediaAsset('background');mediaUrl=null;mediaKind='';$('backgroundImage').removeAttribute('src');$('backgroundVideo').pause();$('backgroundVideo').removeAttribute('src');$('backgroundImage').classList.add('hidden');$('backgroundVideo').classList.add('hidden');$('mediaStatus').textContent='No background selected.';};
 $('srtInput').onchange=async e=>{const f=e.target.files[0];if(f)importSubtitles(await f.text());};
@@ -691,6 +694,6 @@ async function doExport(){
  finally{$('exportBtn').disabled=false;$('exportBtnSide').disabled=false;}
 }
 $('exportBtn').onclick=doExport;$('exportBtnSide').onclick=doExport;
-loadSettings();audio.volume=.85;initObjectEditor();initTypographyStudio();initMixerUI();initHistoryUI();initMediaTools();initFilterStudio();initChromaKey();initAISegmentation();initSymbolLibrary();initThreeStudio();restoreSavedMedia();decorateButtonIcons();startDraw();
+loadSettings();audio.volume=.85;initObjectEditor();initTypographyStudio();initMixerUI();initHistoryUI();initMediaTools();initFilterStudio();initChromaKey();initAISegmentation();initSymbolLibrary();initThreeStudio();initArtworkLayers();restoreSavedMedia();if(window.WaveForgeArtworkLayers)window.WaveForgeArtworkLayers.restore().then(count=>{if(count)setStatus('Restored '+count+' independent artwork layer(s)');}).catch(()=>{});decorateButtonIcons();startDraw();
 window.addEventListener('beforeunload',()=>{if(history)history.flush();if(mediaUrl)URL.revokeObjectURL(mediaUrl);if(logoUrl)URL.revokeObjectURL(logoUrl);if(audio.src)URL.revokeObjectURL(audio.src);});
 })();
