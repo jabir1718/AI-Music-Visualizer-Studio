@@ -27,5 +27,7 @@ assert(/MAX_BYTES=250\*1024\*1024/.test(project),'Portable project media limit m
 assert(/filterPreset:window\.WaveForgeFilters/.test(app)&&/filterIntensity:window\.WaveForgeFilters/.test(app),'Filter settings are not saved');
 assert(/WaveForgeFilters\.set/.test(app)&&/WaveForgeFilters\.draw/.test(app),'Filters are not restored and applied');
 assert(/filter-studio\.js/.test(index),'Filter studio script is not loaded');
+assert(/mainEffects:readMainEffects\(\)/.test(app),'Original music effects are not saved');
+for(const id of ['mainBass','mainTreble','mainPan','mainEcho','mainReverb','mainDistortion','mainEffectsReset'])assert(app.includes(id),'Missing main music effect control: '+id);
 assert(/profiles\.forEach/.test(filters),'Filter catalogue generation missing');
 console.log('Object editor, image import and filter integration regression tests passed.');
