@@ -1,7 +1,8 @@
 'use strict';
 const assert=require('assert');
 global.window={};
-const bpm=require('../bpm-engine.js');
+require('../bpm-engine.js');
+const bpm=global.window.WaveForgeBPM;
 assert.strictEqual(bpm.gridStepSeconds(120,1),.5);
 assert.strictEqual(bpm.gridStepSeconds(120,2),.25);
 assert.strictEqual(bpm.gridStepSeconds(120,4),.125);
