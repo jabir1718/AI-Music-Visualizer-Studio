@@ -78,6 +78,7 @@ function mount(host,options={}){
  host.appendChild(panel);
  const $=id=>panel.querySelector('#'+id),viewport=$('threeViewport');let renderer=null,scene=null,camera=null,mesh=null,material=null,raf=0,config=normalizeConfig(activeConfig),drag=null,resizeObserver=null;
  function report(message){$('threeStatus').textContent=message;}
+ function persist(){activeConfig=normalizeConfig(config);if(typeof options.onChange==='function')options.onChange(getSettings());}
  function updateLabels(){
   $('threeScaleValue').textContent=Math.round(config.scale*100)+'%';$('threeMetalValue').textContent=Math.round(config.metalness*100)+'%';$('threeRoughValue').textContent=Math.round(config.roughness*100)+'%';$('threeLightValue').textContent=Math.round(config.light*100)+'%';
   $('threeXValue').textContent=Math.round(config.rotationX)+'°';$('threeYValue').textContent=Math.round(config.rotationY)+'°';$('threeZValue').textContent=Math.round(config.rotationZ)+'°';$('threePXValue').textContent=config.positionX.toFixed(2);$('threePYValue').textContent=config.positionY.toFixed(2);$('threePZValue').textContent=config.positionZ.toFixed(2);
@@ -130,17 +131,17 @@ function mount(host,options={}){
   updateLabels();animate();report('3D scene ready. Drag the object to rotate it, or use the XYZ controls.');
  }
  $('threeLoad').onclick=async()=>{ $('threeLoad').disabled=true;report('Loading Three.js and preparing WebGL…');try{await initialize();}catch(error){$('threeLoad').disabled=false;report('3D workspace unavailable: '+error.message+' — check WebGL and internet access.');}};
- $('threeShape').onchange=async e=>{config.shape=e.target.value;report(config.shape==='text'?'Loading 3D font…':'Changing geometry…');try{await setShape(config.shape);apply();report(config.shape==='text'?'Extruded 3D text ready.':'3D geometry changed.');}catch(error){report('Could not build this 3D object: '+error.message);}};
- $('threeText').onchange=async e=>{config.text=String(e.target.value||'WAVEFORGE').slice(0,18);if(config.shape==='text'){try{await setShape('text');apply();}catch(error){report('3D text failed: '+error.message);}}};
- $('threeFont').onchange=async e=>{config.fontFamily=FONT_FAMILIES.includes(e.target.value)?e.target.value:'helvetiker_bold';if(config.shape==='text'){report('Loading '+config.fontFamily.replace(/_/g,' ')+' 3D font…');try{await setShape('text');apply();report('3D font changed.');}catch(error){report('Could not load 3D font: '+error.message);}}};
+ $('threeShape').onchange=async e=>{config.shape=e.target.value;report(config.shape==='text'?'Loading 3D font…':'Changing geometry…');try{await setShape(config.shape);apply();persist();report(config.shape==='text'?'Extruded 3D text ready.':'3D geometry changed.');}catch(error){report('Could not build this 3D object: '+error.message);}};
+ $('threeText').onchange=async e=>{config.text=String(e.target.value||'WAVEFORGE').slice(0,18);if(config.shape==='text'){try{await setShape('text');apply();persist();}catch(error){report('3D text failed: '+error.message);}}};
+ $('threeFont').onchange=async e=>{config.fontFamily=FONT_FAMILIES.includes(e.target.value)?e.target.value:'helvetiker_bold';if(config.shape==='text'){report('Loading '+config.fontFamily.replace(/_/g,' ')+' 3D font…');try{await setShape('text');apply();persist();report('3D font changed.');}catch(error){report('Could not load 3D font: '+error.message);}}};
  $('threeDepth').oninput=e=>{config.textDepth=Number(e.target.value)/100;$('threeDepthValue').textContent=config.textDepth.toFixed(2);};
- $('threeDepth').onchange=async()=>{if(config.shape==='text'){try{await setShape('text');apply();}catch(error){report('3D extrusion failed: '+error.message);}}};
- $('threeColor').oninput=e=>{config.color=e.target.value;apply();};
- [['Scale','scale',v=>v/100],['Metal','metalness',v=>v/100],['Rough','roughness',v=>v/100],['Light','light',v=>v/100],['X','rotationX',v=>v],['Y','rotationY',v=>v],['Z','rotationZ',v=>v],['PX','positionX',v=>v/100],['PY','positionY',v=>v/100],['PZ','positionZ',v=>v/100]].forEach(([id,key,convert])=>{$('three'+id).oninput=e=>{config[key]=convert(Number(e.target.value));if(key==='light'&&scene){scene.userData.keyLight.intensity=config.light;scene.userData.rimLight.intensity=config.light*1.15;}apply();};});
- $('threeAuto').onchange=e=>{config.autoRotate=e.target.checked;apply();};
- $('threeComposite').onchange=e=>{config.overlayEnabled=e.target.checked;apply();report(config.overlayEnabled?'3D object is now included in visualizer preview and video export.':'3D video overlay disabled.');};
- [['Scale','overlayScale',v=>v/100],['X','overlayX',v=>v/100],['Y','overlayY',v=>v/100]].forEach(([id,key,convert])=>{$('threeOverlay'+id).oninput=e=>{config[key]=convert(Number(e.target.value));$('threeOverlay'+id+'Value').textContent=Math.round(config[key]*100)+'%';apply();};});
- $('threeReset').onclick=()=>{config=normalizeConfig();$('threeShape').value=config.shape;$('threeColor').value=config.color;$('threeScale').value=100;$('threeMetal').value=65;$('threeRough').value=25;$('threeLight').value=135;$('threeX').value=0;$('threeY').value=0;$('threeZ').value=0;$('threeText').value=config.text;$('threeFont').value=config.fontFamily;$('threeDepth').value=16;$('threeDepthValue').textContent='0.16';$('threePX').value=0;$('threePY').value=0;$('threePZ').value=0;$('threeAuto').checked=true;$('threeComposite').checked=config.overlayEnabled;$('threeOverlayScale').value=Math.round(config.overlayScale*100);$('threeOverlayX').value=Math.round(config.overlayX*100);$('threeOverlayY').value=Math.round(config.overlayY*100);setShape(config.shape).then(()=>{apply();report('3D object reset.');}).catch(error=>report('3D reset failed: '+error.message));};
+ $('threeDepth').onchange=async()=>{if(config.shape==='text'){try{await setShape('text');apply();persist();}catch(error){report('3D extrusion failed: '+error.message);}}};
+ $('threeColor').oninput=e=>{config.color=e.target.value;apply();};$('threeColor').onchange=persist;
+ [['Scale','scale',v=>v/100],['Metal','metalness',v=>v/100],['Rough','roughness',v=>v/100],['Light','light',v=>v/100],['X','rotationX',v=>v],['Y','rotationY',v=>v],['Z','rotationZ',v=>v],['PX','positionX',v=>v/100],['PY','positionY',v=>v/100],['PZ','positionZ',v=>v/100]].forEach(([id,key,convert])=>{$('three'+id).oninput=e=>{config[key]=convert(Number(e.target.value));if(key==='light'&&scene){scene.userData.keyLight.intensity=config.light;scene.userData.rimLight.intensity=config.light*1.15;}apply();};$('three'+id).onchange=persist;});
+ $('threeAuto').onchange=e=>{config.autoRotate=e.target.checked;apply();persist();};
+ $('threeComposite').onchange=e=>{config.overlayEnabled=e.target.checked;apply();persist();report(config.overlayEnabled?'3D object is now included in visualizer preview and video export.':'3D video overlay disabled.');};
+ [['Scale','overlayScale',v=>v/100],['X','overlayX',v=>v/100],['Y','overlayY',v=>v/100]].forEach(([id,key,convert])=>{$('threeOverlay'+id).oninput=e=>{config[key]=convert(Number(e.target.value));$('threeOverlay'+id+'Value').textContent=Math.round(config[key]*100)+'%';apply();};$('threeOverlay'+id).onchange=persist;});
+ $('threeReset').onclick=()=>{config=normalizeConfig();$('threeShape').value=config.shape;$('threeColor').value=config.color;$('threeScale').value=100;$('threeMetal').value=65;$('threeRough').value=25;$('threeLight').value=135;$('threeX').value=0;$('threeY').value=0;$('threeZ').value=0;$('threeText').value=config.text;$('threeFont').value=config.fontFamily;$('threeDepth').value=16;$('threeDepthValue').textContent='0.16';$('threePX').value=0;$('threePY').value=0;$('threePZ').value=0;$('threeAuto').checked=true;$('threeComposite').checked=config.overlayEnabled;$('threeOverlayScale').value=Math.round(config.overlayScale*100);$('threeOverlayX').value=Math.round(config.overlayX*100);$('threeOverlayY').value=Math.round(config.overlayY*100);setShape(config.shape).then(()=>{apply();persist();report('3D object reset.');}).catch(error=>report('3D reset failed: '+error.message));};
  $('threeExport').onclick=async()=>{
   if(!renderer||!mesh)return;$('threeExport').disabled=true;
   try{
@@ -154,7 +155,7 @@ function mount(host,options={}){
   }catch(error){report('3D PNG export failed: '+error.message);}
   finally{$('threeExport').disabled=false;}
  };
- root.addEventListener('beforeunload',()=>{if(raf)root.cancelAnimationFrame(raf);if(resizeObserver)resizeObserver.disconnect();if(renderer)renderer.dispose();},{once:true});
+ root.addEventListener('beforeunload',()=>{persist();if(raf)root.cancelAnimationFrame(raf);if(resizeObserver)resizeObserver.disconnect();if(renderer)renderer.dispose();},{once:true});
 }
 const api={SHAPES,FONT_FAMILIES,DEFAULTS,normalizeConfig,geometry,mount,loadThree,loadTextTools,getSettings,setSettings,drawToCanvas};
 root.WaveForge3D=api;
