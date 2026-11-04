@@ -224,6 +224,7 @@ function initMixerUI(){
  audio.addEventListener('ended',()=>mixerLayers.forEach(layer=>layer.audio.pause()));
 }
 function selectMusicCategory(category){
+ if(window.WaveForgeRecorder)window.WaveForgeRecorder.stopAll();
  mixerCategory=category;
  document.querySelectorAll('.music-category').forEach(btn=>btn.classList.toggle('active',btn.dataset.category===category));
  const detail=$('musicCategoryDetail'),role=$('mixerRole'),add=$('mixerAddBtn'),file=$('mixerFile');
@@ -246,6 +247,7 @@ function selectMusicCategory(category){
  add.disabled=!item.available;file.disabled=!item.available;
  if(item.available&&window.WaveForgeSoundLibrary&&['Sound effect','Engine','Character'].includes(category)){const query=category==='Engine'?'race car engine':category==='Character'?'evil laugh cartoon':'sound effect';window.WaveForgeSoundLibrary.mount(detail,query,file=>addMixerLayer(file,item.role));}
  if(category==='Cleanup'&&window.WaveForgeCleanup)window.WaveForgeCleanup.mount(detail,{onLayer:file=>addMixerLayer(file,'Voice')});
+ if(item.available&&window.WaveForgeRecorder&&['Voice','Ad-lib','Humming','Harmony','Voice FX'].includes(category))window.WaveForgeRecorder.mount(detail,{role:item.role,onAdd:file=>addMixerLayer(file,item.role)});
  renderMixerLayers();
 }
 function addMixerLayer(file,role,restore={},persist=true){
