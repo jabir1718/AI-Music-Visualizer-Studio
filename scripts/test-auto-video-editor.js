@@ -1,7 +1,7 @@
 'use strict';
 const assert=require('assert');
 class MockVideo{constructor(){this.duration=6;this.videoWidth=1280;this.videoHeight=720;this.readyState=2;this.currentTime=0;this.paused=true;this.src='';}setAttribute(){}load(){if(this.onloadedmetadata)this.onloadedmetadata();}pause(){this.paused=true;}play(){this.paused=false;return Promise.resolve();}}
-class MockImage{constructor(){this.naturalWidth=1200;this.naturalHeight=800;this.src='';this.decoding='';}set src(v){this._src=v;if(this.onload)this.onload();}get src(){return this._src;}}
+class MockImage{constructor(){this.naturalWidth=1200;this.naturalHeight=800;this.src='';this.decoding='';}set src(v){this._src=v;queueMicrotask(()=>{if(this.onload)this.onload();});}get src(){return this._src;}}
 const root={document:{createElement:tag=>tag==='video'?new MockVideo():tag==='img'?new MockImage():null},URL:{createObjectURL:file=>'blob:'+file.name,revokeObjectURL(){}},setTimeout:()=>1,clearTimeout(){}};root.window=root;root.Image=MockImage;
 const source=require('fs').readFileSync(require('path').join(__dirname,'..','auto-video-editor.js'),'utf8');
 new Function('window','document','URL','setTimeout','clearTimeout',source)(root,root.document,root.URL,root.setTimeout,root.clearTimeout);
