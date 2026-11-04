@@ -48,7 +48,7 @@ function mount(host,options={}){
  $('openmojiLoad').onclick=async()=>{ $('openmojiLoad').disabled=true;$('openmojiStatus').textContent='Downloading catalogue metadata…';try{entries=await loadData();const groups=[...new Set(entries.map(x=>x.group).filter(Boolean))].sort();groups.forEach(group=>{const option=root.document.createElement('option');option.value=group;option.textContent=group;$('openmojiGroup').append(option);});$('openmojiSearch').disabled=false;$('openmojiGroup').disabled=false;$('openmojiLoad').textContent='Catalogue ready';$('openmojiCount').textContent=entries.length.toLocaleString();render();}catch(error){$('openmojiStatus').textContent='Symbol catalogue unavailable: '+error.message+' — check internet access.';$('openmojiLoad').disabled=false;}};
  $('openmojiUse').onclick=async()=>{
   if(!selected)return;$('openmojiUse').disabled=true;
-  try{const file=await getSvgFile(selected);if(typeof options.onLogo==='function')await options.onLogo(file);$('openmojiStatus').textContent='Added '+selected.annotation+' as an editable SVG logo.';}
+  try{const file=await getSvgFile(selected);const stored=typeof options.onLogo==='function'?await options.onLogo(file):true;$('openmojiStatus').textContent=stored===false?'Loaded '+selected.annotation+' for this session, but media storage is unavailable.':'Added '+selected.annotation+' as an editable SVG logo.';}
   catch(error){$('openmojiStatus').textContent='Could not add symbol: '+error.message;}
   finally{$('openmojiUse').disabled=!selected;}
  };
