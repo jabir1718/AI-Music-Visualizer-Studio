@@ -601,6 +601,7 @@ function loadLogoFile(file){
  });
 }
 function initSymbolLibrary(){if(window.WaveForgeSymbols)window.WaveForgeSymbols.mount($('overlayPanel'),{onLogo:loadLogoFile});}
+function initThreeStudio(){if(window.WaveForge3D)window.WaveForge3D.mount($('overlayPanel'),{onLogo:loadLogoFile});}
  $('logoInput').onchange=e=>loadLogoFile(e.target.files[0]).catch(error=>setStatus(error.message));
 $('clearLogo').onclick=()=>{$('stageLogo').innerHTML='';if(logoUrl)URL.revokeObjectURL(logoUrl);logoUrl=null;logoImage=null;deleteMediaAsset('logo');saveSettings();};
 $('mediaInput').onchange=e=>{
@@ -642,6 +643,6 @@ async function doExport(){
  finally{$('exportBtn').disabled=false;$('exportBtnSide').disabled=false;}
 }
 $('exportBtn').onclick=doExport;$('exportBtnSide').onclick=doExport;
-loadSettings();audio.volume=.85;initObjectEditor();initTypographyStudio();initMixerUI();initHistoryUI();initMediaTools();initFilterStudio();initChromaKey();initAISegmentation();initSymbolLibrary();restoreSavedMedia();decorateButtonIcons();startDraw();
+loadSettings();audio.volume=.85;initObjectEditor();initTypographyStudio();initMixerUI();initHistoryUI();initMediaTools();initFilterStudio();initChromaKey();initAISegmentation();initSymbolLibrary();initThreeStudio();restoreSavedMedia();decorateButtonIcons();startDraw();
 window.addEventListener('beforeunload',()=>{if(history)history.flush();if(mediaUrl)URL.revokeObjectURL(mediaUrl);if(logoUrl)URL.revokeObjectURL(logoUrl);if(audio.src)URL.revokeObjectURL(audio.src);});
 })();
