@@ -514,3 +514,20 @@ body.wf-studio-app .wf-tool-content .risk-result{
 
 /* Keyboard focus visibility for the 3D tool dock */
 body.wf-studio-app .wf-tool-tab:focus-visible,body.wf-studio-app .btn:focus-visible,body.wf-studio-app .style-card:focus-visible,body.wf-studio-app .template-card:focus-visible{outline:2px solid #9feaff;outline-offset:3px;}
+
+/* Compact option preview: shows a visual hint whenever an option is selected */
+body.wf-studio-app .wf-option-preview{position:relative;flex:0 0 auto;min-height:76px;margin:0 10px 7px;padding:8px 42px 8px 9px;display:grid;grid-template-columns:76px minmax(0,1fr);align-items:center;gap:10px;border:1px solid #6658a8;border-radius:13px;background:linear-gradient(125deg,#252b51 0%,#17213c 52%,#101b30 100%);box-shadow:0 4px 0 #090f20,0 8px 16px #0005,inset 0 1px 1px #ffffff20;overflow:hidden}
+body.wf-studio-app .wf-preview-art{position:relative;height:56px;width:76px;display:grid;place-items:center;overflow:hidden;border-radius:9px;border:1px solid #7d75c4;background:radial-gradient(circle at 50% 45%,#7b65ff88,transparent 45%),linear-gradient(145deg,#101a31,#263a5c);box-shadow:inset 0 0 16px #8d77ff30}
+body.wf-studio-app .wf-preview-orb{position:absolute;width:30px;height:30px;border-radius:50%;background:linear-gradient(140deg,#b7a2ff,#6552ec 60%,#23d9ee);box-shadow:0 0 14px #876bff,inset -4px -5px 8px #25145b88,inset 3px 3px 7px #ffffffaa}
+body.wf-studio-app .wf-preview-glyph{position:relative;color:white;font-size:20px;text-shadow:0 0 10px #fff}
+body.wf-studio-app .wf-preview-copy{min-width:0;display:grid;gap:2px}
+body.wf-studio-app .wf-preview-copy small{font-size:8px;letter-spacing:1.2px;font-weight:800;color:#a99aff}
+body.wf-studio-app .wf-preview-copy b{font-size:11px;line-height:1.2;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.wf-studio-app .wf-preview-copy span{font-size:9px;line-height:1.3;color:#c1cbe2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+body.wf-studio-app .wf-preview-tag{position:absolute;right:8px;top:8px;font-size:7px;letter-spacing:.8px;color:#a9f7ff}
+body.wf-studio-app .wf-preview-art.is-meter:after{content:"";position:absolute;left:5px;right:5px;bottom:7px;height:5px;border-radius:9px;background:linear-gradient(90deg,#4ee8ee var(--preview-fill),#344360 var(--preview-fill));box-shadow:0 0 7px #37d9ff66}
+body.wf-studio-app .wf-preview-art.is-color .wf-preview-orb{background:var(--preview-color);box-shadow:0 0 16px var(--preview-color)}
+body.wf-studio-app .wf-preview-art.is-sample{padding:5px}
+body.wf-studio-app .wf-preview-sample{max-width:100%;max-height:100%;font-size:19px!important;line-height:1!important;display:grid;place-items:center;overflow:hidden}
+body.wf-studio-app .wf-preview-sample b{font-size:8px}
+@media(max-width:760px){body.wf-studio-app .wf-option-preview{min-height:64px;margin:0 5px 5px;padding:6px 36px 6px 7px;grid-template-columns:62px minmax(0,1fr);gap:8px;border-radius:10px}body.wf-studio-app .wf-preview-art{width:62px;height:48px}body.wf-studio-app .wf-preview-copy small{font-size:7px}body.wf-studio-app .wf-preview-copy b{font-size:10px}body.wf-studio-app .wf-preview-copy span{font-size:8px}body.wf-studio-app .wf-preview-tag{right:6px;top:6px;font-size:6px}}
