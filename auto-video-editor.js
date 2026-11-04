@@ -1,6 +1,6 @@
 'use strict';
 (function(root){
- const MAX_CLIPS=8,MAX_FILE=120*1024*1024,MAX_TOTAL=180*1024*1024,MAX_DURATION=180;
+ const MAX_CLIPS=8,MAX_FILE=120*1024*1024,MAX_TOTAL=180*1024*1024,MAX_DURATION=180,MAX_SEGMENTS=300;
  const PRESETS={
   social:{label:'Fast social montage',beats:1},
   cinematic:{label:'Cinematic',beats:4},
@@ -72,7 +72,7 @@
   const bpm=clamp(options.bpm||120,30,240),beat=60/bpm,preset=PRESETS[style]||PRESETS.social;
   const beatsPerCut=Math.max(.5,preset.beats*(1.2-intensity*.15)),totalSource=Array.from(assets.values()).reduce((n,a)=>n+durationOf(a),0),cutLength=Math.max(.35,beat*beatsPerCut,totalSource/300);
   const sources=Array.from(assets.values()),cursors=sources.map(()=>0),out=[];let active=0,guard=0;
-  while(guard++<1200&&out.length<300){
+  while(guard++<1200&&out.length<MAX_SEGMENTS){
    let found=-1;for(let k=0;k<sources.length;k++){const ix=(active+k)%sources.length;if(cursors[ix]<durationOf(sources[ix])-.15){found=ix;break;}}
    if(found<0)break;
    const source=sources[found],start=cursors[found],end=Math.min(durationOf(source),start+cutLength);
