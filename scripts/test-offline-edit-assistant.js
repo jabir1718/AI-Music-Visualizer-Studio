@@ -1,0 +1,18 @@
+'use strict';
+const assert=require('assert');
+const assistant=require('../offline-edit-assistant.js');
+const result=assistant.parsePrompt('Make it cinematic, 9:16, bass +3 dB, title to Night Drive',{mainBass:0});
+const values=Object.fromEntries(result.actions.map(x=>[x.id,x.value]));
+assert.strictEqual(values.autoVideoStyle,'cinematic');
+assert.strictEqual(values.exportRatio,'9:16');
+assert.strictEqual(values.mainBass,3);
+assert.strictEqual(values.titleInput,'Night Drive');
+assert.ok(result.actions.length>=4,'multiple supported edits should be previewed');
+const volume=assistant.parsePrompt('set volume 70% and lyrics bigger',{lyricSize:48});
+const v=Object.fromEntries(volume.actions.map(x=>[x.id,x.value]));
+assert.strictEqual(v.volume,.7);
+assert.strictEqual(v.lyricSize,58);
+const unsupported=assistant.parsePrompt('make a 3D dragon walk through the city');
+assert.strictEqual(unsupported.actions.length,0,'unsupported AI requests must not be guessed or executed');
+assert.ok(unsupported.unsupported.length);
+console.log('Offline assistant tests passed: supported prompts, safe preview values and unsupported request rejection.');
