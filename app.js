@@ -86,7 +86,7 @@ function draw(){
  raf=requestAnimationFrame(draw);
 }
 function startDraw(){if(!raf)draw();}
-async function ensureEngine(){if(!engine)engine=new AudioEngine(audio);await engine.connect();await engine.resume();engine.setVolume(Number($('volume').value));mixerLayers.forEach(layer=>{if(!layer.connected){engine.addLayer(layer.id,layer.audio,layer.muted?0:layer.volume,layer);layer.connected=true;}});return engine;}
+async function ensureEngine(){if(!engine)engine=new AudioEngine(audio);await engine.connect();await engine.resume();engine.setVolume(Number($('volume').value));mixerLayers.forEach(layer=>{if(!layer.connected){const soloActive=mixerLayers.some(x=>x.solo);engine.addLayer(layer.id,layer.audio,(!layer.muted&&(!soloActive||layer.solo))?layer.volume:0,layer);layer.connected=true;}});return engine;}
 
 let mixerLayers=[],mixerPanel=null,mixerCategory='Voice',savedProjectData={},mediaDbPromise=null;
 function syncMixerLayers(){
@@ -165,9 +165,9 @@ function addMixerLayer(file,role,restore={},persist=true){
  if(!file.type.startsWith('audio/')){alert('Choose a supported audio file.');return;}
  const id=restore.id||('mix-'+Date.now()+'-'+Math.random().toString(36).slice(2,7)),url=URL.createObjectURL(file);
  const el=document.createElement('audio');el.preload='auto';el.hidden=true;el.src=url;el.preservesPitch=false;
- const layer={id,file,url,audio:el,role,volume:.85,rate:1,offset:0,muted:false,solo:false,pan:0,bass:0,treble:0,delay:0,reverb:0,connected:false,...restore,id,file,url,audio:el,role};
- mixerLayers.push(layer);mixerPanel.appendChild(el);renderMixerLayers();
- if(engine&&engine.ready){engine.addLayer(id,el,layer.volume,layer);layer.connected=true;}
+ const layer={id,file,url,audio:el,role,volume:.85,rate:1,pitch:0,offset:0,muted:false,solo:false,pan:0,bass:0,treble:0,delay:0,reverb:0,connected:false,...restore,id,file,url,audio:el,role};
+ el.playbackRate=layer.rate||1;mixerLayers.push(layer);mixerPanel.appendChild(el);renderMixerLayers();
+ if(engine&&engine.ready){engine.addLayer(id,el,layer.volume,layer);layer.connected=true;applyMixerSoloState();}
  syncMixerLayers();if(persist)saveMediaAsset(id,file);saveSettings();setStatus('Audio layer added');
 }
 function applyMixerSoloState(){
@@ -236,7 +236,7 @@ async function restoreSavedMedia(){
 }
 
 function saveSettings(){
- const data={mainPitch:$('mainPitch')?$('mainPitch').value:0,layers:mixerLayers.map(l=>({id:l.id,role:l.role,volume:l.volume,rate:l.rate,offset:l.offset,muted:l.muted,solo:l.solo,pan:l.pan,bass:l.bass,treble:l.treble,delay:l.delay,reverb:l.reverb})),title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,positions,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
+ const data={mainPitch:$('mainPitch')?$('mainPitch').value:0,layers:mixerLayers.map(l=>({id:l.id,role:l.role,volume:l.volume,rate:l.rate,pitch:l.pitch,offset:l.offset,muted:l.muted,solo:l.solo,pan:l.pan,bass:l.bass,treble:l.treble,delay:l.delay,reverb:l.reverb})),title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,positions,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
  try{localStorage.setItem('waveforge-v1',JSON.stringify(data));setStatus('Saved locally');}catch(e){setStatus('Ready');}
 }
 function loadSettings(){
