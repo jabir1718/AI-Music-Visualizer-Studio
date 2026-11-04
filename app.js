@@ -60,7 +60,7 @@ function draw(){
  const grad=ctx.createRadialGradient(w*.5,h*.4,0,w*.5,h*.5,h*.75);grad.addColorStop(0,'#29304f');grad.addColorStop(1,'#080d18');ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
  if(source){
   const sw=source.videoWidth||source.naturalWidth,sh=source.videoHeight||source.naturalHeight;
-  const scale=Math.max(w/sw,h/sh),dw=sw*scale,dh=sh*scale,x=(w-dw)/2,y=(h-dh)/2;
+  const motion=window.WaveForgeAutoVideo?window.WaveForgeAutoVideo.getMotion(audio.currentTime||0):{scale:1,x:0,y:0};const scale=Math.max(w/sw,h/sh)*motion.scale,dw=sw*scale,dh=sh*scale,x=(w-dw)/2+motion.x*w,y=(h-dh)/2+motion.y*h;
   const aiHandled=window.WaveForgeSegmentation&&window.WaveForgeSegmentation.getSettings().enabled&&window.WaveForgeSegmentation.draw(ctx,source,x,y,dw,dh,w,h);
   const keySettings=window.WaveForgeChromaKey?window.WaveForgeChromaKey.getSettings():{enabled:false};
   if(aiHandled){}
@@ -661,7 +661,7 @@ window.WaveForgeAssetBridge={
  }
 };
 function initArtworkLayers(){if(window.WaveForgeArtworkLayers)window.WaveForgeArtworkLayers.mount($('artworkLayerPanel'),{saveMediaAsset,getMediaAsset,deleteMediaAsset,onChange:saveSettings});}
-function initAutoVideoEditor(){if(window.WaveForgeAutoVideo)window.WaveForgeAutoVideo.mount($('autoVideoPanel'),{saveMediaAsset,getMediaAsset,deleteMediaAsset,onChange:saveSettings,getBpm:()=>manualBpm||120});}
+function initAutoVideoEditor(){if(window.WaveForgeAutoVideo)window.WaveForgeAutoVideo.mount($('autoVideoPanel'),{saveMediaAsset,getMediaAsset,deleteMediaAsset,onChange:saveSettings,getBpm:()=>manualBpm||120,getMusicDuration:()=>audio.duration||0});}
 function initOfflineEditAssistant(){if(window.WaveForgeOfflineAssistant)window.WaveForgeOfflineAssistant.mount(document.querySelector('.workspace'),{onApply:saveSettings});}
 
 $('mediaInput').onchange=e=>{const f=e.target.files[0];if(f)setBackgroundFile(f).catch(error=>{setStatus(error.message);$('mediaStatus').textContent=error.message;});};
