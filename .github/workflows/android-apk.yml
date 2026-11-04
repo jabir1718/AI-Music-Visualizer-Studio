@@ -7,6 +7,8 @@ on:
     paths:
       - 'index.html'
       - 'style.css'
+      - 'studio-shell.js'
+      - 'option-preview.js'
       - 'app.js'
       - 'audio-engine.js'
       - 'bpm-engine.js'
@@ -51,7 +53,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Validate JavaScript syntax
-        run: node --check app.js && node --check lyrics-engine.js && node --check audio-engine.js && node --check bpm-engine.js && node --check export.js && node --check project-file.js && node --check image-search.js && node --check filter-studio.js && node --check chroma-key.js && node --check ai-segmentation.js && node --check audio-cleanup.js && node --check voice-recorder.js && node --check symbol-library.js && node --check three-studio.js && node --check video-audio-extractor.js && node --check sound-library.js && node --check artwork-layers.js && node --check auto-video-editor.js && node --check offline-edit-assistant.js && node --check typography-studio.js && node --check timeline-engine.js && node --check timeline-view.js && node --check history-engine.js && node --check keyframe-engine.js
+        run: node --check studio-shell.js && node --check option-preview.js && node --check app.js && node --check lyrics-engine.js && node --check audio-engine.js && node --check bpm-engine.js && node --check export.js && node --check project-file.js && node --check image-search.js && node --check filter-studio.js && node --check chroma-key.js && node --check ai-segmentation.js && node --check audio-cleanup.js && node --check voice-recorder.js && node --check symbol-library.js && node --check three-studio.js && node --check video-audio-extractor.js && node --check sound-library.js && node --check artwork-layers.js && node --check auto-video-editor.js && node --check offline-edit-assistant.js && node --check typography-studio.js && node --check timeline-engine.js && node --check timeline-view.js && node --check history-engine.js && node --check keyframe-engine.js
 
       - name: Set up Node
         uses: actions/setup-node@v5
