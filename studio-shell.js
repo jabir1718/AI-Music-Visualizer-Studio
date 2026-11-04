@@ -31,6 +31,10 @@ function init(){
  modal.innerHTML='<div class="wf-modal-backdrop" data-close="1"></div><section class="wf-modal-sheet" role="dialog" aria-modal="true" aria-labelledby="wfModalTitle"><header class="wf-modal-head"><div><span class="wf-kicker">WAVEFORGE STUDIO</span><h2 id="wfModalTitle">Tool</h2></div><button type="button" class="wf-modal-close" data-close="1" aria-label="Close">×</button></header><div class="wf-modal-preview"><span class="wf-modal-orb">✦</span><div><small>QUICK PREVIEW</small><b id="wfModalPreviewTitle">Selected tool</b><span id="wfModalPreviewText">Your controls are ready.</span></div></div><div class="wf-modal-tabs" id="wfModalTabs"></div><div class="wf-modal-content" id="wfModalContent"></div></section>';
  editor.insertBefore(dashboard,stageWrap);
  dashboard.append(hero,timeline,toolSection);
+ const legacyHeading=editor.querySelector(':scope > .section-heading');if(legacyHeading)legacyHeading.remove();
+ const showcase=document.createElement('section');showcase.className='wf-showcase-strip';
+ showcase.innerHTML='<button type="button" data-showcase="templates"><span>▣</span><b>Templates</b></button><button type="button" data-showcase="visualizers"><span>◎</span><b>Visualizer styles</b></button><button type="button" data-showcase="effects"><span>✦</span><b>Effects preview</b></button><button type="button" data-showcase="save"><span>⇩</span><b>Save project</b></button><button type="button" data-showcase="share"><span>↗</span><b>Share app</b></button><button type="button" data-showcase="reset"><span>⟲</span><b>Reset preview</b></button>';
+ dashboard.append(showcase);
  editor.append(bottom,modal);
  const audioPanel=panelMap.get('audioPanel');
  if(audioPanel){
@@ -127,6 +131,24 @@ function init(){
   if(a==='timeline')openTool('autoVideoPanel','Timeline','Edit and arrange your video segments.',panelMap.get('autoVideoPanel'));
   if(a==='settings')openTool('wfExportPanel','Settings','Project output and export settings.',exportPanel);
   if(a==='preview'){stageWrap.classList.toggle('wf-preview-focus');b.classList.toggle('active',stageWrap.classList.contains('wf-preview-focus'));}
+ });
+ showcase.addEventListener('click',async event=>{
+  const button=event.target.closest('[data-showcase]');if(!button)return;
+  const action=button.dataset.showcase;
+  if(action==='templates')openTool('autoVideoPanel','Templates','Choose a montage template and create a beat-synced edit.',panelMap.get('autoVideoPanel'));
+  if(action==='visualizers')openTool('visualPanel','Visualizer styles','Choose a live audio-reactive visualizer.',panelMap.get('visualPanel'));
+  if(action==='effects'){const p=panelFor('filterStudio');openTool('filterStudio','Effects preview','Apply one of the available photo and video filter looks.',p);}
+  if(action==='save'){const save=document.getElementById('saveProjectFile');if(save)save.click();else bottom.querySelector('[data-dock="settings"]').click();}
+  if(action==='share'){
+   const shareData={title:'WaveForge Studio',text:'Create music visualizers with WaveForge Studio.',url:location.href};
+   try{if(navigator.share)await navigator.share(shareData);else if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(location.href);button.querySelector('b').textContent='Link copied';setTimeout(()=>button.querySelector('b').textContent='Share app',1800);}else{button.querySelector('b').textContent='Share unavailable';}}catch(error){if(error&&error.name!=='AbortError')button.querySelector('b').textContent='Share unavailable';}
+  }
+  if(action==='reset'){
+   const defaults=[['titleInput','YOUR TRACK'],['subtitleInput','Create something unforgettable'],['visualColor','aurora'],['intensity','65'],['sensitivity','55'],['exportRatio','9:16']];
+   defaults.forEach(([id,value])=>{const control=document.getElementById(id);if(control){control.value=value;control.dispatchEvent(new Event(control.tagName==='SELECT'?'change':'input',{bubbles:true}));}});
+   document.querySelector('.style-card[data-style="bars"]')?.click();document.querySelector('.ratio[data-ratio="9:16"]')?.click();
+   button.querySelector('b').textContent='Preview reset';setTimeout(()=>button.querySelector('b').textContent='Reset preview',1800);
+  }
  });
  const media=stageWrap.querySelector('.media-tools');if(media)hero.append(media);
  const drag=stageWrap.querySelector('.drag-hint');if(drag)hero.append(drag);
