@@ -411,6 +411,7 @@ function captureUndoState(){
   typography:window.WaveForgeTypography?window.WaveForgeTypography.getAll():null,
   filter:window.WaveForgeFilters?window.WaveForgeFilters.getSettings():null,
   chromaKey:window.WaveForgeChromaKey?window.WaveForgeChromaKey.getSettings():null,
+  aiSegmentation:window.WaveForgeSegmentation?window.WaveForgeSegmentation.getSettings():null,
   lyrics:JSON.parse(JSON.stringify(lyrics)),manualBpm,tapBeatOffset,
   intensity:$('intensity').value,sensitivity:$('sensitivity').value,
   mainPitch:$('mainPitch')?$('mainPitch').value:0,mainEffects:readMainEffects(),
@@ -436,6 +437,7 @@ function restoreUndoState(state){
  if(window.WaveForgeTypography&&state.typography)window.WaveForgeTypography.setAll(state.typography);
  if(window.WaveForgeFilters&&state.filter)window.WaveForgeFilters.set(state.filter.filterPreset,state.filter.filterIntensity);
  if(window.WaveForgeChromaKey&&state.chromaKey)window.WaveForgeChromaKey.set(state.chromaKey);
+ if(window.WaveForgeSegmentation&&state.aiSegmentation){window.WaveForgeSegmentation.setSettings(state.aiSegmentation);if($('aiSegmentationEnabled'))$('aiSegmentationEnabled').checked=state.aiSegmentation.enabled;}
  if(Array.isArray(state.lyrics))lyrics=JSON.parse(JSON.stringify(state.lyrics));
  if(Number.isFinite(state.manualBpm))manualBpm=state.manualBpm;
  if(Number.isFinite(state.tapBeatOffset))tapBeatOffset=state.tapBeatOffset;
