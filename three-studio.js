@@ -12,8 +12,8 @@ const FONT_URLS={
 };
 const FONT_FAMILIES=Object.keys(FONT_URLS);
 const SHAPES=['box','sphere','torus','torus-knot','cone','cylinder','octahedron','dodecahedron','icosahedron','tetrahedron','text'];
-const DEFAULTS={shape:'torus-knot',color:'#57d8ff',scale:1,rotationX:0,rotationY:0,rotationZ:0,positionX:0,positionY:0,positionZ:0,text:'WAVEFORGE',textDepth:.16,fontFamily:'helvetiker_bold',metalness:.65,roughness:.25,light:1.35,autoRotate:true};
-let THREE=null,loading=null,FontLoaderClass=null,TextGeometryClass=null,loadedFonts=new Map(),textToolsLoading=null,fontLoads=new Map();
+const DEFAULTS={shape:'torus-knot',color:'#57d8ff',scale:1,rotationX:0,rotationY:0,rotationZ:0,positionX:0,positionY:0,positionZ:0,text:'WAVEFORGE',textDepth:.16,fontFamily:'helvetiker_bold',metalness:.65,roughness:.25,light:1.35,autoRotate:true,overlayEnabled:false,overlayScale:.55,overlayX:.5,overlayY:.55};
+let THREE=null,loading=null,FontLoaderClass=null,TextGeometryClass=null,loadedFonts=new Map(),textToolsLoading=null,fontLoads=new Map(),activeConfig=normalizeConfig(),activeRenderer=null,activeScene=null,activeCamera=null,activeMesh=null;
 function normalizeConfig(input={}){
  const number=(v,f,min,max)=>Math.max(min,Math.min(max,Number.isFinite(Number(v))?Number(v):f));
  return{
@@ -28,7 +28,7 @@ function normalizeConfig(input={}){
   metalness:number(input.metalness,DEFAULTS.metalness,0,1),
   roughness:number(input.roughness,DEFAULTS.roughness,.05,1),
   light:number(input.light,DEFAULTS.light,.2,3),
-  autoRotate:input.autoRotate===undefined?DEFAULTS.autoRotate:!!input.autoRotate
+  autoRotate:input.autoRotate===undefined?DEFAULTS.autoRotate:!!input.autoRotate,overlayEnabled:!!input.overlayEnabled,overlayScale:number(input.overlayScale,DEFAULTS.overlayScale,.15,.9),overlayX:number(input.overlayX,DEFAULTS.overlayX,0,1),overlayY:number(input.overlayY,DEFAULTS.overlayY,0,1)
  };
 }
 async function loadThree(){
@@ -51,6 +51,12 @@ async function loadTextTools(fontFamily='helvetiker_bold'){
  fontLoads.set(selected,task);
  try{return await task;}finally{fontLoads.delete(selected);}
 }
+function getSettings(){return normalizeConfig(activeConfig);}
+function setSettings(value){activeConfig=normalizeConfig(value);return getSettings();}
+function drawToCanvas(ctx,w,h){
+ if(!activeConfig.overlayEnabled||!activeRenderer||!activeMesh)return false;
+ try{activeRenderer.render(activeScene,activeCamera);const size=Math.min(w,h)*activeConfig.overlayScale,x=activeConfig.overlayX*w-size/2,y=activeConfig.overlayY*h-size/2;ctx.save();ctx.drawImage(activeRenderer.domElement,x,y,size,size);ctx.restore();return true;}catch(error){return false;}
+}
 function geometry(T,shape){
  switch(shape){
   case'box':return new T.BoxGeometry(1.45,1.45,1.45,2,2,2);
@@ -70,7 +76,7 @@ function mount(host,options={}){
  const panel=root.document.createElement('section');panel.id='threeObjectStudio';panel.className='three-object-studio';
  panel.innerHTML='<div class="three-studio-head"><div><span class="eyebrow">REAL-TIME WEBGL OBJECT</span><h3>3D Object Studio</h3><p>Build a lit 3D primitive, rotate it by touch, then export a transparent PNG logo.</p></div><span class="font-count">3D</span></div><button type="button" class="btn small" id="threeLoad">Load 3D workspace</button><div id="threeViewport" class="three-viewport" aria-label="Interactive 3D object preview"></div><div class="three-controls" id="threeControls" hidden><label>Object<select id="threeShape">'+SHAPES.map(x=>'<option value="'+x+'">'+x.replace('-',' ')+'</option>').join('')+'</select></label><label id="threeTextWrap" hidden>3D text<input id="threeText" type="text" maxlength="18" value="WAVEFORGE"></label><label id="threeFontWrap" hidden>3D font<select id="threeFont">'+FONT_FAMILIES.map(x=>'<option value="'+x+'">'+x.replace(/_/g,' ')+'</option>').join('')+'</select></label><label id="threeDepthWrap" hidden>Extrusion depth <output id="threeDepthValue">0.16</output><input id="threeDepth" type="range" min="5" max="60" value="16"></label><label>Material color<input id="threeColor" type="color" value="#57d8ff"></label><label>Scale <output id="threeScaleValue">100%</output><input id="threeScale" type="range" min="35" max="250" value="100"></label><label>Metalness <output id="threeMetalValue">65%</output><input id="threeMetal" type="range" min="0" max="100" value="65"></label><label>Roughness <output id="threeRoughValue">25%</output><input id="threeRough" type="range" min="5" max="100" value="25"></label><label>Light <output id="threeLightValue">135%</output><input id="threeLight" type="range" min="20" max="300" value="135"></label><label>Rotation X <output id="threeXValue">0°</output><input id="threeX" type="range" min="-180" max="180" value="0"></label><label>Rotation Y <output id="threeYValue">0°</output><input id="threeY" type="range" min="-180" max="180" value="0"></label><label>Rotation Z <output id="threeZValue">0°</output><input id="threeZ" type="range" min="-180" max="180" value="0"></label><label>Position X <output id="threePXValue">0</output><input id="threePX" type="range" min="-150" max="150" value="0"></label><label>Position Y <output id="threePYValue">0</output><input id="threePY" type="range" min="-150" max="150" value="0"></label><label>Position Z <output id="threePZValue">0</output><input id="threePZ" type="range" min="-150" max="150" value="0"></label><label class="three-auto"><input id="threeAuto" type="checkbox" checked> Auto rotate</label></div><div class="three-actions"><button type="button" class="btn small primary" id="threeExport" disabled>Export transparent PNG logo</button><button type="button" class="btn small" id="threeReset" disabled>Reset object</button></div><p id="threeStatus" class="hint" aria-live="polite">The 3D engine loads only when you tap the button. Internet and WebGL support are required.</p><small class="three-license">Powered by Three.js (MIT). Export is a 1024 × 1024 PNG snapshot; it is not a 3D model file or 16K render.</small>';
  host.appendChild(panel);
- const $=id=>panel.querySelector('#'+id),viewport=$('threeViewport');let renderer=null,scene=null,camera=null,mesh=null,material=null,raf=0,config=normalizeConfig(),drag=null,resizeObserver=null;
+ const $=id=>panel.querySelector('#'+id),viewport=$('threeViewport');let renderer=null,scene=null,camera=null,mesh=null,material=null,raf=0,config=normalizeConfig(activeConfig),drag=null,resizeObserver=null;
  function report(message){$('threeStatus').textContent=message;}
  function updateLabels(){
   $('threeScaleValue').textContent=Math.round(config.scale*100)+'%';$('threeMetalValue').textContent=Math.round(config.metalness*100)+'%';$('threeRoughValue').textContent=Math.round(config.roughness*100)+'%';$('threeLightValue').textContent=Math.round(config.light*100)+'%';
@@ -90,10 +96,11 @@ function mount(host,options={}){
   if(config.shape!==shapeName){geom.dispose();return;}
   if(mesh){scene.remove(mesh);mesh.geometry.dispose();mesh.material.dispose();}
   material=new THREE.MeshStandardMaterial({color:config.color,metalness:config.metalness,roughness:config.roughness});
-  mesh=new THREE.Mesh(geom,material);
+  mesh=new THREE.Mesh(geom,material);activeMesh=mesh;
   mesh.scale.setScalar(config.scale);mesh.rotation.set(config.rotationX*Math.PI/180,config.rotationY*Math.PI/180,config.rotationZ*Math.PI/180);mesh.position.set(config.positionX,config.positionY,config.positionZ);scene.add(mesh);$('threeTextWrap').hidden=config.shape!=='text';$('threeFontWrap').hidden=config.shape!=='text';$('threeDepthWrap').hidden=config.shape!=='text';$('threeFont').value=config.fontFamily;
  }
  function apply(){
+  activeConfig=normalizeConfig(config);
   if(!mesh||!material)return;
   material.color.set(config.color);material.metalness=config.metalness;material.roughness=config.roughness;material.needsUpdate=true;
   mesh.scale.setScalar(config.scale);mesh.rotation.set(config.rotationX*Math.PI/180,config.rotationY*Math.PI/180,config.rotationZ*Math.PI/180);mesh.position.set(config.positionX,config.positionY,config.positionZ);
@@ -106,11 +113,11 @@ function mount(host,options={}){
  }
  async function initialize(){
   const T=await loadThree();
-  renderer=new T.WebGLRenderer({alpha:true,antialias:true,preserveDrawingBuffer:true});
+  renderer=new T.WebGLRenderer({alpha:true,antialias:true,preserveDrawingBuffer:true});activeRenderer=renderer;
   renderer.setPixelRatio(Math.min(2,root.devicePixelRatio||1));renderer.setClearColor(0x000000,0);renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
   renderer.domElement.style.width='100%';renderer.domElement.style.height='100%';renderer.domElement.style.display='block';renderer.domElement.style.touchAction='none';
   viewport.replaceChildren(renderer.domElement);
-  scene=new T.Scene();camera=new T.PerspectiveCamera(35,1,.1,100);camera.position.set(3,2.1,4);camera.lookAt(0,0,0);
+  scene=new T.Scene();activeScene=scene;camera=new T.PerspectiveCamera(35,1,.1,100);activeCamera=camera;camera.position.set(3,2.1,4);camera.lookAt(0,0,0);
   const ambient=new T.AmbientLight(0xffffff,.75),key=new T.DirectionalLight(0xffffff,config.light);key.position.set(3,4,5);
   const rim=new T.PointLight(0x57d8ff,config.light*1.15,12);rim.position.set(-3,1.5,-2);
   scene.add(ambient,key,rim);scene.userData.keyLight=key;scene.userData.rimLight=rim;
@@ -147,7 +154,7 @@ function mount(host,options={}){
  };
  root.addEventListener('beforeunload',()=>{if(raf)root.cancelAnimationFrame(raf);if(resizeObserver)resizeObserver.disconnect();if(renderer)renderer.dispose();},{once:true});
 }
-const api={SHAPES,FONT_FAMILIES,DEFAULTS,normalizeConfig,geometry,mount,loadThree,loadTextTools};
+const api={SHAPES,FONT_FAMILIES,DEFAULTS,normalizeConfig,geometry,mount,loadThree,loadTextTools,getSettings,setSettings,drawToCanvas};
 root.WaveForge3D=api;
 if(typeof module!=='undefined'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);
