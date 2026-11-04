@@ -12,7 +12,8 @@ A browser-based, local-first music visualizer editor. Version 1.0 foundation.
 - Touch selection outlines and resize/rotate handles for native text, current lyric and logo objects.
 - Per-object position/scale/rotation/opacity keyframes synchronized to the main audio playhead, with smooth interpolation and project persistence.
 - Per-layer generic voice styles (Telephone, Radio, Monster, Chipmunk, Robot and Alien) with independent EQ, echo, reverb and distortion.
-- Optional SoundTouchJS pitch-preserving processing per mixer layer, with separate semitone pitch and speed controls. First use loads the MPL-2.0 AudioWorklet package from jsDelivr; AudioWorklet support and internet access are required.
+- Optional SoundTouchJS pitch-preserving processing per mixer layer, with separate semitone pitch and speed controls.
+- Optional LPC formant correction for voice layers, with a 0–100% formant-strength control to retain more natural vocal timbre while shifting pitch. Both worklets are MPL-2.0 and load from jsDelivr on first use; AudioWorklet support and internet access are required.
 - Local spectral noise reduction for short voice/audio clips using a selected noise-only sample; cleaned audio is exported as a separate WAV layer.
 - Mixer clip in/out trimming, looping and split-at-playhead controls.
 - Searchable OpenMoji symbol collection (4,000+ upstream symbols) with SVG logo import. OpenMoji graphics are CC BY-SA 4.0; follow attribution and ShareAlike requirements.
@@ -39,7 +40,7 @@ Open `index.html` in a modern browser. For best results, serve the folder from a
 - BPM can be estimated offline from the audio or calculated from manual taps. Tapping while playback is running anchors a beat pulse grid to the current song position.
 - Mixer settings and imported audio files are restored from local browser storage on the same browser installation when IndexedDB data remains available.
 - Background music remains on its own gain path; changing a voice/effect layer's volume or per-layer effects does not change the background music path. Soloing a mixer layer also mutes the original background track, then restores it when Solo is turned off.
-- Without the optional SoundTouch AudioWorklet, pitch shifting uses playback-rate changes and also changes speed. The SoundTouch mode separates pitch and speed for mixer layers; AI/formant-preserving voice conversion remains unimplemented.
+- Without the optional SoundTouch AudioWorklet, pitch shifting uses playback-rate changes and also changes speed. The SoundTouch mode separates pitch and speed for mixer layers; optional LPC formant correction is available for more natural vocal timbre. AI voice conversion and voice identity cloning remain unimplemented.
 - The character-style presets are generic DSP chains, not generated voice models or real-person voice cloning.
 - Mixer clip trimming, looping and splitting are supported; a full visual multi-track video clip timeline and keyframed compositing of arbitrary imported media are not yet implemented. Undo/redo covers editor/visual settings; media and mixer-layer add/remove actions are not included. This foundation mixes separately supplied stems; it does not split vocals/instruments out of one mixed song.
 - Extra layers follow the main track timeline and are included in the mixed audio export stream. Real-device and exported-file verification is still required.
