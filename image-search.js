@@ -5,7 +5,7 @@ const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 function mount(){
  const host=document.getElementById('overlayPanel');if(!host||document.getElementById('assetSearchPanel'))return;
  const panel=document.createElement('section');panel.id='assetSearchPanel';panel.className='asset-search-panel';
- panel.innerHTML='<div class="asset-search-head"><div><span class="eyebrow">ASSET FINDER</span><h3>Search images & PNG artwork</h3><p>Find an image, preview it, then import it as your background or logo.</p></div><span class="asset-search-tag">ONLINE</span></div>'+
+ panel.innerHTML='<div class="asset-search-head"><div><span class="eyebrow">ASSET FINDER</span><h3>Search images & PNG artwork</h3><p>Find an image, preview it, then send it to the background, logo, artwork or text-decoration layer.</p></div><span class="asset-search-tag">ONLINE</span></div>'+
  '<div class="asset-search-controls"><label>Image source<select id="assetProvider"><option value="commons">Open licensed · Wikimedia Commons</option><option value="google">Google Images API</option></select></label><label>Search<input id="assetQuery" type="search" maxlength="120" placeholder="e.g. dark skull PNG, neon city"></label><button id="assetSearchBtn" class="btn small" type="button">Search images</button></div>'+
  '<div id="googleCredentials" class="asset-credentials" hidden><label>Google API key<input id="assetGoogleKey" type="password" autocomplete="off" placeholder="Paste your Google API key"></label><label>Search engine ID (cx)<input id="assetGoogleCx" type="text" autocomplete="off" placeholder="Programmable Search Engine ID"></label><small>Credentials stay in this browser only. Google Custom Search JSON API access is restricted for new customers; see Google documentation before setting this up.</small></div>'+
  '<div id="assetSearchStatus" class="asset-search-status" aria-live="polite">Search Wikimedia Commons now, or configure Google credentials for Google image results.</div><div id="assetSearchResults" class="asset-search-results"></div>'+
@@ -38,7 +38,7 @@ async function search(){
    items=Object.values(data.query&&data.query.pages||{}).map(x=>{const i=x.imageinfo&&x.imageinfo[0]||{},m=i.extmetadata||{};return{title:x.title.replace(/^File:/,''),url:i.url,thumb:i.thumburl||i.url,width:i.width||0,height:i.height||0,source:'Wikimedia Commons',sourceUrl:'https://commons.wikimedia.org/wiki/'+encodeURIComponent(x.title),license:(m.LicenseShortName&&m.LicenseShortName.value||'Licence not stated')+' · '+(m.Artist&&m.Artist.value||'Attribution check required')}}).filter(x=>x.url);
   }
   if(!items.length){status('No images found. Try a shorter search.');return}
-  status(items.length+' image results. Choose Background or Logo to import.');
+  status(items.length+' image results. Choose how to use an image.');
   items.forEach(item=>results.appendChild(makeCard(item)));
  }catch(e){status('Search error: '+e.message)}
  finally{btn.disabled=false}
@@ -51,8 +51,10 @@ function makeCard(item){
  const actions=document.createElement('div');actions.className='asset-result-actions';
  const bg=document.createElement('button');bg.type='button';bg.className='btn small';bg.textContent='Use as background';bg.addEventListener('click',()=>importImage(item,'background',bg));
  const logo=document.createElement('button');logo.type='button';logo.className='btn small';logo.textContent='Use as logo';logo.addEventListener('click',()=>importImage(item,'logo',logo));
+ const artwork=document.createElement('button');artwork.type='button';artwork.className='btn small';artwork.textContent='Add as artwork';artwork.addEventListener('click',()=>importImage(item,'artwork',artwork));
+ const textDecoration=document.createElement('button');textDecoration.type='button';textDecoration.className='btn small';textDecoration.textContent='Use with text';textDecoration.addEventListener('click',()=>importImage(item,'text-decoration',textDecoration));
  const source=document.createElement('a');source.href=item.sourceUrl||(/^https?:/.test(item.source||'')?item.source:item.url);source.target='_blank';source.rel='noopener';source.textContent='Source / licence';
- actions.append(bg,logo,source);card.append(img,title,meta,actions);return card;
+ actions.append(bg,logo,artwork,textDecoration,source);card.append(img,title,meta,actions);return card;
 }
 async function importImage(item,target,button){
  button.disabled=true;const old=button.textContent;button.textContent='Fetching…';
@@ -61,8 +63,8 @@ async function importImage(item,target,button){
   const blob=await response.blob();if(!blob.type.startsWith('image/'))throw new Error('The selected result is not a supported image.');
   if(blob.size>30*1024*1024)throw new Error('Image is larger than the 30 MB import limit.');
   const file=new File([blob],safeName(item.title,blob.type),{type:blob.type});
-  const input=document.getElementById(target==='background'?'mediaInput':'logoInput');
-  const transfer=new DataTransfer();transfer.items.add(file);input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));
+  if(!window.WaveForgeAssetBridge||typeof window.WaveForgeAssetBridge.importFile!=='function')throw new Error('The editor import bridge is not ready. Reload the studio and try again.');
+  await window.WaveForgeAssetBridge.importFile(file,target);
   status('Imported '+file.name+' as '+target+'. Source: '+item.source+'. '+(item.width&&item.height?'Original result: '+item.width+' × '+item.height+' px.':'Check original dimensions before export.'));
  }catch(e){status('Import failed: '+e.message)}
  finally{button.disabled=false;button.textContent=old}
