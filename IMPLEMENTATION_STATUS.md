@@ -163,3 +163,6 @@ Last source audit: 2026-11-05 (after connecting image-search and OpenMoji import
 
 
 - Expanded Auto Cut to accept mixed local photos and videos (up to 12 photos + 8 videos; 180 MB total) and added ten named offline montage templates. Each template changes cut spacing and photo motion; Flash Cuts adds a brief white flash. Photo-only edits can be paced to the imported song duration; video remains beat-cut into editable segments. Sources are preserved and media/project state uses the existing IndexedDB packaging bridge. Automated tests cover mixed import, template count, music-length photo montage, frame mapping, motion and manual edits. Android codec/export performance still needs a real device test; this is not AI scene understanding or a full transitions/compositor system.
+
+
+- Extended the free offline Quick Edit Assistant to recognize basic Roman Urdu alongside English for the supported command set: template selection (including all ten Auto Cut templates), cut intensity, canvas ratio, title/subtitle, bass/treble, volume and lyric size. Added regression tests for mixed English/Roman Urdu prompts and a subtitle/title parsing edge case. This remains a limited deterministic command parser, not a conversational AI or ChatGPT integration.
