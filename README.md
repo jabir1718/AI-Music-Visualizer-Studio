@@ -5,6 +5,7 @@ A browser-based, local-first music visualizer editor. Version 1.0 foundation.
 ## Included in this starter
 - Import a local audio track (browser-supported audio formats).
 - Add a photo or video as the visual background.
+- Extract audio from a local video in real time, then use the extracted audio as the main track or an independent mixer layer, or download it.
 - Live canvas visualizer: equalizer bars, waveform, circular spectrum and neon pulse.
 - 50 adjustable photo/video color filters across cinema, vintage, monochrome, vibrant, cool, warm, dreamy, night, analog and editorial looks; filters are included in canvas export.
 - Local audio playback, seeking and volume.
