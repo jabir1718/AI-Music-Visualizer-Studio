@@ -16,6 +16,8 @@
    [/(?:beat snap|social|reels|tiktok|fast social)/,'social']
   ];
   for(const [pattern,value] of styleRules)if(pattern.test(lower)){add('autoVideoStyle','Video editing template',value);break;}
+  const transitionMatch=lower.match(/(?:transition\\s*(?:to|as|:|ko)?\\s*(cut|fade|flash|wipe|zoom)|\\b(fade|flash|wipe|zoom)\\s+(?:transition|lagao|apply|rakho))/i);if(transitionMatch)add('autoVideoTransition','Selected clip transition',transitionMatch[1]||transitionMatch[2]);
+  const ramp=lower.match(/(?:speed\\s*)?ramp\\s*(?:to|:)?\\s*(0?\\.\\d+|[12](?:\\.\\d+)?)\\s*x?\\s*(?:to|se|->)\\s*(0?\\.\\d+|[12](?:\\.\\d+)?)\\s*x?/i);if(ramp){add('autoVideoSpeedStart','Selected clip start speed',Math.max(.5,Math.min(2,Number(ramp[1]))));add('autoVideoSpeedEnd','Selected clip end speed',Math.max(.5,Math.min(2,Number(ramp[2]))));}else{const startSpeed=lower.match(/(?:start|shuru)\\s*speed\\s*(?:to|ko)?\\s*(0?\\.\\d+|[12](?:\\.\\d+)?)\\s*x?/i),endSpeed=lower.match(/(?:end|akhir)\\s*speed\\s*(?:to|ko)?\\s*(0?\\.\\d+|[12](?:\\.\\d+)?)\\s*x?/i);if(startSpeed)add('autoVideoSpeedStart','Selected clip start speed',Math.max(.5,Math.min(2,Number(startSpeed[1]))));if(endSpeed)add('autoVideoSpeedEnd','Selected clip end speed',Math.max(.5,Math.min(2,Number(endSpeed[1]))));}
   if(/(?:more cuts|cut faster|faster cuts|zyada cuts|tez cuts|cuts? tez|cuts? fast|speed barhao)/i.test(lower))add('autoVideoIntensity','Cut intensity',Math.min(5,(Number(current.autoVideoIntensity)||3)+1));
   else if(/(?:fewer cuts|cut slower|slower cuts|kam cuts|slow cuts|cuts? ahista|cuts? dheema|speed kam)/i.test(lower))add('autoVideoIntensity','Cut intensity',Math.max(1,(Number(current.autoVideoIntensity)||3)-1));
   const vis=[[/equalizer bars|equalizer|bars/,'bars'],[/waveform|wave/,'wave'],[/circle|circular/,'circle'],[/neon pulse|neon/,'neon']];
@@ -60,9 +62,9 @@
   if(!host||!root.document)return null;
   const $=id=>host.querySelector('#'+id),input=$('offlineEditPrompt'),preview=$('offlineEditPreview'),apply=$('offlineEditApply'),analyse=$('offlineEditAnalyse'),status=$('offlineEditStatus');
   let pending=[];
-  function current(){const read=id=>$(id)?$(id).value:'';return{autoVideoIntensity:read('autoVideoIntensity'),mainBass:read('mainBass'),mainTreble:read('mainTreble'),lyricSize:read('lyricSize'),volume:read('volume')};}
+  function current(){const read=id=>$(id)?$(id).value:'';const av=options.getAutoVideo&&options.getAutoVideo(),segment=av&&av.getSelectedSegment?av.getSelectedSegment():null;return{autoVideoIntensity:read('autoVideoIntensity'),mainBass:read('mainBass'),mainTreble:read('mainTreble'),lyricSize:read('lyricSize'),volume:read('volume'),autoVideoSpeedStart:segment&&segment.rateStart||1,autoVideoSpeedEnd:segment&&segment.rateEnd||1};}
   function show(){
-   preview.innerHTML='';pending.forEach(action=>{const item=root.document.createElement('li');item.textContent=action.label+': '+action.value;preview.appendChild(item);});
+   preview.innerHTML='';pending.forEach(action=>{const item=root.document.createElement('li');item.textContent=action.label+': '+action.value+(action.id==='autoVideoSpeedStart'||action.id==='autoVideoSpeedEnd'?'×':'');preview.appendChild(item);});
    if(!pending.length){const item=root.document.createElement('li');item.textContent='No supported changes detected.';preview.appendChild(item);}
    apply.disabled=!pending.length;
   }
@@ -71,6 +73,7 @@
   apply.addEventListener('click',()=>{
    if(!pending.length)return;let count=0;
    pending.forEach(action=>{
+    if(action.id==='autoVideoTransition'||action.id==='autoVideoSpeedStart'||action.id==='autoVideoSpeedEnd'){const av=options.getAutoVideo&&options.getAutoVideo(),segment=av&&av.getSelectedSegment&&av.getSelectedSegment();if(!av||!segment){status.textContent='Select a video segment in Auto Cut first, then apply this command.';return;}if(action.id==='autoVideoTransition')av.setTransition(segment.id,action.value);else{const start=action.id==='autoVideoSpeedStart'?action.value:(segment.rateStart||1),end=action.id==='autoVideoSpeedEnd'?action.value:(segment.rateEnd||1);av.setSpeedRamp(segment.id,start,end);}count++;return;}
     if(action.id==='visualStyle'){const button=host.querySelector('.style-card[data-style="'+action.value+'"]');if(button){button.click();count++;}return;}
     const control=root.document.getElementById(action.id);if(!control)return;
     control.value=String(action.value);control.dispatchEvent(new Event(control.tagName==='SELECT'?'change':'input',{bubbles:true}));
