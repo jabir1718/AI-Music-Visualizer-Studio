@@ -56,7 +56,7 @@ function mount(host,before,options={}){
   const mainLabel=root.document.createElement('div');mainLabel.className='wf-timeline-label';mainLabel.textContent='♫ '+(opts.getMainName&&opts.getMainName()||'Background music');
   const mainLane=root.document.createElement('div');mainLane.className='wf-timeline-lane';mainLane.style.width=width+'px';
   const mainClip=root.document.createElement('div');mainClip.className='wf-timeline-clip main';mainClip.style.left='0px';mainClip.style.width=Math.max(20,mainDuration()*pps)+'px';mainClip.textContent='MAIN AUDIO';mainLane.appendChild(mainClip);
-  mainLane.addEventListener('click',e=>{if(e.target===mainLane)seekAt(e,mainLane);});
+  mainLane.addEventListener('click',e=>{if(e.target===mainLane)seekAt(e,mainLane);});mainClip.addEventListener('click',e=>{e.stopPropagation();seekAt(e,mainLane);});
   main.append(mainLabel,mainLane);rows.appendChild(main);
   getLayers().forEach((layer,index)=>{
    const row=root.document.createElement('div');row.className='wf-timeline-row';
@@ -76,10 +76,12 @@ function mount(host,before,options={}){
   updatePlayhead();
  }
  zoom.addEventListener('input',render);
+ const onMetadata=()=>render();
  if(opts.audioElement){
-  ['timeupdate','durationchange','seeked','loadedmetadata'].forEach(event=>opts.audioElement.addEventListener(event,updatePlayhead));
+  ['timeupdate','seeked'].forEach(event=>opts.audioElement.addEventListener(event,updatePlayhead));
+  ['durationchange','loadedmetadata'].forEach(event=>opts.audioElement.addEventListener(event,onMetadata));
  }
- const api={render,updatePlayhead,dispose(){disposed=true;if(opts.audioElement)['timeupdate','durationchange','seeked','loadedmetadata'].forEach(event=>opts.audioElement.removeEventListener(event,updatePlayhead));panel.remove();}};
+ const api={render,updatePlayhead,dispose(){disposed=true;if(opts.audioElement){['timeupdate','seeked'].forEach(event=>opts.audioElement.removeEventListener(event,updatePlayhead));['durationchange','loadedmetadata'].forEach(event=>opts.audioElement.removeEventListener(event,onMetadata));}panel.remove();}};
  panel.__api=api;render();return api;
 }
 const api={clipLayout,formatTime,mount};
