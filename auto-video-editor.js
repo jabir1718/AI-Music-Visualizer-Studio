@@ -82,7 +82,7 @@
   relayout();render();updateStatus('Imported '+newPhotos+' photo(s) and '+newVideos+' video(s). Original files are stored locally.');persist();return assets.size;
  }
  function move(index,delta){const next=index+delta;if(next<0||next>=segments.length)return;[segments[index],segments[next]]=[segments[next],segments[index]];relayout();render();persist();}
- function splitSegment(segmentId){const index=segments.findIndex(s=>s.id===segmentId);if(index<0||segments.length>=MAX_SEGMENTS)return false;const source=segments[index],mid=(source.sourceStart+source.sourceEnd)/2;if(mid-source.sourceStart<.1||source.sourceEnd-mid<.1)return false;const first={...source,id:id(),sourceEnd:mid},second={...source,id:id(),sourceStart:mid};segments.splice(index,1,first,second);relayout();selected=first.id;render();persist();return true;}
+ function splitSegment(segmentId){const index=segments.findIndex(s=>s.id===segmentId);if(index<0||segments.length>=MAX_SEGMENTS)return false;const source=segments[index],mid=(source.sourceStart+source.sourceEnd)/2;if(mid-source.sourceStart<.1||source.sourceEnd-mid<.1)return false;const midRate=((Number(source.rateStart)||1)+(Number(source.rateEnd)||1))/2;const first={...source,id:id(),sourceEnd:mid,rateEnd:midRate,rate:(Number(source.rateStart||1)+midRate)/2},second={...source,id:id(),sourceStart:mid,rateStart:midRate,rate:(midRate+Number(source.rateEnd||1))/2};segments.splice(index,1,first,second);relayout();selected=first.id;render();persist();return true;}
  function removeSegment(segmentId){segments=segments.filter(s=>s.id!==segmentId);relayout();render();persist();}
  function buildQueue(asset,cutLength){
   const duration=durationOf(asset),ranges=[];
