@@ -315,3 +315,5 @@ button[data-action-icon]:disabled{opacity:.45;cursor:not-allowed}
 .auto-video-panel .auto-video-controls select{min-height:42px}.auto-video-clip-head small{font-variant-numeric:tabular-nums}.auto-video-panel .hint{line-height:1.55}
 
 .auto-video-speed{display:grid;grid-template-columns:1fr 1fr;gap:10px}.auto-video-clip select{width:100%;min-height:38px;background:var(--panel-soft);color:var(--text);border:1px solid var(--line);border-radius:9px;padding:7px}@media(max-width:560px){.auto-video-speed{grid-template-columns:1fr}}
+
+.auto-video-actions button:disabled{opacity:.55;cursor:wait}
