@@ -152,7 +152,7 @@ Last source audit: 2026-11-05 (after connecting image-search and OpenMoji import
 - Generated montage segments are non-destructive references to the original local videos. Users can reorder, shorten, split or remove individual segments. The current preview/export canvas follows the main music playhead and switches the active video source; source files are not overwritten.
 - Video files are stored locally in the existing IndexedDB media store. Auto-video source and segment metadata are included in local editor settings and portable .waveforge project packaging.
 - Automated tests now cover imports, beat-cut planning, playback mapping and manual segment edits. Latest CI is being rerun after a test exposed and corrected an async return mismatch; APK build and physical Infinix device behavior must be confirmed separately.
-- **Not yet implemented:** scene-change detection, speech-pause cuts, AI-generated captions, crossfade/transition library, speed ramps, zoom/motion effects, multi-layer video compositing, cloud AI, and device-verified export codec/resolution. This first Auto Cut implementation makes direct cuts only; do not advertise the remaining items as available.
+- **Still not implemented:** speech-pause detection, AI-generated captions, true overlapping crossfades, multi-layer video compositing, cloud AI, and device-verified export codec/resolution. Local frame-difference scene suggestions, per-clip speed ramps and canvas transition treatments are now implemented and covered by automated tests.
 
 ## Free offline editing helper — 2026-11-05
 
