@@ -6,7 +6,7 @@ const SVG_BASE='https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@'+VERSION+'/colo
 let entries=null,loading=null,selected=null;
 function normalizeEntry(item){
  if(!item||!/^[0-9A-F-]{4,32}$/i.test(String(item.hexcode||'')))return null;
- return{hexcode:String(item.hexcode).toUpperCase(),annotation:String(item.annotation||item.name||item.hexcode),tags:Array.isArray(item.tags)?item.tags:String(item.tags||'').split(/[ ,]+/).filter(Boolean),group:String(item.group||''),subgroup:String(item.subgroups||item.subgroup||'')};
+ return{hexcode:String(item.hexcode).toUpperCase(),annotation:String(item.annotation||item.name||item.hexcode),tags:[...(Array.isArray(item.tags)?item.tags:String(item.tags||'').split(/[ ,]+/).filter(Boolean)),...String(item.openmoji_tags||'').split(/[ ,]+/).filter(Boolean)],group:String(item.group||''),subgroup:String(item.subgroups||item.subgroup||'')};
 }
 function filterEntries(items,query='',group='All'){
  const q=String(query||'').trim().toLowerCase();
