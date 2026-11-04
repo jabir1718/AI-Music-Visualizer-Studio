@@ -88,7 +88,7 @@ async function processFile(file,options={},onProgress){
  try{
   if(onProgress)onProgress({progress:5,status:'Decoding audio…'});
   const buffer=await context.decodeAudioData(await file.arrayBuffer());
-  if(!Number.isFinite(buffer.duration)||buffer.duration>120)throw new Error('Noise cleanup is limited to 2-minute clips. Split the audio layer first.');
+  if(!Number.isFinite(buffer.duration)||buffer.duration>120)throw new Error('Noise cleanup is limited to 2-minute source files. Choose a shorter audio file.');
   const start=Math.max(0,Number(options.noiseStart)||0),end=Math.max(start+.02,Number(options.noiseEnd)||.5);
   if(end>buffer.duration)throw new Error('Noise sample range must be inside the audio clip.');
   if(onProgress)onProgress({progress:15,status:'Estimating the noise profile…'});
