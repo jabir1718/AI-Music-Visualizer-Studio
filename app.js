@@ -229,6 +229,14 @@ function initMixerUI(){
 }
 function selectMusicCategory(category){
  if(voiceRecorder){voiceRecorder.dispose();voiceRecorder=null;}
+ const detailHost=$('musicCategoryDetail');
+ const mainPitchPanel=document.querySelector('.mixer-main-pitch');
+ const mainFxPanel=document.querySelector('.main-effects-panel');
+ const mixerListHost=$('mixerList');
+ if(mainPitchPanel&&mainFxPanel&&mixerListHost&&category!=='Background music'){
+  mixerListHost.parentNode.insertBefore(mainPitchPanel,mixerListHost);
+  mixerListHost.parentNode.insertBefore(mainFxPanel,mixerListHost);
+ }
  mixerCategory=category;
  document.querySelectorAll('.music-category').forEach(btn=>btn.classList.toggle('active',btn.dataset.category===category));
  const detail=$('musicCategoryDetail'),role=$('mixerRole'),add=$('mixerAddBtn'),file=$('mixerFile');
@@ -257,14 +265,19 @@ function selectMusicCategory(category){
   const heading=document.createElement('b');heading.textContent='Choose an instrument stem';quick.append(heading);
   [['Bass stem','Bass'],['Drums','Drums'],['Piano','Piano'],['Guitar','Guitar'],['Instrumental','Full instrumental']].forEach(([value,label])=>{
    const button=document.createElement('button');button.type='button';button.className='btn small';button.textContent=label;button.setAttribute('aria-pressed',String(role.value===value));
-   button.addEventListener('click',()=>{role.value=value;quick.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));detail.querySelector('.music-detail-desc')?.setAttribute('data-selected',label);});
+   button.addEventListener('click',()=>{role.value=value;quick.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));detail.querySelector('.music-detail-desc')?.setAttribute('data-selected',label);const addButton=$('mixerAddBtn');if(addButton)addButton.textContent='Add '+label+' stem';const sourceLabel=$('mixerRole');if(sourceLabel)sourceLabel.setAttribute('aria-label','Selected instrument source: '+label);});
    quick.append(button);
   });
   detail.append(quick);
+  const selected=document.createElement('p');selected.className='music-selected-source';selected.textContent='Selected source: '+role.value;detail.append(selected);
  }
  if(category==='Background music'){
-  const note=document.createElement('p');note.className='music-master-link';note.textContent='Master controls are in the Background music effects section below.';detail.append(note);
-  document.getElementById('mainEffectsReset')?.scrollIntoView({block:'center',behavior:'smooth'});
+  const note=document.createElement('p');note.className='music-master-link';note.textContent='These live controls affect the original song only. Imported vocal and instrument layers keep their own independent mixer settings.';detail.append(note);
+  const mainPitchPanel=document.querySelector('.mixer-main-pitch'),mainFxPanel=document.querySelector('.main-effects-panel'),mixerListHost=$('mixerList');
+  if(mainPitchPanel)detail.append(mainPitchPanel);
+  if(mainFxPanel)detail.append(mainFxPanel);
+  const controls=detail.querySelectorAll('input[type="range"]');controls.forEach(input=>{input.setAttribute('aria-label',input.closest('label')?.textContent?.trim()||'Background music control');});
+  detail.querySelector('.music-detail-state').textContent='MASTER CONTROLS READY';
  }
  const recordRoles={'Voice':'Voice','Ad-lib':'Ad-lib','Humming':'Humming','Harmony':'Harmony','Voice FX':'Voice FX'};if(recordRoles[category]&&window.WaveForgeRecorder)voiceRecorder=window.WaveForgeRecorder.mount(detail,recordRoles[category],file=>addMixerLayer(file,recordRoles[category]));
  renderMixerLayers();
