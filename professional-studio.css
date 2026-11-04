@@ -1,0 +1,71 @@
+/* WaveForge Professional Studio skin — layered on top of the existing functional editor. */
+:root{--wf-ink:#050713;--wf-panel:#0b1022;--wf-panel-hi:#111a35;--wf-edge:#26365d;--wf-cyan:#27dfff;--wf-violet:#a34dff;--wf-pink:#ff38cf;--wf-gold:#ffc85a}
+body.wf-dashboard-app{background:radial-gradient(ellipse at 50% -15%,#17265a 0,#080b1a 44%,#03050d 100%);color:#f4f7ff}
+body.wf-dashboard-app .topbar{background:linear-gradient(90deg,#070a18f5,#10102bf2,#070b1bf5);border-bottom:1px solid #2b5c9a;box-shadow:0 5px 28px #02040d99}
+body.wf-dashboard-app .brand-mark{background:linear-gradient(145deg,#fff1a6,#f6a82c 45%,#8c36ff);box-shadow:0 0 18px #f0b64b88;color:#130e29}
+body.wf-dashboard-app .brand{letter-spacing:1.1px;text-shadow:0 0 16px #8c63ff55}
+body.wf-dashboard-app .btn{border-radius:12px;border-color:#344b7a;background:linear-gradient(180deg,#17264a,#0a1128);box-shadow:inset 0 1px #ffffff20,0 3px 0 #030612;color:#edf6ff}
+body.wf-dashboard-app .btn.primary{background:linear-gradient(110deg,#8a2bff,#db35d5 52%,#168dff);border-color:#a65dff;color:white;box-shadow:0 0 18px #9d35ff77,inset 0 1px #ffffff70,0 3px 0 #35125d}
+body.wf-dashboard-app .wf-dashboard{gap:9px}
+body.wf-dashboard-app .wf-hero,body.wf-dashboard-app .wf-timeline,body.wf-dashboard-app .wf-tools-section{background:linear-gradient(145deg,#101a35ed,#080d1ff5 65%,#10102b);border:1px solid #344b7b;border-radius:17px;box-shadow:inset 0 1px #ffffff12,0 9px 26px #0008}
+body.wf-dashboard-app .wf-hero{position:relative;overflow:hidden}
+body.wf-dashboard-app .wf-hero:before,body.wf-dashboard-app .wf-timeline:before,body.wf-dashboard-app .wf-tools-section:before{content:"";position:absolute;pointer-events:none;inset:0;border-radius:inherit;background:linear-gradient(120deg,#27dfff0b,transparent 35%,#c53cff0c);opacity:1}
+body.wf-dashboard-app .wf-hero .stage{border:1px solid #2b9edb;box-shadow:0 0 0 1px #8c3fff55,0 0 28px #087de966;background:#070b1a}
+body.wf-dashboard-app .wf-hero .stage canvas{filter:drop-shadow(0 0 5px #20dfff55)}
+body.wf-dashboard-app .wf-project-info{border-color:#344b7b}
+body.wf-dashboard-app .wf-project-info span{background:linear-gradient(145deg,#111c3a,#080e20);border:1px solid #263b69;border-radius:10px;padding:7px 10px}
+body.wf-dashboard-app .wf-project-info b{color:#f5f8ff}
+body.wf-dashboard-app .wf-kicker{color:#62e7ff;letter-spacing:1.65px}
+body.wf-dashboard-app .wf-timeline{position:relative}
+body.wf-dashboard-app .wf-transport{background:linear-gradient(90deg,#080b1b,#15102d,#080b1b);border-color:#6a42ba;box-shadow:inset 0 1px #ffffff12,0 0 14px #7c32e633}
+body.wf-dashboard-app .wf-transport button{border:1px solid #344d86;background:linear-gradient(145deg,#17264d,#080e24);box-shadow:inset 0 1px #ffffff20}
+body.wf-dashboard-app .wf-transport button[data-transport=play]{background:linear-gradient(145deg,#e32cff,#6325cb 55%,#087fc5);border-color:#d35cff;box-shadow:0 0 17px #db31ff99}
+body.wf-dashboard-app .wf-audio-lane{background:linear-gradient(90deg,#160d37,#08142c 55%,#0b1b37);border-color:#7042bc}
+body.wf-dashboard-app .wf-waveform{background:repeating-linear-gradient(90deg,#f13cff 0 2px,transparent 2px 4px);filter:drop-shadow(0 0 4px #e332ff)}
+body.wf-dashboard-app .wf-tool-card{position:relative;overflow:hidden;min-height:clamp(52px,8.7dvh,78px);border:1px solid #3d5e9b;border-radius:14px;background:linear-gradient(155deg,#1a2850 0,#101632 47%,#080d20 100%);box-shadow:inset 0 1px 0 #ffffff2a,inset 0 -5px 10px #0008,0 3px 0 #030611,0 0 12px #1766a333;transition:transform .18s,border-color .18s,box-shadow .18s}
+body.wf-dashboard-app .wf-tool-card:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(125deg,#ffffff12,transparent 30%,transparent 70%,#9b48ff12)}
+body.wf-dashboard-app .wf-tool-card:nth-child(3n+1),body.wf-dashboard-app .wf-tool-card:nth-child(3n+2){border-color:#3d5e9b;box-shadow:inset 0 1px #ffffff25,inset 0 -5px 10px #0008,0 3px 0 #030611,0 0 13px #1766a333}
+body.wf-dashboard-app .wf-tool-card:nth-child(4n+1){border-color:#a33ee8;box-shadow:inset 0 1px #ffffff25,inset 0 -5px 10px #0008,0 3px 0 #030611,0 0 13px #c32eff33}
+body.wf-dashboard-app .wf-tool-card:nth-child(4n+2){border-color:#168fc5;box-shadow:inset 0 1px #ffffff25,inset 0 -5px 10px #0008,0 3px 0 #030611,0 0 13px #17dfff33}
+body.wf-dashboard-app .wf-tool-card:hover,body.wf-dashboard-app .wf-tool-card:focus-visible{transform:translateY(-2px);border-color:#6deaff;box-shadow:inset 0 1px #ffffff35,0 0 20px #23cfff55,0 4px 0 #030611;outline:none}
+body.wf-dashboard-app .wf-tool-card-icon{font-size:clamp(19px,2.3vw,27px);color:#64eaff;text-shadow:0 0 12px #23dfff99}
+body.wf-dashboard-app .wf-tool-card:nth-child(4n+1) .wf-tool-card-icon{color:#f47aff;text-shadow:0 0 12px #e34bff99}
+body.wf-dashboard-app .wf-tool-card b{font-size:clamp(8px,1vw,11px);letter-spacing:.1px}
+body.wf-dashboard-app .wf-bottom-dock{background:linear-gradient(100deg,#090d22f5,#11103af7,#07152cf5);border:1px solid #3d86bd;box-shadow:0 0 25px #812cff44,inset 0 1px #ffffff35;backdrop-filter:blur(22px)}
+body.wf-dashboard-app .wf-bottom-dock button span{color:#5beaff}
+body.wf-dashboard-app .wf-bottom-dock .wf-dock-play{background:radial-gradient(circle at 40% 30%,#ff8aff,#b72aff 36%,#283cff 68%,#071027 74%);border:2px solid #5ceaff;box-shadow:0 0 12px #ee39ff,0 0 25px #1ecfff}
+body.wf-dashboard-app .wf-tool-modal{inset:64px 0 0;align-items:center;padding:12px}
+body.wf-dashboard-app .wf-modal-backdrop{background:#02040bdc;backdrop-filter:blur(13px)}
+body.wf-dashboard-app .wf-modal-sheet{width:min(1180px,96vw);height:min(82dvh,850px);max-height:calc(100% - 8px);border:1px solid #4772b9;border-radius:22px;background:linear-gradient(145deg,#121d3b 0,#090f24 58%,#170d32 100%);box-shadow:0 0 0 1px #bd3eff33,0 18px 70px #000c,0 0 35px #7c36ff44;padding:20px;display:flex;flex-direction:column;overflow:hidden}
+body.wf-dashboard-app .wf-modal-head{flex:0 0 auto;padding-bottom:12px;border-bottom:1px solid #2a3c68}
+body.wf-dashboard-app .wf-modal-head h2{font:750 22px Manrope;letter-spacing:-.4px}
+body.wf-dashboard-app .wf-modal-close{width:38px;height:38px;border:1px solid #5577b5;background:linear-gradient(145deg,#253967,#101a35);box-shadow:inset 0 1px #ffffff30}
+body.wf-dashboard-app .wf-modal-preview{flex:0 0 auto;background:linear-gradient(100deg,#211044,#0c1d3c 60%,#102b40);border-color:#4268a3;box-shadow:inset 0 1px #ffffff18}
+body.wf-dashboard-app .wf-modal-tabs{flex:0 0 auto;flex-wrap:wrap;overflow:visible;padding:4px 0 10px;border-bottom:1px solid #2a3c68}
+body.wf-dashboard-app .wf-modal-tabs button{border-radius:10px;padding:9px 14px;background:linear-gradient(180deg,#18264a,#0b132b);border-color:#3c5687;font-size:10px}
+body.wf-dashboard-app .wf-modal-tabs button.active{background:linear-gradient(110deg,#7024c8,#155b9e);border-color:#63eaff;box-shadow:0 0 14px #3a9fff55;color:white}
+body.wf-dashboard-app .wf-modal-content{flex:1 1 auto;min-height:0;overflow:auto;padding:12px 3px 4px;overscroll-behavior:contain}
+body.wf-dashboard-app .wf-modal-content>.panel{background:linear-gradient(145deg,#111b35,#080f22);border:1px solid #2f4779;border-radius:15px;padding:16px;box-shadow:inset 0 1px #ffffff12}
+body.wf-dashboard-app .wf-modal-content .panel-head{border-bottom:1px solid #263b65;padding-bottom:12px;margin-bottom:12px}
+body.wf-dashboard-app .wf-modal-content input:not([type=range]),body.wf-dashboard-app .wf-modal-content select,body.wf-dashboard-app .wf-modal-content textarea{background:#080f21;border:1px solid #344e80;color:#f3f7ff;border-radius:9px;padding:10px}
+body.wf-dashboard-app .wf-modal-content input[type=range]{accent-color:#cb4cff}
+body.wf-dashboard-app .wf-modal-content .btn{min-height:36px}
+body.wf-dashboard-app .wf-modal-content .music-category-nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));overflow:visible}
+body.wf-dashboard-app .wf-modal-content .music-category{border-radius:10px;background:linear-gradient(150deg,#1a2850,#0b1227);border-color:#344d80;color:#dce8ff}
+body.wf-dashboard-app .wf-modal-content .music-category.active{background:linear-gradient(110deg,#742bd1,#145d99);border-color:#53eaff;color:white;box-shadow:0 0 14px #4b9cff55}
+body.wf-dashboard-app .wf-modal-content .music-category-detail{background:#0b1530;border-color:#36558b;border-radius:13px}
+@media(max-width:700px){
+ body.wf-dashboard-app .wf-tool-modal{inset:56px 0 0;padding:0;align-items:flex-end}
+ body.wf-dashboard-app .wf-modal-sheet{width:100%;height:min(88dvh,900px);max-height:calc(100% - 2px);border-radius:20px 20px 0 0;padding:14px 12px calc(14px + env(safe-area-inset-bottom))}
+ body.wf-dashboard-app .wf-modal-head h2{font-size:18px}
+ body.wf-dashboard-app .wf-modal-tabs{display:flex;flex-wrap:nowrap;overflow-x:auto}
+ body.wf-dashboard-app .wf-modal-tabs button{flex:0 0 auto}
+ body.wf-dashboard-app .wf-modal-content{padding:10px 1px}
+ body.wf-dashboard-app .wf-modal-content .music-category-nav{display:flex;overflow-x:auto}
+ body.wf-dashboard-app .wf-tool-card{min-height:clamp(48px,7.4dvh,64px)}
+}
+@media(max-height:720px) and (max-width:700px){
+ body.wf-dashboard-app .wf-hero .stage{height:clamp(120px,20dvh,170px)!important;min-height:120px!important}
+ body.wf-dashboard-app .wf-tool-card{min-height:45px}
+}
+@media(prefers-reduced-motion:reduce){body.wf-dashboard-app .wf-tool-card{transition:none}}
