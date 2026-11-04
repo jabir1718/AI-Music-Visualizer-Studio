@@ -47,10 +47,11 @@ function estimateNoise(samples,sampleRate,start,end){
 function denoiseChannel(samples,sampleRate,options={}){
  const start=Math.max(0,Number(options.noiseStart)||0),end=Math.max(start+.02,Number(options.noiseEnd)||.5);
  const strength=Math.max(0,Math.min(3,options.strength===undefined?1.25:Number(options.strength))),floor=Math.max(.02,Math.min(.5,Number(options.floor)||.08));
- const noise=estimateNoise(samples,sampleRate,start,end),out=new Float64Array(samples.length),weight=new Float64Array(samples.length);
+ const noise=estimateNoise(samples,sampleRate,start,end),pad=SIZE,paddedLength=samples.length+2*pad;
+ const out=new Float64Array(paddedLength),weight=new Float64Array(paddedLength);
  const real=new Float64Array(SIZE),imag=new Float64Array(SIZE),bins=SIZE/2+1;
- for(let pos=0;pos<samples.length;pos+=HOP){
-  for(let i=0;i<SIZE;i++){real[i]=(samples[pos+i]||0)*windowFn[i];imag[i]=0;}
+ for(let pos=0;pos+SIZE<=paddedLength;pos+=HOP){
+  for(let i=0;i<SIZE;i++){const sourceIndex=pos+i-pad;real[i]=sourceIndex>=0&&sourceIndex<samples.length?samples[sourceIndex]*windowFn[i]:0;imag[i]=0;}
   fft(real,imag,false);
   for(let k=0;k<SIZE;k++){
    const bin=k<bins?k:SIZE-k,mag=Math.hypot(real[k],imag[k]),noiseMag=noise[bin];
@@ -58,10 +59,10 @@ function denoiseChannel(samples,sampleRate,options={}){
    real[k]*=ratio;imag[k]*=ratio;
   }
   fft(real,imag,true);
-  for(let i=0;i<SIZE&&pos+i<samples.length;i++){const w=windowFn[i];out[pos+i]+=real[i]*w;weight[pos+i]+=w*w;}
+  for(let i=0;i<SIZE;i++){const w=windowFn[i];out[pos+i]+=real[i]*w;weight[pos+i]+=w*w;}
  }
  const result=new Float32Array(samples.length);
- for(let i=0;i<samples.length;i++)result[i]=weight[i]>1e-8?out[i]/weight[i]:samples[i];
+ for(let i=0;i<samples.length;i++){const index=i+pad;result[i]=weight[index]>1e-8?out[index]/weight[index]:samples[i];}
  return result;
 }
 function processBuffer(buffer,options={},onProgress){
