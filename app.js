@@ -188,6 +188,20 @@ function applyMixerSoloState(){
  const soloActive=mixerLayers.some(x=>x.solo);
  mixerLayers.forEach(layer=>{const audible=!layer.muted&&(!soloActive||layer.solo);if(engine&&layer.connected)engine.setLayerVolume(layer.id,audible?layer.volume:0);});if(engine&&engine.ready)engine.setMainSoloMute(soloActive);
 }
+function applyLayerPreset(layer,preset){
+ const presets={
+  clean:{bass:0,treble:0,delay:0,reverb:0,pan:0,rate:1,pitch:0},
+  telephone:{bass:-8,treble:5,delay:0,reverb:.04,pan:0,rate:1,pitch:0},
+  radio:{bass:-5,treble:3,delay:.08,reverb:.02,pan:0,rate:1,pitch:0},
+  room:{bass:0,treble:1,delay:.04,reverb:.38,pan:0,rate:1,pitch:0},
+  echo:{bass:0,treble:0,delay:.72,reverb:.12,pan:0,rate:1,pitch:0},
+  dreamy:{bass:2,treble:2,delay:.28,reverb:.62,pan:0,rate:1,pitch:0}
+ };
+ const p=presets[preset]||presets.clean;Object.assign(layer,p,{preset});
+ layer.audio.playbackRate=layer.rate;layer.audio.preservesPitch=false;
+ if(engine&&layer.connected){engine.setLayerEQ(layer.id,layer.bass,layer.treble);engine.setLayerPan(layer.id,layer.pan);engine.setLayerDelay(layer.id,layer.delay);engine.setLayerReverb(layer.id,layer.reverb);}
+ renderMixerLayers();saveSettings();setStatus('Applied '+preset+' audio preset');
+}
 function renderMixerLayers(){
  const list=$('mixerList');list.innerHTML='';
  if(!mixerLayers.length){list.innerHTML='<p class="hint">No extra layers yet. Your original song remains the background music.</p>';return;}
@@ -199,6 +213,10 @@ function renderMixerLayers(){
   const solo=document.createElement('button');solo.className='btn small';solo.textContent=layer.solo?'Solo on':'Solo';decorateActionButton(solo);solo.setAttribute('aria-pressed',String(layer.solo));solo.onclick=()=>{layer.solo=!layer.solo;solo.textContent=layer.solo?'Solo on':'Solo';solo.setAttribute('aria-pressed',String(layer.solo));applyMixerSoloState();saveSettings();};
   const remove=document.createElement('button');remove.className='btn small';remove.textContent='Remove';decorateActionButton(remove);remove.onclick=()=>{if(engine&&layer.connected)engine.removeLayer(layer.id);layer.audio.pause();layer.audio.removeAttribute('src');layer.audio.load();URL.revokeObjectURL(layer.url);mixerLayers=mixerLayers.filter(x=>x!==layer);deleteMediaAsset(layer.id);renderMixerLayers();applyMixerSoloState();saveSettings();};
   head.append(info,mute,solo,remove);row.append(head);
+  const presetWrap=document.createElement('label');presetWrap.className='mixer-preset';presetWrap.textContent='Effect preset';
+  const preset=document.createElement('select');preset.setAttribute('aria-label','Audio effect preset');
+  [['clean','Clean'],['telephone','Telephone'],['radio','Radio'],['room','Small room'],['echo','Echo'],['dreamy','Dreamy reverb']].forEach(([value,label])=>{const option=document.createElement('option');option.value=value;option.textContent=label;preset.append(option);});
+  preset.value=layer.preset||'clean';preset.onchange=()=>applyLayerPreset(layer,preset.value);presetWrap.append(preset);row.append(presetWrap);
   const controls=document.createElement('div');controls.className='mixer-track-controls';
   function addRange(labelText,key,min,max,step,unit,apply){
    const wrap=document.createElement('label');wrap.textContent=labelText;const input=document.createElement('input');input.type='range';input.min=String(min);input.max=String(max);input.step=String(step);input.value=String(layer[key]??0);const readout=document.createElement('small');
@@ -250,7 +268,7 @@ async function restoreSavedMedia(){
 }
 
 function saveSettings(){
- const data={mainPitch:$('mainPitch')?$('mainPitch').value:0,layers:mixerLayers.map(l=>({id:l.id,role:l.role,volume:l.volume,rate:l.rate,pitch:l.pitch,offset:l.offset,muted:l.muted,solo:l.solo,pan:l.pan,bass:l.bass,treble:l.treble,delay:l.delay,reverb:l.reverb})),title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,lyricPosition:$('lyricPosition').value,positions,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
+ const data={mainPitch:$('mainPitch')?$('mainPitch').value:0,layers:mixerLayers.map(l=>({id:l.id,role:l.role,volume:l.volume,rate:l.rate,pitch:l.pitch,offset:l.offset,muted:l.muted,solo:l.solo,pan:l.pan,bass:l.bass,treble:l.treble,delay:l.delay,reverb:l.reverb,preset:l.preset||'clean'})),title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,lyricPosition:$('lyricPosition').value,positions,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
  try{localStorage.setItem('waveforge-v1',JSON.stringify(data));setStatus('Saved locally');}catch(e){setStatus('Ready');}
 }
 function loadSettings(){
