@@ -4,7 +4,7 @@
     async connect(){
       if(this.ready)return;const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)throw new Error('Web Audio is not supported in this browser.');
       this.context=new Ctx();this.analyser=this.context.createAnalyser();this.analyser.fftSize=2048;this.analyser.smoothingTimeConstant=.78;
-      this.gain=this.context.createGain();this.gain.gain.value=this.masterVolume;this.source=this.context.createMediaElementSource(this.audio);
+      this.gain=this.context.createGain();this.gain.gain.value=this.masterVolume;this.mainSoloGain=this.context.createGain();this.mainSoloGain.gain.value=1;this.audio.volume=1;this.source=this.context.createMediaElementSource(this.audio);
       this.exportDestination=this.context.createMediaStreamDestination();this.monitorGain=this.context.createGain();this.monitorGain.gain.value=0;
       this.source.connect(this.analyser);this.analyser.connect(this.monitorGain);this.monitorGain.connect(this.context.destination);
       this.source.connect(this.gain);this.gain.connect(this.mainSoloGain);this.mainSoloGain.connect(this.context.destination);this.mainSoloGain.connect(this.exportDestination);

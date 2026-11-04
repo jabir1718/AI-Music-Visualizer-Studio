@@ -264,7 +264,7 @@ function loadAudio(file){
 function renderLyricList(){
  const host=$('lyricList');host.innerHTML='';
  if(!lyrics.length){host.innerHTML='<span class="hint">Generated or imported lyric lines will appear here.</span>';return;}
- lyrics.forEach((line,i)=>{const row=document.createElement('div');row.className='lyric-row';const time=document.createElement('time');time.textContent=fmt(line.start);const text=document.createElement('span');text.textContent=line.text;const edit=document.createElement('button');edit.textContent='Edit';edit.onclick=()=>{const v=prompt('Edit lyric line',line.text);if(v!==null){line.text=v;renderLyricList();}};row.append(time,text,edit);host.appendChild(row);});
+ lyrics.forEach((line,i)=>{const row=document.createElement('div');row.className='lyric-row';const time=document.createElement('time');time.textContent=fmt(line.start);const text=document.createElement('span');text.textContent=line.text;const edit=document.createElement('button');edit.textContent='Edit';decorateActionButton(edit);edit.onclick=()=>{const v=prompt('Edit lyric line',line.text);if(v!==null){line.text=v;renderLyricList();}};row.append(time,text,edit);host.appendChild(row);});
 }
 function manualLyrics(){
  const lines=$('captionInput').value.split(/\n+/).map(x=>x.trim()).filter(Boolean),duration=audio.duration||Math.max(4,lines.length*4);
