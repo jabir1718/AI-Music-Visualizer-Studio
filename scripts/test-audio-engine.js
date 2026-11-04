@@ -35,6 +35,7 @@ const mainAudio = { volume: .85, currentTime: 2, duration: 30, playbackRate: 1 }
   const engine = new Engine(mainAudio);
   await engine.connect();
   assert.ok(engine.mainSoloGain, 'main solo gain node must be initialized');
+  await assert.rejects(engine.loadSoundTouch(),/AudioWorklet support/,'unsupported browsers must receive a clear pitch-preserving error');
   assert.ok(engine.mainPanner.connections.includes(engine.mainSoloGain), 'main effects chain must route through solo gain');
   assert.ok(engine.gain.connections.includes(engine.mainLow), 'master gain must feed the main EQ chain');
   assert.equal(mainAudio.volume, 1, 'element volume must not double-attenuate master gain');
