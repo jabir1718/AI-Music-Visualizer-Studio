@@ -269,6 +269,7 @@
 ## 27. Video project, timeline, autosave and export studio
 - Create, save, reopen, rename, duplicate and delete editing projects.
 - Autosave project state and recover the latest safe version after an unexpected close where platform storage permits.
+- AI speech-to-text captions/subtitles for spoken audio or dialogue, separately from song-lyric transcription; allow manual correction, timing adjustment and caption styling.
 - Live preview while editing, with playback controls and timeline scrubbing.
 - Multi-layer timeline for audio, video, images, PNGs, logos, text, lyrics, visualizers and effects.
 - Undo/redo and edit history; preserve layer order and independent layer settings.
