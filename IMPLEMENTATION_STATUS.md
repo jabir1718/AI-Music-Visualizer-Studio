@@ -2,7 +2,7 @@
 
 This file is the delivery checklist for the 31 groups in `ROADMAP.md`. It is deliberately conservative: **Partial** means some working code exists, not that the complete request is finished. **Not started** means there is no verified implementation in the current source.
 
-Last source audit: 2026-11-04 (after editable object layers, media persistence and image-import fixes).
+Last source audit: 2026-11-04 (after editable object layers, media persistence, image import and 50-filter studio).
 
 ## Status definitions
 - **Partial** — working foundation exists, but one or more requested capabilities are missing or unverified.
@@ -32,7 +32,7 @@ Last source audit: 2026-11-04 (after editable object layers, media persistence a
 | 17 | Smart template editing | Partial | Added a native editable canvas-object inspector for title, subtitle, lyric/caption and logo layers: per-object position, scale, rotation, opacity, visibility and text/color controls persist in projects and affect rendered/exported canvas. Flattened third-party template segmentation/OCR is still missing. |
 | 18 | Decorative artwork, skulls, symbols and emoji collection | Not started | No curated 2,000+ asset library. |
 | 19 | Voice character/effect studio | Not started | No verified character voice preset library or formant processing. |
-| 20 | Photo and video filters | Not started | No 50+ photo/video filter pack. |
+| 20 | Photo and video filters | Partial | Added 50 named canvas filter presets across Cinema, Vintage, Monochrome, Vibrant, Cool, Warm, Dreamy, Night, Analog and Editorial families. Filter strength is adjustable; selected filter and intensity persist in projects and are applied to imported photo/video backgrounds in preview and canvas export. This is color/blur processing, not AI retouching or upscaling; device performance and appearance need testing. |
 | 21 | Vocal/instrument separation and noise removal | Not started | No verified AI source-separation or noise-removal engine. |
 | 22 | Advanced sound-effects library | Not started | No curated sound-effects collection. |
 | 23 | Searchable 5,000+ sound-effects collection | Not started | No indexed/searchable 5,000+ asset catalogue. |
@@ -64,6 +64,7 @@ Last source audit: 2026-11-04 (after editable object layers, media persistence a
 
 - Added six per-layer audio effect presets in the mixer. Choosing Clean, Telephone, Radio, Small room, Echo or Dreamy immediately applies the preset's EQ, pan, delay and reverb values to that imported track and saves the selection.
 - Added a native editable object inspector in the Text & Logo workspace. Select title, subtitle, lyrics/captions or logo; change each object's position, scale, rotation, opacity and visibility independently. Title/subtitle text and color are editable in the selected-object panel. Object settings are saved with editor settings and `.waveforge` projects and are applied to the canvas renderer used by preview/export. Uploaded logos and background media are now also stored in IndexedDB and included in portable project files. This supports app-native layers, not automatic separation of flattened downloaded artwork. Device interaction still needs testing.\n- Fixed downloaded image filename extensions so imported JPEG/WebP/GIF/SVG/PNG files retain a matching extension instead of being mislabeled as PNG.\n- Added an offline BPM analyser in `bpm-engine.js`; it decodes the imported audio, analyses its energy-onset envelope and estimates tempo. Music Studio exposes a Detect BPM action with an approximate result and rhythm-confidence indicator. This is not a guaranteed beat grid and needs device testing. The new engine is included in CI syntax checks.
+- Added 50 named canvas photo/video filters with search, filter selection, adjustable strength and reset. They render onto imported photo/video backgrounds before visualizer overlays, so canvas recording includes the selected look. Filter settings are saved with `.waveforge` projects. A Node regression test checks catalogue size, unique names, numeric parameters, canvas application and state isolation.
 
 ## Important accuracy rules
 
