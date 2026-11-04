@@ -33,4 +33,10 @@ assert(/threeFont/.test(source)&&/FONT_FAMILIES\.map/.test(source),'3D text font
 assert(/loadAsync\(FONT_URLS\[selected\]\)/.test(source),'Selected 3D font must be loaded from its own typeface file');
 assert(/TextGeometryClass/.test(source)&&/depth:config\.textDepth/.test(source),'3D text must use extruded TextGeometry depth');
 assert(/loadTextTools/.test(source),'3D font and text addons should load lazily');
+assert.strictEqual(studio.getSettings().overlayEnabled,false);
+const saved=studio.setSettings({shape:'sphere',overlayEnabled:true,overlayScale:.7,overlayX:.3,overlayY:.65});
+assert.strictEqual(saved.shape,'sphere');assert.strictEqual(saved.overlayEnabled,true);
+assert.strictEqual(saved.overlayScale,.7);assert.strictEqual(saved.overlayX,.3);assert.strictEqual(saved.overlayY,.65);
+assert.strictEqual(studio.drawToCanvas({},100,100),false,'must safely skip canvas compositing until WebGL scene is initialized');
+studio.setSettings({overlayEnabled:false});
 console.log('3D object studio tests passed.');
