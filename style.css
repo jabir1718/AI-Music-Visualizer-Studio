@@ -195,3 +195,5 @@ button[data-action-icon]:disabled{opacity:.45;cursor:not-allowed}
 .noise-cleanup-result{display:flex;gap:8px;flex-wrap:wrap}
 .noise-cleanup-note{font-size:.72rem}
 @media(max-width:560px){.noise-cleanup-grid{grid-template-columns:1fr}}
+
+.noise-cleanup-result[hidden]{display:none}
