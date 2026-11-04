@@ -13,7 +13,7 @@ Last source audit: 2026-11-04 (after editable object layers, media persistence, 
 
 | # | Feature group | Current status | Verified source-level foundation / remaining work |
 |---:|---|---|---|
-| 1 | Lyrics, transcription and karaoke | Partial | Whisper-based timed-line transcription, manual lyrics, SRT/VTT import and line editing exist. Word-level karaoke timing/highlighting, robust per-word correction and full project persistence still need work. |
+| 1 | Lyrics, transcription and karaoke | Partial | Whisper timed-line transcription, manual lyrics, SRT/VTT import/editing and a manual word-sync workflow now let users mark each word's start during playback; karaoke highlighting uses saved word timings. Automatic word-level alignment and robust transcription correction remain. |
 | 2 | Fonts, typography and 3D text studio | Not started | Only a few basic font choices exist; 100+ font library, per-object typography and true 3D text are missing. |
 | 3 | Advanced music visualizer | Partial | Four canvas visualizer modes, color/intensity/sensitivity controls and audio-energy reaction exist. Advanced 3D designs, true beat maps and broader object controls are missing. |
 | 4 | Tempo, BPM and timing studio | Partial | Offline BPM estimation is connected to Music Studio and reports an approximate tempo plus rhythm confidence. Manual beat grid, tap tempo and beat-linked automation remain. |
@@ -78,3 +78,5 @@ Last source audit: 2026-11-04 (after editable object layers, media persistence, 
 - Added a dedicated background-music effect chain in `audio-engine.js`: independent bass/treble shelving EQ, stereo pan, echo feedback, convolution reverb and a controllable WaveShaper distortion node. Controls are in the Music Studio and do not alter imported mixer layers. Values persist in local settings and portable project files. Mocked Web Audio tests verify each effect node and setter; device sound quality still needs listening tests.
 
 - Added a local video-to-audio extraction tool in `video-audio-extractor.js`. It captures the video's audio through Web Audio and MediaRecorder, shows extraction progress, supports cancellation, and offers the resulting audio as the main track, a mixer layer or a download. It runs in real time and is limited to 500 MB / 60 minutes; audio-only WebM/Opus or Ogg availability depends on the device browser. CI tests cover codec selection, file validation and output naming; actual device extraction still needs testing.
+
+- Added manual word-by-word karaoke timing. Each lyric row has a Sync words action; play the song and tap Mark word at each word's start, undo a mark if needed, then finish. Per-word start/end values are saved with lyrics and `.waveforge` projects and drive the active-word karaoke highlight during playback/export. This is user-tapped timing, not automatic forced alignment.
