@@ -25,5 +25,6 @@ async function detect(file,onProgress){
   return{bpm:Math.round(bpm*10)/10,confidence:Math.max(0,Math.min(1,best.score/(variance/Math.max(1,novelty.length)))),duration:buffer.duration};
  }finally{await ctx.close().catch(()=>{});}
 }
-window.WaveForgeBPM={detect};
+function fromTaps(times){if(!Array.isArray(times)||times.length<3)throw new Error('Tap at least three beats to estimate tempo.');const intervals=[];for(let i=1;i<times.length;i++){const d=Number(times[i])-Number(times[i-1]);if(Number.isFinite(d)&&d>=.25&&d<=2)intervals.push(d);}if(intervals.length<2)throw new Error('Tap at a steady pace between 30 and 240 BPM.');const sorted=intervals.slice().sort((a,b)=>a-b),median=sorted[Math.floor(sorted.length/2)],kept=intervals.filter(x=>Math.abs(x-median)<=median*.22);if(kept.length<2)throw new Error('Tap more steadily to estimate tempo.');const mean=kept.reduce((a,b)=>a+b,0)/kept.length,bpm=60/mean;if(bpm<30||bpm>240)throw new Error('Tap at a steady pace between 30 and 240 BPM.');const variance=kept.reduce((a,x)=>a+(x-mean)*(x-mean),0)/kept.length,confidence=Math.max(0,Math.min(1,1-Math.sqrt(variance)/mean));return{bpm:Math.round(bpm*10)/10,confidence,interval:mean};}
+window.WaveForgeBPM={detect,fromTaps};
 })();
