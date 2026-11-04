@@ -22,11 +22,11 @@
   if(!item||!isAudioMime(item.mime)||!item.url)throw new Error('This search result is not a supported audio file.');
   if(item.size>MAX_AUDIO_BYTES)throw new Error('This audio file is larger than the 25 MB import limit.');
   const response=await fetch(item.url);if(!response.ok)throw new Error('The source audio could not be downloaded. Open the source page instead.');
-  const blob=await response.blob();if(!isAudioMime(blob.type||item.mime))throw new Error('The downloaded file is not recognized as audio.');
+  const blob=await response.blob(),type=isAudioMime(blob.type)?blob.type:item.mime;if(!isAudioMime(type))throw new Error('The downloaded file is not recognized as audio.');
   if(blob.size>MAX_AUDIO_BYTES)throw new Error('This audio file is larger than the 25 MB import limit.');
-  const ext=({'audio/mpeg':'mp3','audio/ogg':'ogg','audio/wav':'wav','audio/x-wav':'wav','audio/flac':'flac','audio/mp4':'m4a','audio/webm':'webm'}[blob.type||item.mime]||'audio');
+  const ext=({'audio/mpeg':'mp3','audio/ogg':'ogg','audio/wav':'wav','audio/x-wav':'wav','audio/flac':'flac','audio/mp4':'m4a','audio/webm':'webm'}[type]||'audio');
   const name=String(item.title||'sound-effect').replace(/\.[a-z0-9]{2,5}$/i,'').replace(/[^a-z0-9_-]+/gi,'-').slice(0,60)||'sound-effect';
-  return new File([blob],name+'.'+ext,{type:blob.type||item.mime,lastModified:Date.now()});
+  return new File([blob],name+'.'+ext,{type,lastModified:Date.now()});
  }
  function mount(host,defaultQuery,onImport){
   if(!host||host.querySelector('#soundLibrary'))return;
