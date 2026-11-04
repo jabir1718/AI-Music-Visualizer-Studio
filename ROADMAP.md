@@ -399,7 +399,7 @@ This is an order for development, not a reduction of the full scope:
 ## 2026-11-05 delivery notes — free Infinix ZERO 40 path
 
 - Start the Auto Video Editor with a local-only, deterministic beat-cut workflow using the existing BPM detector/grid. Do not require paid APIs or accounts for basic montage creation.
-- Initial implementation now includes 8 local source clips, storage/length guardrails, five original cut styles, editable segment order/length/removal, playhead-synchronized canvas preview, and portable project metadata.
+- Current free implementation includes up to 8 local video sources plus 12 photos, storage/length guardrails, ten original montage templates, BPM-synced editable cuts, scene-change and quiet-gap suggestions, per-clip speed ramps/transitions, a shared video montage timeline lane, and portable project metadata.
 - The current free milestone includes local sampled-frame scene detection, speed ramps and canvas transition treatments; it does not include speech-pause cuts, AI captions, true overlapping crossfades or advanced multi-layer compositing.
 - Tune previews and storage for the user's Infinix ZERO 40 (X6860 / 4G configuration), while detecting actual browser/codec support at runtime. Never force 4K/16K export or keep all video sources decoding simultaneously.
 - Free local editing assistant is preferred over any billable ChatGPT API integration. Keep paid/cloud AI disabled unless the user explicitly opts in later.
