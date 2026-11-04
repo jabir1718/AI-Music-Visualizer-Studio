@@ -84,7 +84,7 @@ function mount(host,options={}){
   const rim=new T.PointLight(0x57d8ff,config.light*1.15,12);rim.position.set(-3,1.5,-2);
   scene.add(ambient,key,rim);scene.userData.keyLight=key;scene.userData.rimLight=rim;
   setShape(config.shape);resize();
-  if(root.ResizeObserver){resizeObserver=new ResizeObserver(resize);resizeObserver.observe(viewport);}else root.addEventListener('resize',resize);
+  if(root.ResizeObserver){resizeObserver=new root.ResizeObserver(resize);resizeObserver.observe(viewport);}else root.addEventListener('resize',resize);
   renderer.domElement.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};renderer.domElement.setPointerCapture(e.pointerId);});
   renderer.domElement.addEventListener('pointermove',e=>{if(!drag||!mesh)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;drag={x:e.clientX,y:e.clientY};mesh.rotation.y+=dx*.01;mesh.rotation.x+=dy*.01;config.rotationY=mesh.rotation.y*180/Math.PI;config.rotationX=mesh.rotation.x*180/Math.PI;$('threeX').value=Math.round(config.rotationX);$('threeY').value=Math.round(config.rotationY);updateLabels();});
   ['pointerup','pointercancel','lostpointercapture'].forEach(type=>renderer.domElement.addEventListener(type,()=>{drag=null;}));
