@@ -166,3 +166,5 @@ Last source audit: 2026-11-05 (after connecting image-search and OpenMoji import
 
 
 - Extended the free offline Quick Edit Assistant to recognize basic Roman Urdu alongside English for the supported command set: template selection (including all ten Auto Cut templates), cut intensity, canvas ratio, title/subtitle, bass/treble, volume and lyric size. Added regression tests for mixed English/Roman Urdu prompts and a subtitle/title parsing edge case. This remains a limited deterministic command parser, not a conversational AI or ChatGPT integration.
+
+- Auto Cut now attempts real local BPM analysis of the imported main music track when no BPM has been detected/set yet. If analysis fails, it explicitly reports and uses the 120 BPM fallback; the chosen BPM is saved into the project settings.
