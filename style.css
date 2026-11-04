@@ -258,3 +258,8 @@ button[data-action-icon]:disabled{opacity:.45;cursor:not-allowed}
 .wf-timeline-playhead span{position:absolute;top:-26px;left:-18px;padding:3px 5px;border-radius:4px;background:#ff6b73;color:#fff;font-size:.62rem;font-weight:700;white-space:nowrap}
 .wf-timeline-foot{display:flex;justify-content:space-between;gap:8px;margin-top:9px;color:var(--muted);font-size:.67rem}
 @media(max-width:560px){.wf-timeline-head{display:grid}.wf-timeline-zoom{grid-template-columns:auto 1fr;align-items:center}.wf-timeline-zoom input{grid-column:1/-1}.wf-timeline-foot{flex-direction:column}}
+
+.bpm-grid-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:10px;align-items:end;margin:12px 0}
+.bpm-grid-controls label{display:grid;gap:5px;color:var(--muted);font-size:.72rem}
+.bpm-grid-controls input,.bpm-grid-controls select{width:100%;min-width:0}
+@media(max-width:620px){.bpm-grid-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.bpm-grid-controls button{grid-column:1/-1}}
