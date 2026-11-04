@@ -58,6 +58,10 @@ Last source audit: 2026-11-04 (after mixer, lyric-edit and export reliability fi
 - JavaScript syntax checks are run for `app.js`, `audio-engine.js`, `lyrics-engine.js` and `export.js`; the Android workflow now also runs `npm test` before building. A mocked Web Audio test is source-level verification only, not real playback.
 - These are source-level checks, not Android device tests. The latest APK workflow must finish and publish its artifact before this checkpoint can be called build-verified.
 
+
+- Added a portable `.waveforge` project-file workflow in `project-file.js`: exports editor settings plus the main audio and stored mixer-layer blobs from IndexedDB; imports validate the project format/version and media records, enforce a 250 MB unpacked-media limit, confirm before replacing saved media/settings, then reload the editor to restore the project.
+- Added Save project / Open project controls to the export inspector and included `project-file.js` in the Android workflow's JavaScript syntax validation. This project-file feature is source-implemented but awaits CI and real-browser/device testing; browser storage quota and Android WebView file handling remain device-dependent.
+
 ## Important accuracy rules
 
 - A roadmap entry or a UI category is not proof that the feature works.
