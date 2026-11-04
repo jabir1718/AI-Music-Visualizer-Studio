@@ -105,10 +105,11 @@ let mixerLayers=[],mixerPanel=null,mixerCategory='Voice',savedProjectData={},med
 function syncMixerLayers(){
  const now=audio.currentTime||0;
  mixerLayers.forEach(layer=>{
-  const target=(now-layer.offset)*layer.rate;
-  if(audio.paused||target<0||(isFinite(layer.audio.duration)&&layer.audio.duration>0&&target>=layer.audio.duration)){
+  const timing=window.WaveForgeTimeline?window.WaveForgeTimeline.resolveLayerTime(layer,now,layer.audio.duration):{active:now>=layer.offset,currentTime:Math.max(0,(now-layer.offset)*layer.rate)};
+  const target=timing.currentTime;
+  if(audio.paused||!timing.active){
    if(!layer.audio.paused)layer.audio.pause();
-   if(target<0&&layer.audio.currentTime!==0)layer.audio.currentTime=0;
+   if(Number.isFinite(target)&&Math.abs(layer.audio.currentTime-target)>.08)try{layer.audio.currentTime=Math.max(0,target);}catch(e){}
    return;
   }
   if(Math.abs(layer.audio.currentTime-target)>.35)try{layer.audio.currentTime=Math.max(0,target);}catch(e){}
@@ -200,7 +201,7 @@ function addMixerLayer(file,role,restore={},persist=true){
  if(!file.type.startsWith('audio/')){alert('Choose a supported audio file.');return;}
  const id=restore.id||('mix-'+Date.now()+'-'+Math.random().toString(36).slice(2,7)),url=URL.createObjectURL(file);
  const el=document.createElement('audio');el.preload='auto';el.hidden=true;el.src=url;el.preservesPitch=false;
- const layer={id,file,url,audio:el,role,volume:.85,rate:1,pitch:0,offset:0,muted:false,solo:false,pan:0,bass:0,treble:0,delay:0,reverb:0,distortion:0,voiceStyle:'natural',connected:false,...restore,id,file,url,audio:el,role};
+ const layer={id,file,url,audio:el,role,volume:.85,rate:1,pitch:0,offset:0,muted:false,solo:false,pan:0,bass:0,treble:0,delay:0,reverb:0,distortion:0,voiceStyle:'natural',trimStart:0,trimEnd:0,loop:false,connected:false,...restore,id,file,url,audio:el,role};
  el.playbackRate=layer.rate||1;mixerLayers.push(layer);mixerPanel.appendChild(el);renderMixerLayers();
  if(engine&&engine.ready){engine.addLayer(id,el,layer.volume,layer);layer.connected=true;applyMixerSoloState();}
  syncMixerLayers();if(persist)saveMediaAsset(id,file);saveSettings();setStatus('Audio layer added');
@@ -271,7 +272,13 @@ function renderMixerLayers(){
   addRange('Echo','delay',0,1,.05,'',v=>{if(engine&&layer.connected)engine.setLayerDelay(layer.id,v);});
   addRange('Reverb','reverb',0,1,.05,'',v=>{if(engine&&layer.connected)engine.setLayerReverb(layer.id,v);});
   addRange('Distortion','distortion',0,1,.05,'',v=>{if(engine&&layer.connected)engine.setLayerDistortion(layer.id,v*100);});
-  const offsetWrap=document.createElement('label');offsetWrap.textContent='Start offset (seconds)';const offset=document.createElement('input');offset.type='number';offset.min='0';offset.max='3600';offset.step='.1';offset.value=layer.offset;offset.onchange=()=>{layer.offset=Math.max(0,Number(offset.value)||0);syncMixerLayers();saveSettings();};offsetWrap.append(offset);controls.append(offsetWrap);
+  const offsetWrap=document.createElement('label');offsetWrap.textContent='Timeline position (seconds)';const offset=document.createElement('input');offset.type='number';offset.min='0';offset.max='3600';offset.step='.1';offset.value=layer.offset;offset.onchange=()=>{layer.offset=Math.max(0,Number(offset.value)||0);syncMixerLayers();saveSettings();};offsetWrap.append(offset);controls.append(offsetWrap);
+  const clipTools=document.createElement('div');clipTools.className='mixer-clip-tools';
+  const startWrap=document.createElement('label');startWrap.textContent='Clip in (seconds)';const trimStart=document.createElement('input');trimStart.type='number';trimStart.min='0';trimStart.max='3600';trimStart.step='.05';trimStart.value=layer.trimStart||0;trimStart.onchange=()=>{const result=window.WaveForgeTimeline.setTrim(layer,trimStart.value,layer.trimEnd,layer.audio.duration);if(!result.valid){trimStart.value=layer.trimStart||0;setStatus('Clip start must be before clip end.');return;}syncMixerLayers();saveSettings();};startWrap.append(trimStart);
+  const endWrap=document.createElement('label');endWrap.textContent='Clip out (seconds) · blank = full';const trimEnd=document.createElement('input');trimEnd.type='number';trimEnd.min='0';trimEnd.max='3600';trimEnd.step='.05';trimEnd.placeholder='Full duration';trimEnd.value=layer.trimEnd||'';trimEnd.onchange=()=>{const result=window.WaveForgeTimeline.setTrim(layer,layer.trimStart,trimEnd.value,layer.audio.duration);if(!result.valid){trimEnd.value=layer.trimEnd||'';setStatus('Clip end must be after clip start.');return;}syncMixerLayers();saveSettings();};endWrap.append(trimEnd);
+  const loopWrap=document.createElement('label');loopWrap.className='mixer-loop-toggle';const loop=document.createElement('input');loop.type='checkbox';loop.checked=!!layer.loop;loop.onchange=()=>{layer.loop=loop.checked;syncMixerLayers();saveSettings();};loopWrap.append(loop,document.createTextNode('Loop trimmed clip'));
+  const split=document.createElement('button');split.type='button';split.className='btn small';split.textContent='Split at playhead';split.onclick=()=>{if(!window.WaveForgeTimeline||!audio.src){setStatus('Load and position the main track before splitting.');return;}const parts=window.WaveForgeTimeline.splitLayer(layer,audio.currentTime,layer.audio.duration);if(!parts){setStatus('Move the playhead inside this clip, away from its edges.');return;}layer.trimEnd=parts.first.trimEnd;const restore={volume:layer.volume,rate:layer.rate,pitch:layer.pitch,offset:audio.currentTime,muted:false,solo:false,pan:layer.pan,bass:layer.bass,treble:layer.treble,delay:layer.delay,reverb:layer.reverb,distortion:layer.distortion,voiceStyle:layer.voiceStyle,preset:layer.preset,trimStart:parts.second.trimStart,trimEnd:parts.second.trimEnd,loop:false};addMixerLayer(layer.file,layer.role,restore,true);syncMixerLayers();saveSettings();setStatus('Layer split into two editable clips.');};
+  clipTools.append(startWrap,endWrap,loopWrap,split);row.append(clipTools);
   row.append(controls);list.append(row);
  });applyMixerSoloState();decorateButtonIcons(list);
 }
@@ -391,7 +398,7 @@ async function restoreSavedMedia(){
 }
 
 function saveSettings(){
- const data={mainPitch:$('mainPitch')?$('mainPitch').value:0,mainEffects:readMainEffects(),typography:window.WaveForgeTypography?window.WaveForgeTypography.getAll():null,layers:mixerLayers.map(l=>({id:l.id,role:l.role,volume:l.volume,rate:l.rate,pitch:l.pitch,offset:l.offset,muted:l.muted,solo:l.solo,pan:l.pan,bass:l.bass,treble:l.treble,delay:l.delay,reverb:l.reverb,distortion:l.distortion||0,voiceStyle:l.voiceStyle||'natural',preset:l.preset||'clean'})),title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,lyricPosition:$('lyricPosition').value,positions,objectSettings,manualBpm,tapBeatOffset,filterPreset:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterPreset:'f01',filterIntensity:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterIntensity:100,chromaKey:window.WaveForgeChromaKey?window.WaveForgeChromaKey.getSettings():null,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
+ const data={mainPitch:$('mainPitch')?$('mainPitch').value:0,mainEffects:readMainEffects(),typography:window.WaveForgeTypography?window.WaveForgeTypography.getAll():null,layers:mixerLayers.map(l=>({id:l.id,role:l.role,volume:l.volume,rate:l.rate,pitch:l.pitch,offset:l.offset,muted:l.muted,solo:l.solo,pan:l.pan,bass:l.bass,treble:l.treble,delay:l.delay,reverb:l.reverb,distortion:l.distortion||0,voiceStyle:l.voiceStyle||'natural',trimStart:l.trimStart||0,trimEnd:l.trimEnd||0,loop:!!l.loop,preset:l.preset||'clean'})),title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,lyricPosition:$('lyricPosition').value,positions,objectSettings,manualBpm,tapBeatOffset,filterPreset:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterPreset:'f01',filterIntensity:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterIntensity:100,chromaKey:window.WaveForgeChromaKey?window.WaveForgeChromaKey.getSettings():null,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
  try{localStorage.setItem('waveforge-v1',JSON.stringify(data));setStatus('Saved locally');}catch(e){setStatus('Ready');}
 }
 function loadSettings(){
