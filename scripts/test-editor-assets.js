@@ -42,7 +42,7 @@ assert(/WaveForgeMediaTools\.mount/.test(app),'Video extractor UI is not mounted
 assert(/onMain:loadAudio/.test(app)&&/addMixerLayer\(file,'Other'\)/.test(app),'Extracted audio import actions are not connected');
 assert(/MediaRecorder/.test(mediaTools)&&/createMediaElementSource/.test(mediaTools),'Video audio extraction must use real media capture');
 assert(/mainEffects:readMainEffects\(\)/.test(app),'Original music effects are not saved');
-for(const id of ['mainBass','mainTreble','mainPan','mainEcho','mainReverb','mainDistortion','mainEffectsReset'])assert(app.includes(id),'Missing main music effect control: '+id);
+for(const id of ['mainBass','mainTreble','mainPan','mainEcho','mainReverb','mainDistortion','mainCompression','mainEffectsReset'])assert(app.includes(id),'Missing main music effect control: '+id);
 assert(/profiles\.forEach/.test(filters),'Filter catalogue generation missing');
 assert(/video-audio-extractor\.js/.test(index),'Video extractor script is not loaded');
 assert(/WaveForgeMediaTools\.mount/.test(app),'Video extractor UI is not mounted');
