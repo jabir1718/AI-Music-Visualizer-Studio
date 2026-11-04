@@ -200,7 +200,7 @@ function addMixerLayer(file,role,restore={},persist=true){
  if(!file.type.startsWith('audio/')){alert('Choose a supported audio file.');return;}
  const id=restore.id||('mix-'+Date.now()+'-'+Math.random().toString(36).slice(2,7)),url=URL.createObjectURL(file);
  const el=document.createElement('audio');el.preload='auto';el.hidden=true;el.src=url;el.preservesPitch=false;
- const layer={id,file,url,audio:el,role,volume:.85,rate:1,pitch:0,offset:0,muted:false,solo:false,pan:0,bass:0,treble:0,delay:0,reverb:0,connected:false,...restore,id,file,url,audio:el,role};
+ const layer={id,file,url,audio:el,role,volume:.85,rate:1,pitch:0,offset:0,muted:false,solo:false,pan:0,bass:0,treble:0,delay:0,reverb:0,distortion:0,voiceStyle:'natural',connected:false,...restore,id,file,url,audio:el,role};
  el.playbackRate=layer.rate||1;mixerLayers.push(layer);mixerPanel.appendChild(el);renderMixerLayers();
  if(engine&&engine.ready){engine.addLayer(id,el,layer.volume,layer);layer.connected=true;applyMixerSoloState();}
  syncMixerLayers();if(persist)saveMediaAsset(id,file);saveSettings();setStatus('Audio layer added');
@@ -209,18 +209,33 @@ function applyMixerSoloState(){
  const soloActive=mixerLayers.some(x=>x.solo);
  mixerLayers.forEach(layer=>{const audible=!layer.muted&&(!soloActive||layer.solo);if(engine&&layer.connected)engine.setLayerVolume(layer.id,audible?layer.volume:0);});if(engine&&engine.ready)engine.setMainSoloMute(soloActive);
 }
+function applyVoiceStyle(layer,style){
+ const styles={
+  natural:{rate:1,bass:0,treble:0,delay:0,reverb:0,distortion:0},
+  telephone:{rate:1,bass:-9,treble:5,delay:0,reverb:0,distortion:0},
+  radio:{rate:1,bass:-5,treble:3,delay:.06,reverb:.02,distortion:.04},
+  monster:{rate:.78,bass:5,treble:-3,delay:.08,reverb:.22,distortion:.12},
+  chipmunk:{rate:1.32,bass:-4,treble:6,delay:0,reverb:.03,distortion:0},
+  robot:{rate:1,bass:-3,treble:5,delay:.03,reverb:.02,distortion:.42},
+  alien:{rate:.92,bass:2,treble:6,delay:.18,reverb:.32,distortion:.22}
+ };
+ const p=styles[style]||styles.natural;Object.assign(layer,p,{voiceStyle:style});
+ layer.audio.playbackRate=layer.rate;layer.audio.preservesPitch=false;
+ if(engine&&layer.connected){engine.setLayerEQ(layer.id,layer.bass,layer.treble);engine.setLayerDelay(layer.id,layer.delay);engine.setLayerReverb(layer.id,layer.reverb);engine.setLayerDistortion(layer.id,layer.distortion);}
+ renderMixerLayers();saveSettings();setStatus('Applied '+style+' voice style');
+}
 function applyLayerPreset(layer,preset){
  const presets={
-  clean:{bass:0,treble:0,delay:0,reverb:0,pan:0,rate:1,pitch:0},
-  telephone:{bass:-8,treble:5,delay:0,reverb:.04,pan:0,rate:1,pitch:0},
-  radio:{bass:-5,treble:3,delay:.08,reverb:.02,pan:0,rate:1,pitch:0},
-  room:{bass:0,treble:1,delay:.04,reverb:.38,pan:0,rate:1,pitch:0},
-  echo:{bass:0,treble:0,delay:.72,reverb:.12,pan:0,rate:1,pitch:0},
-  dreamy:{bass:2,treble:2,delay:.28,reverb:.62,pan:0,rate:1,pitch:0}
+  clean:{bass:0,treble:0,delay:0,reverb:0,pan:0,rate:1,pitch:0,distortion:0},
+  telephone:{bass:-8,treble:5,delay:0,reverb:.04,pan:0,rate:1,pitch:0,distortion:0},
+  radio:{bass:-5,treble:3,delay:.08,reverb:.02,pan:0,rate:1,pitch:0,distortion:.04},
+  room:{bass:0,treble:1,delay:.04,reverb:.38,pan:0,rate:1,pitch:0,distortion:0},
+  echo:{bass:0,treble:0,delay:.72,reverb:.12,pan:0,rate:1,pitch:0,distortion:0},
+  dreamy:{bass:2,treble:2,delay:.28,reverb:.62,pan:0,rate:1,pitch:0,distortion:0}
  };
  const p=presets[preset]||presets.clean;Object.assign(layer,p,{preset});
  layer.audio.playbackRate=layer.rate;layer.audio.preservesPitch=false;
- if(engine&&layer.connected){engine.setLayerEQ(layer.id,layer.bass,layer.treble);engine.setLayerPan(layer.id,layer.pan);engine.setLayerDelay(layer.id,layer.delay);engine.setLayerReverb(layer.id,layer.reverb);}
+ if(engine&&layer.connected){engine.setLayerEQ(layer.id,layer.bass,layer.treble);engine.setLayerPan(layer.id,layer.pan);engine.setLayerDelay(layer.id,layer.delay);engine.setLayerReverb(layer.id,layer.reverb);engine.setLayerDistortion(layer.id,layer.distortion);}
  renderMixerLayers();saveSettings();setStatus('Applied '+preset+' audio preset');
 }
 function renderMixerLayers(){
@@ -238,11 +253,15 @@ function renderMixerLayers(){
   const preset=document.createElement('select');preset.setAttribute('aria-label','Audio effect preset');
   [['clean','Clean'],['telephone','Telephone'],['radio','Radio'],['room','Small room'],['echo','Echo'],['dreamy','Dreamy reverb']].forEach(([value,label])=>{const option=document.createElement('option');option.value=value;option.textContent=label;preset.append(option);});
   preset.value=layer.preset||'clean';preset.onchange=()=>applyLayerPreset(layer,preset.value);presetWrap.append(preset);row.append(presetWrap);
+  const voiceWrap=document.createElement('label');voiceWrap.className='mixer-preset';voiceWrap.textContent='Voice character style';
+  const voiceStyle=document.createElement('select');voiceStyle.setAttribute('aria-label','Voice character style');
+  [['natural','Natural'],['telephone','Telephone'],['radio','Radio'],['monster','Monster / deep'],['chipmunk','Chipmunk / high'],['robot','Robot'],['alien','Alien'],['custom','Custom settings']].forEach(([value,label])=>{const option=document.createElement('option');option.value=value;option.textContent=label;voiceStyle.append(option);});
+  voiceStyle.value=layer.voiceStyle||'natural';voiceStyle.onchange=()=>{if(voiceStyle.value!=='custom')applyVoiceStyle(layer,voiceStyle.value);};voiceWrap.append(voiceStyle);row.append(voiceWrap);
   const controls=document.createElement('div');controls.className='mixer-track-controls';
   function addRange(labelText,key,min,max,step,unit,apply){
    const wrap=document.createElement('label');wrap.textContent=labelText;const input=document.createElement('input');input.type='range';input.min=String(min);input.max=String(max);input.step=String(step);input.value=String(layer[key]??0);const readout=document.createElement('small');
    const show=()=>{const v=Number(input.value);readout.textContent=(v>0&&min<0?'+':'')+v+unit;};
-   input.oninput=()=>{layer[key]=Number(input.value);show();apply(layer[key]);saveSettings();};show();wrap.append(input,readout);controls.append(wrap);
+   input.oninput=()=>{layer[key]=Number(input.value);show();if(['pitch','pan','bass','treble','delay','reverb','distortion'].includes(key)){layer.voiceStyle='custom';voiceStyle.value='custom';}apply(layer[key]);saveSettings();};show();wrap.append(input,readout);controls.append(wrap);
   }
   addRange('Volume','volume',0,1,.01,'',()=>applyMixerSoloState());
   addRange('Pitch / speed','pitch',-12,12,1,' semitones',v=>{layer.rate=Math.pow(2,v/12);layer.audio.playbackRate=layer.rate;layer.audio.preservesPitch=false;syncMixerLayers();});
@@ -251,6 +270,7 @@ function renderMixerLayers(){
   addRange('Treble EQ','treble',-12,12,1,' dB',()=>{if(engine&&layer.connected)engine.setLayerEQ(layer.id,layer.bass,layer.treble);});
   addRange('Echo','delay',0,1,.05,'',v=>{if(engine&&layer.connected)engine.setLayerDelay(layer.id,v);});
   addRange('Reverb','reverb',0,1,.05,'',v=>{if(engine&&layer.connected)engine.setLayerReverb(layer.id,v);});
+  addRange('Distortion','distortion',0,1,.05,'',v=>{if(engine&&layer.connected)engine.setLayerDistortion(layer.id,v*100);});
   const offsetWrap=document.createElement('label');offsetWrap.textContent='Start offset (seconds)';const offset=document.createElement('input');offset.type='number';offset.min='0';offset.max='3600';offset.step='.1';offset.value=layer.offset;offset.onchange=()=>{layer.offset=Math.max(0,Number(offset.value)||0);syncMixerLayers();saveSettings();};offsetWrap.append(offset);controls.append(offsetWrap);
   row.append(controls);list.append(row);
  });applyMixerSoloState();decorateButtonIcons(list);
@@ -371,7 +391,7 @@ async function restoreSavedMedia(){
 }
 
 function saveSettings(){
- const data={mainPitch:$('mainPitch')?$('mainPitch').value:0,mainEffects:readMainEffects(),typography:window.WaveForgeTypography?window.WaveForgeTypography.getAll():null,layers:mixerLayers.map(l=>({id:l.id,role:l.role,volume:l.volume,rate:l.rate,pitch:l.pitch,offset:l.offset,muted:l.muted,solo:l.solo,pan:l.pan,bass:l.bass,treble:l.treble,delay:l.delay,reverb:l.reverb,preset:l.preset||'clean'})),title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,lyricPosition:$('lyricPosition').value,positions,objectSettings,manualBpm,tapBeatOffset,filterPreset:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterPreset:'f01',filterIntensity:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterIntensity:100,chromaKey:window.WaveForgeChromaKey?window.WaveForgeChromaKey.getSettings():null,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
+ const data={mainPitch:$('mainPitch')?$('mainPitch').value:0,mainEffects:readMainEffects(),typography:window.WaveForgeTypography?window.WaveForgeTypography.getAll():null,layers:mixerLayers.map(l=>({id:l.id,role:l.role,volume:l.volume,rate:l.rate,pitch:l.pitch,offset:l.offset,muted:l.muted,solo:l.solo,pan:l.pan,bass:l.bass,treble:l.treble,delay:l.delay,reverb:l.reverb,distortion:l.distortion||0,voiceStyle:l.voiceStyle||'natural',preset:l.preset||'clean'})),title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,lyricPosition:$('lyricPosition').value,positions,objectSettings,manualBpm,tapBeatOffset,filterPreset:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterPreset:'f01',filterIntensity:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterIntensity:100,chromaKey:window.WaveForgeChromaKey?window.WaveForgeChromaKey.getSettings():null,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
  try{localStorage.setItem('waveforge-v1',JSON.stringify(data));setStatus('Saved locally');}catch(e){setStatus('Ready');}
 }
 function loadSettings(){
