@@ -1,9 +1,9 @@
 (function(root){
 'use strict';
-const THREE_URL='https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js';
-const SHAPES=['box','sphere','torus','torus-knot','cone','cylinder','octahedron','dodecahedron','icosahedron','tetrahedron'];
-const DEFAULTS={shape:'torus-knot',color:'#57d8ff',scale:1,rotationX:0,rotationY:0,rotationZ:0,positionX:0,positionY:0,positionZ:0,metalness:.65,roughness:.25,light:1.35,autoRotate:true};
-let THREE=null,loading=null;
+const FONT_URL='https://cdn.jsdelivr.net/npm/three@0.187.0/examples/fonts/helvetiker_bold.typeface.json';
+const SHAPES=['box','sphere','torus','torus-knot','cone','cylinder','octahedron','dodecahedron','icosahedron','tetrahedron','text'];
+const DEFAULTS={shape:'torus-knot',color:'#57d8ff',scale:1,rotationX:0,rotationY:0,rotationZ:0,positionX:0,positionY:0,positionZ:0,text:'WAVEFORGE',textDepth:.16,metalness:.65,roughness:.25,light:1.35,autoRotate:true};
+let THREE=null,loading=null,FontLoaderClass=null,TextGeometryClass=null,loadedFont=null,textToolsLoading=null;
 function normalizeConfig(input={}){
  const number=(v,f,min,max)=>Math.max(min,Math.min(max,Number.isFinite(Number(v))?Number(v):f));
  return{
@@ -14,6 +14,7 @@ function normalizeConfig(input={}){
   rotationY:number(input.rotationY,0,-180,180),
   rotationZ:number(input.rotationZ,0,-180,180),
   positionX:number(input.positionX,0,-1.5,1.5),positionY:number(input.positionY,0,-1.5,1.5),positionZ:number(input.positionZ,0,-1.5,1.5),
+  text:String(input.text||DEFAULTS.text).slice(0,18),textDepth:number(input.textDepth,DEFAULTS.textDepth,.05,.6),
   metalness:number(input.metalness,DEFAULTS.metalness,0,1),
   roughness:number(input.roughness,DEFAULTS.roughness,.05,1),
   light:number(input.light,DEFAULTS.light,.2,3),
@@ -22,8 +23,17 @@ function normalizeConfig(input={}){
 }
 async function loadThree(){
  if(THREE)return THREE;if(loading)return loading;
- loading=import(THREE_URL).then(mod=>{THREE=mod;return mod;}).catch(error=>{loading=null;throw error;});
+ loading=import('three').then(mod=>{THREE=mod;return mod;}).catch(error=>{loading=null;throw error;});
  return loading;
+}
+async function loadTextTools(){
+ if(loadedFont)return loadedFont;if(textToolsLoading)return textToolsLoading;
+ textToolsLoading=(async()=>{
+  const [loaderModule,geometryModule]=await Promise.all([import('three/addons/loaders/FontLoader.js'),import('three/addons/geometries/TextGeometry.js')]);
+  FontLoaderClass=loaderModule.FontLoader;TextGeometryClass=geometryModule.TextGeometry;
+  const loader=new FontLoaderClass();loadedFont=await loader.loadAsync(FONT_URL);return loadedFont;
+ })().catch(error=>{textToolsLoading=null;throw error;});
+ return textToolsLoading;
 }
 function geometry(T,shape){
  switch(shape){
@@ -42,7 +52,7 @@ function geometry(T,shape){
 function mount(host,options={}){
  if(!host||root.document.getElementById('threeObjectStudio'))return;
  const panel=root.document.createElement('section');panel.id='threeObjectStudio';panel.className='three-object-studio';
- panel.innerHTML='<div class="three-studio-head"><div><span class="eyebrow">REAL-TIME WEBGL OBJECT</span><h3>3D Object Studio</h3><p>Build a lit 3D primitive, rotate it by touch, then export a transparent PNG logo.</p></div><span class="font-count">3D</span></div><button type="button" class="btn small" id="threeLoad">Load 3D workspace</button><div id="threeViewport" class="three-viewport" aria-label="Interactive 3D object preview"></div><div class="three-controls" id="threeControls" hidden><label>Object<select id="threeShape">'+SHAPES.map(x=>'<option value="'+x+'">'+x.replace('-',' ')+'</option>').join('')+'</select></label><label>Material color<input id="threeColor" type="color" value="#57d8ff"></label><label>Scale <output id="threeScaleValue">100%</output><input id="threeScale" type="range" min="35" max="250" value="100"></label><label>Metalness <output id="threeMetalValue">65%</output><input id="threeMetal" type="range" min="0" max="100" value="65"></label><label>Roughness <output id="threeRoughValue">25%</output><input id="threeRough" type="range" min="5" max="100" value="25"></label><label>Light <output id="threeLightValue">135%</output><input id="threeLight" type="range" min="20" max="300" value="135"></label><label>Rotation X <output id="threeXValue">0°</output><input id="threeX" type="range" min="-180" max="180" value="0"></label><label>Rotation Y <output id="threeYValue">0°</output><input id="threeY" type="range" min="-180" max="180" value="0"></label><label>Rotation Z <output id="threeZValue">0°</output><input id="threeZ" type="range" min="-180" max="180" value="0"></label><label>Position X <output id="threePXValue">0</output><input id="threePX" type="range" min="-150" max="150" value="0"></label><label>Position Y <output id="threePYValue">0</output><input id="threePY" type="range" min="-150" max="150" value="0"></label><label>Position Z <output id="threePZValue">0</output><input id="threePZ" type="range" min="-150" max="150" value="0"></label><label class="three-auto"><input id="threeAuto" type="checkbox" checked> Auto rotate</label></div><div class="three-actions"><button type="button" class="btn small primary" id="threeExport" disabled>Export transparent PNG logo</button><button type="button" class="btn small" id="threeReset" disabled>Reset object</button></div><p id="threeStatus" class="hint" aria-live="polite">The 3D engine loads only when you tap the button. Internet and WebGL support are required.</p><small class="three-license">Powered by Three.js (MIT). Export is a 1024 × 1024 PNG snapshot; it is not a 3D model file or 16K render.</small>';
+ panel.innerHTML='<div class="three-studio-head"><div><span class="eyebrow">REAL-TIME WEBGL OBJECT</span><h3>3D Object Studio</h3><p>Build a lit 3D primitive, rotate it by touch, then export a transparent PNG logo.</p></div><span class="font-count">3D</span></div><button type="button" class="btn small" id="threeLoad">Load 3D workspace</button><div id="threeViewport" class="three-viewport" aria-label="Interactive 3D object preview"></div><div class="three-controls" id="threeControls" hidden><label>Object<select id="threeShape">'+SHAPES.map(x=>'<option value="'+x+'">'+x.replace('-',' ')+'</option>').join('')+'</select></label><label id="threeTextWrap" hidden>3D text<input id="threeText" type="text" maxlength="18" value="WAVEFORGE"></label><label id="threeDepthWrap" hidden>Extrusion depth <output id="threeDepthValue">0.16</output><input id="threeDepth" type="range" min="5" max="60" value="16"></label><label>Material color<input id="threeColor" type="color" value="#57d8ff"></label><label>Scale <output id="threeScaleValue">100%</output><input id="threeScale" type="range" min="35" max="250" value="100"></label><label>Metalness <output id="threeMetalValue">65%</output><input id="threeMetal" type="range" min="0" max="100" value="65"></label><label>Roughness <output id="threeRoughValue">25%</output><input id="threeRough" type="range" min="5" max="100" value="25"></label><label>Light <output id="threeLightValue">135%</output><input id="threeLight" type="range" min="20" max="300" value="135"></label><label>Rotation X <output id="threeXValue">0°</output><input id="threeX" type="range" min="-180" max="180" value="0"></label><label>Rotation Y <output id="threeYValue">0°</output><input id="threeY" type="range" min="-180" max="180" value="0"></label><label>Rotation Z <output id="threeZValue">0°</output><input id="threeZ" type="range" min="-180" max="180" value="0"></label><label>Position X <output id="threePXValue">0</output><input id="threePX" type="range" min="-150" max="150" value="0"></label><label>Position Y <output id="threePYValue">0</output><input id="threePY" type="range" min="-150" max="150" value="0"></label><label>Position Z <output id="threePZValue">0</output><input id="threePZ" type="range" min="-150" max="150" value="0"></label><label class="three-auto"><input id="threeAuto" type="checkbox" checked> Auto rotate</label></div><div class="three-actions"><button type="button" class="btn small primary" id="threeExport" disabled>Export transparent PNG logo</button><button type="button" class="btn small" id="threeReset" disabled>Reset object</button></div><p id="threeStatus" class="hint" aria-live="polite">The 3D engine loads only when you tap the button. Internet and WebGL support are required.</p><small class="three-license">Powered by Three.js (MIT). Export is a 1024 × 1024 PNG snapshot; it is not a 3D model file or 16K render.</small>';
  host.appendChild(panel);
  const $=id=>panel.querySelector('#'+id),viewport=$('threeViewport');let renderer=null,scene=null,camera=null,mesh=null,material=null,raf=0,config=normalizeConfig(),drag=null,resizeObserver=null;
  function report(message){$('threeStatus').textContent=message;}
@@ -54,13 +64,18 @@ function mount(host,options={}){
   if(!renderer||!camera)return;const w=Math.max(240,viewport.clientWidth||520),h=Math.max(220,viewport.clientHeight||320);
   renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();renderer.render(scene,camera);
  }
- function setShape(shape){
+ async function setShape(shape){
   if(!THREE||!scene)return;
+  const shapeName=SHAPES.includes(shape)?shape:DEFAULTS.shape;config.shape=shapeName;
+  let geom;
+  if(shapeName==='text'){
+   await loadTextTools();const label=config.text||'WAVEFORGE',fontSize=Math.min(.72,5.2/Math.max(1,label.length));geom=new TextGeometryClass(label,{font:loadedFont,size:fontSize,depth:config.textDepth,curveSegments:10,bevelEnabled:true,bevelThickness:.018,bevelSize:.012,bevelSegments:3});geom.computeBoundingBox();geom.center();
+  }else geom=geometry(THREE,shapeName);
+  if(config.shape!==shapeName){geom.dispose();return;}
   if(mesh){scene.remove(mesh);mesh.geometry.dispose();mesh.material.dispose();}
-  config.shape=SHAPES.includes(shape)?shape:DEFAULTS.shape;
   material=new THREE.MeshStandardMaterial({color:config.color,metalness:config.metalness,roughness:config.roughness});
-  mesh=new THREE.Mesh(geometry(THREE,config.shape),material);
-  mesh.scale.setScalar(config.scale);mesh.rotation.set(config.rotationX*Math.PI/180,config.rotationY*Math.PI/180,config.rotationZ*Math.PI/180);mesh.position.set(config.positionX,config.positionY,config.positionZ);scene.add(mesh);
+  mesh=new THREE.Mesh(geom,material);
+  mesh.scale.setScalar(config.scale);mesh.rotation.set(config.rotationX*Math.PI/180,config.rotationY*Math.PI/180,config.rotationZ*Math.PI/180);mesh.position.set(config.positionX,config.positionY,config.positionZ);scene.add(mesh);$('threeTextWrap').hidden=config.shape!=='text';$('threeDepthWrap').hidden=config.shape!=='text';
  }
  function apply(){
   if(!mesh||!material)return;
@@ -83,7 +98,7 @@ function mount(host,options={}){
   const ambient=new T.AmbientLight(0xffffff,.75),key=new T.DirectionalLight(0xffffff,config.light);key.position.set(3,4,5);
   const rim=new T.PointLight(0x57d8ff,config.light*1.15,12);rim.position.set(-3,1.5,-2);
   scene.add(ambient,key,rim);scene.userData.keyLight=key;scene.userData.rimLight=rim;
-  setShape(config.shape);resize();
+  await setShape(config.shape);resize();
   if(root.ResizeObserver){resizeObserver=new root.ResizeObserver(resize);resizeObserver.observe(viewport);}else root.addEventListener('resize',resize);
   renderer.domElement.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};renderer.domElement.setPointerCapture(e.pointerId);});
   renderer.domElement.addEventListener('pointermove',e=>{if(!drag||!mesh)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;drag={x:e.clientX,y:e.clientY};mesh.rotation.y+=dx*.01;mesh.rotation.x+=dy*.01;config.rotationY=mesh.rotation.y*180/Math.PI;config.rotationX=mesh.rotation.x*180/Math.PI;$('threeX').value=Math.round(config.rotationX);$('threeY').value=Math.round(config.rotationY);updateLabels();});
@@ -92,11 +107,14 @@ function mount(host,options={}){
   updateLabels();animate();report('3D scene ready. Drag the object to rotate it, or use the XYZ controls.');
  }
  $('threeLoad').onclick=async()=>{ $('threeLoad').disabled=true;report('Loading Three.js and preparing WebGL…');try{await initialize();}catch(error){$('threeLoad').disabled=false;report('3D workspace unavailable: '+error.message+' — check WebGL and internet access.');}};
- $('threeShape').onchange=e=>{config.shape=e.target.value;setShape(config.shape);apply();};
+ $('threeShape').onchange=async e=>{config.shape=e.target.value;report(config.shape==='text'?'Loading 3D font…':'Changing geometry…');try{await setShape(config.shape);apply();report(config.shape==='text'?'Extruded 3D text ready.':'3D geometry changed.');}catch(error){report('Could not build this 3D object: '+error.message);}};
+ $('threeText').onchange=async e=>{config.text=String(e.target.value||'WAVEFORGE').slice(0,18);if(config.shape==='text'){try{await setShape('text');apply();}catch(error){report('3D text failed: '+error.message);}}};
+ $('threeDepth').oninput=e=>{config.textDepth=Number(e.target.value)/100;$('threeDepthValue').textContent=config.textDepth.toFixed(2);};
+ $('threeDepth').onchange=async()=>{if(config.shape==='text'){try{await setShape('text');apply();}catch(error){report('3D extrusion failed: '+error.message);}}};
  $('threeColor').oninput=e=>{config.color=e.target.value;apply();};
  [['Scale','scale',v=>v/100],['Metal','metalness',v=>v/100],['Rough','roughness',v=>v/100],['Light','light',v=>v/100],['X','rotationX',v=>v],['Y','rotationY',v=>v],['Z','rotationZ',v=>v],['PX','positionX',v=>v/100],['PY','positionY',v=>v/100],['PZ','positionZ',v=>v/100]].forEach(([id,key,convert])=>{$('three'+id).oninput=e=>{config[key]=convert(Number(e.target.value));if(key==='light'&&scene){scene.userData.keyLight.intensity=config.light;scene.userData.rimLight.intensity=config.light*1.15;}apply();};});
  $('threeAuto').onchange=e=>{config.autoRotate=e.target.checked;};
- $('threeReset').onclick=()=>{config=normalizeConfig();$('threeShape').value=config.shape;$('threeColor').value=config.color;$('threeScale').value=100;$('threeMetal').value=65;$('threeRough').value=25;$('threeLight').value=135;$('threeX').value=0;$('threeY').value=0;$('threeZ').value=0;$('threePX').value=0;$('threePY').value=0;$('threePZ').value=0;$('threeAuto').checked=true;setShape(config.shape);apply();report('3D object reset.');};
+ $('threeReset').onclick=()=>{config=normalizeConfig();$('threeShape').value=config.shape;$('threeColor').value=config.color;$('threeScale').value=100;$('threeMetal').value=65;$('threeRough').value=25;$('threeLight').value=135;$('threeX').value=0;$('threeY').value=0;$('threeZ').value=0;$('threeText').value=config.text;$('threeDepth').value=16;$('threeDepthValue').textContent='0.16';$('threePX').value=0;$('threePY').value=0;$('threePZ').value=0;$('threeAuto').checked=true;setShape(config.shape).then(()=>{apply();report('3D object reset.');}).catch(error=>report('3D reset failed: '+error.message));};
  $('threeExport').onclick=async()=>{
   if(!renderer||!mesh)return;$('threeExport').disabled=true;
   try{
