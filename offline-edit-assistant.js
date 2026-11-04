@@ -13,9 +13,9 @@
   for(const [word,value] of colors)if(new RegExp('\\b'+word+'\\b','i').test(lower)){add('visualColor','Color theme',value);break;}
   const ratio=lower.match(/(?:9\s*:\s*16|16\s*:\s*9|1\s*:\s*1)/);
   if(ratio)add('exportRatio','Canvas format',ratio[0].replace(/\s/g,''));
-  const title=text.match(/(?:^|[,;]\s*|\b)(?:set\s+)?title\s*(?:to|as|[:=])\s*(.+)$/i);
+  const title=text.match(/(?:^|[,;]\s*|\b)(?:set\s+)?title\s*(?:to|as|[:=])\s*([^,;]+)/i);
   if(title)add('titleInput','Video title',title[1].trim().slice(0,60));
-  const subtitle=text.match(/(?:^|[,;]\s*|\b)(?:set\s+)?subtitle\s*(?:to|as|[:=])\s*(.+)$/i);
+  const subtitle=text.match(/(?:^|[,;]\s*|\b)(?:set\s+)?subtitle\s*(?:to|as|[:=])\s*([^,;]+)/i);
   if(subtitle)add('subtitleInput','Subtitle',subtitle[1].trim().slice(0,90));
   const bass=lower.match(/bass\s*(?:to\s*)?([+-]?\d{1,2})\s*(?:db)?/);
   if(bass)add('mainBass','Music bass',Math.max(-12,Math.min(12,Number(bass[1]))));
