@@ -62,11 +62,13 @@
       chunks.forEach((chunk,index)=>{
         const text=String(chunk&&chunk.text||'').trim(),parts=text.match(/\S+/g)||[];
         if(!parts.length)return;
-        const stamp=chunk.timestamp||[],rawStart=Number(stamp[0]),rawEnd=Number(stamp[1]);
-        const hasStart=Number.isFinite(rawStart),hasEnd=Number.isFinite(rawEnd)&&Number.isFinite(rawStart)&&rawEnd>rawStart;
+        const stamp=chunk.timestamp||[],rawStart=stamp[0],rawEnd=stamp[1];
+        const hasStart=typeof rawStart==='number'&&Number.isFinite(rawStart),hasEnd=hasStart&&typeof rawEnd==='number'&&Number.isFinite(rawEnd)&&rawEnd>rawStart;
         const fallbackStart=duration*index/chunks.length,fallbackEnd=duration*(index+1)/chunks.length;
-        const start=hasStart?Math.max(0,Math.min(duration,rawStart)):Math.max(previousEnd,fallbackStart);
-        const end=hasEnd?Math.max(start+.04,Math.min(duration,rawEnd)):Math.max(start+.08,fallbackEnd);
+        const maxStart=Number.isFinite(duration)&&duration>.04?duration-.04:Math.max(0,duration||0);
+        const start=hasStart?Math.max(0,Math.min(maxStart,rawStart)):Math.max(previousEnd,fallbackStart);
+        const boundedEnd=Number.isFinite(duration)?Math.min(duration,rawEnd):rawEnd;
+        const end=hasEnd?Math.max(start+.04,boundedEnd):Math.max(start+.08,fallbackEnd);
         parts.forEach((word,i)=>{
           const a=start+(end-start)*i/parts.length,b=start+(end-start)*(i+1)/parts.length;
           tokens.push({text:word,start:a,end:Math.max(a+.04,b),source:hasEnd?'whisper-word-timestamp':'estimated'});
