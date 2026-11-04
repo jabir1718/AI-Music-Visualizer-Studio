@@ -45,7 +45,7 @@ function init(){
   ['overlayTools','▱','Overlay','Independent image and text artwork layers.'],
   ['colorTools','◍','Colors','Visualizer and artwork color controls.'],
   ['riskPanel','▦','More Tools','Project checks and additional studio utilities.'],
-  ['wfExportPanel','⇧','Export','Resolution, format and render settings.']
+  ['visualPanel','▧','Filters','Choose visualizer looks and available visual filter controls.']
  ];
  const grid=toolSection.querySelector('#wfToolGrid');
  const descriptions=new Map(tools.map(t=>[t[0],t[3]]));
