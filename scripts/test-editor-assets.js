@@ -55,7 +55,9 @@ assert(/chroma-key\.js/.test(index)&&/processPixels/.test(chroma),'Chroma key mo
 assert(/ai-segmentation\.js/.test(index)&&/WaveForgeSegmentation\.mount/.test(app)&&/WaveForgeSegmentation\.draw/.test(app),'AI person segmentation is not integrated');
 assert(/audio-cleanup\.js/.test(index)&&/WaveForgeCleanup\.mount/.test(app),'Spectral noise cleanup is not integrated');
 assert(/symbol-library\.js/.test(index)&&/WaveForgeSymbols\.mount/.test(app)&&/loadLogoFile/.test(app),'OpenMoji symbol library is not connected to logo import');
-assert(/three-studio\.js/.test(index)&&/WaveForge3D\.mount/.test(app)&&/initThreeStudio/.test(app),'3D object studio is not mounted and connected to logo export');
+assert(/three-studio\.js/.test(index)&&/WaveForge3D\.mount/.test(app)&&/initThreeStudio/.test(app),'3D object studio is not mounted');
+assert(/WaveForge3D\.drawToCanvas\(ctx,w,h\)/.test(app),'3D object is not composited into the visualizer canvas');
+assert(/threeStudio:window\.WaveForge3D\.getSettings\(\)/.test(app)&&/WaveForge3D\.setSettings\(d\.threeStudio\)/.test(app),'3D overlay settings are not saved/restored');
 assert(/type="importmap"/.test(index)&&/three\/addons/.test(index),'Three.js import map for 3D text addons is missing');
 assert(/aiSegmentation:window\.WaveForgeSegmentation/.test(app),'AI segmentation settings are not saved');
 assert(/WaveForgeSoundLibrary\.mount/.test(app)&&/addMixerLayer\(file,item\.role\)/.test(app),'Open audio library is not connected to the mixer');
