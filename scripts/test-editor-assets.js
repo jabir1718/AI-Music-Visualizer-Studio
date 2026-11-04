@@ -15,7 +15,7 @@ for(const id of ['objectSelect','objectTextValue','objectX','objectY','objectSca
 for(const object of ['title','subtitle','lyric','logo']){
  assert(app.includes(object+':{visible:true,scale:1,rotation:0,opacity:1,color:'));
 }
-assert(/objectSettings,manualBpm,tapBeatOffset,filterPreset:/.test(app),'Object settings are not persisted in editor settings');
+assert(/objectSettings,objectKeyframes,manualBpm,tapBeatOffset,filterPreset:/.test(app),'Object settings are not persisted in editor settings');
 assert(/d\.objectSettings/.test(app),'Object settings are not restored');
 assert(/objectSettings\.title\.visible/.test(app)&&/objectSettings\.subtitle\.visible/.test(app),'Text visibility not applied to canvas');
 assert(/objectSettings\.lyric\.visible/.test(app)&&/objectSettings\.logo\.visible/.test(app),'Lyric/logo visibility not applied to canvas');
@@ -49,11 +49,12 @@ assert(/WaveForgeMediaTools\.mount/.test(app),'Video extractor UI is not mounted
 assert(/onMain:loadAudio/.test(app)&&/addMixerLayer\(file,'Other'\)/.test(app),'Extracted audio import actions are not connected');
 assert(/MediaRecorder/.test(mediaTools)&&/createMediaElementSource/.test(mediaTools),'Video audio extraction must use real media capture');
 assert(/WaveForgeChromaKey\.mount/.test(app)&&/WaveForgeChromaKey\.process/.test(app),'Chroma key processor is not integrated');
-assert(app.includes('loadSettings();audio.volume=.85;initObjectEditor();initTypographyStudio();initMixerUI();initHistoryUI();initMediaTools();initFilterStudio();initChromaKey();initAISegmentation();'),'All saved editor state and audio controls must initialize before filter UI callbacks save settings');
+assert(app.includes('loadSettings();audio.volume=.85;initObjectEditor();initTypographyStudio();initMixerUI();initHistoryUI();initMediaTools();initFilterStudio();initChromaKey();initAISegmentation();initSymbolLibrary();'),'All saved editor state and audio controls must initialize before filter UI callbacks save settings');
 assert(/chromaKey:window\.WaveForgeChromaKey/.test(app),'Chroma key settings are not saved');
 assert(/chroma-key\.js/.test(index)&&/processPixels/.test(chroma),'Chroma key module or UI is missing');
 assert(/ai-segmentation\.js/.test(index)&&/WaveForgeSegmentation\.mount/.test(app)&&/WaveForgeSegmentation\.draw/.test(app),'AI person segmentation is not integrated');
 assert(/audio-cleanup\.js/.test(index)&&/WaveForgeCleanup\.mount/.test(app),'Spectral noise cleanup is not integrated');
+assert(/symbol-library\.js/.test(index)&&/WaveForgeSymbols\.mount/.test(app)&&/loadLogoFile/.test(app),'OpenMoji symbol library is not connected to logo import');
 assert(/aiSegmentation:window\.WaveForgeSegmentation/.test(app),'AI segmentation settings are not saved');
 assert(/WaveForgeSoundLibrary\.mount/.test(app)&&/addMixerLayer\(file,item\.role\)/.test(app),'Open audio library is not connected to the mixer');
 assert(/WaveForgeTimeline\.resolveLayerTime/.test(app)&&/Split at playhead/.test(app),'Mixer timeline trim/split controls are missing');

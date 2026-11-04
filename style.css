@@ -202,3 +202,19 @@ button[data-action-icon]:disabled{opacity:.45;cursor:not-allowed}
 .object-keyframe-tools>div:first-child{display:grid;gap:4px}
 .object-keyframe-tools b{font-size:.88rem}
 .object-keyframe-tools small{color:var(--muted);font-size:.74rem}
+
+.openmoji-library{margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--panel-soft,rgba(255,255,255,.025));display:grid;gap:12px}
+.openmoji-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.openmoji-head h3{margin:3px 0;font-size:1rem}
+.openmoji-head p{margin:0;color:var(--muted);font-size:.76rem;line-height:1.5}
+.openmoji-search{display:grid;grid-template-columns:1fr minmax(110px,.6fr);gap:8px}
+.openmoji-search input,.openmoji-search select{min-width:0;width:100%}
+.openmoji-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;max-height:440px;overflow:auto}
+.openmoji-item{min-width:0;display:grid;gap:5px;align-content:start;padding:7px;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--text);cursor:pointer}
+.openmoji-item img{width:100%;aspect-ratio:1;object-fit:contain}
+.openmoji-item span{font-size:.65rem;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.openmoji-item.selected{border-color:var(--accent);background:var(--accent-soft,rgba(125,110,255,.12))}
+.openmoji-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.openmoji-actions .hint{font-size:.72rem}
+.openmoji-license{color:var(--muted);font-size:.68rem;line-height:1.5}
+@media(max-width:560px){.openmoji-grid{grid-template-columns:repeat(4,minmax(0,1fr));max-height:360px}.openmoji-search{grid-template-columns:1fr}}
