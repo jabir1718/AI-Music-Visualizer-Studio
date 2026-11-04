@@ -221,7 +221,7 @@ function applyVoiceStyle(layer,style){
  };
  const p=styles[style]||styles.natural;Object.assign(layer,p,{voiceStyle:style});
  layer.audio.playbackRate=layer.rate;layer.audio.preservesPitch=false;
- if(engine&&layer.connected){engine.setLayerEQ(layer.id,layer.bass,layer.treble);engine.setLayerDelay(layer.id,layer.delay);engine.setLayerReverb(layer.id,layer.reverb);engine.setLayerDistortion(layer.id,layer.distortion);}
+ if(engine&&layer.connected){engine.setLayerEQ(layer.id,layer.bass,layer.treble);engine.setLayerDelay(layer.id,layer.delay);engine.setLayerReverb(layer.id,layer.reverb);engine.setLayerDistortion(layer.id,layer.distortion*100);}
  renderMixerLayers();saveSettings();setStatus('Applied '+style+' voice style');
 }
 function applyLayerPreset(layer,preset){
