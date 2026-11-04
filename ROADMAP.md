@@ -346,3 +346,26 @@ This is an order for development, not a reduction of the full scope:
 - Never bundle copyrighted music, sound effects, artwork or templates without permission.
 - Keep controls accessible, responsive and usable on Android screens; heavy model/effect work should be cancellable and should not freeze the editor.
 - Run syntax checks and the Android APK workflow after code changes. Test actual audio playback, independent layer volume, timing, export and UI behavior on a real Android device before calling a release complete.
+
+
+## 30. In-app Google image search and smart template editing
+- Add a Google Images search option inside the APK. Show results in-app; tapping an eligible result imports/fetches it into the app's asset library or active project without forcing the user to leave the APK.
+- Use authorized search/provider integrations and respect provider terms, copyright, licensing and hotlink restrictions. Do not scrape Google Images pages or promise every result can be fetched. If import is unavailable, show the source-page link and reason.
+- Show source, dimensions, file type, transparency and license details where available. Let users insert an asset as background, logo, artwork, text decoration or visualizer object.
+- Support original-resolution downloads. Offer up to 16K only when genuine source detail supports it; label AI enlargement as upscaling, never native 16K.
+- Keep a reusable asset-search/import button available in background, text/font, logo, artwork and visualizer editors.
+- For a chosen background, let users add song lyrics by transcription, paste/write their own text or poetry, or edit text from a template where extractable. Keep each content source on its own editable layer.
+- When a downloaded template is opened, detect its editable regions where possible and show a named element list such as headline, title, subtitle, lyric/text, logo, artwork, decorative shape, music and background. Clicking a list item selects that exact element and opens its relevant editor; tapping the canvas element should select the same item.
+- Preserve untouched template elements. If the template is a flattened image/video, explain that automatic per-element editing is unavailable and offer manual overlays/recreation.
+- Run fetching/template analysis asynchronously with cancel, progress only when needed, memory limits and clear network/file error recovery; never freeze the editor.
+- Populate a searchable library of 2,000+ distinct skulls, symbols and emoji-style graphics, with categories, tags, favorites, previews and insert actions usable in background, text/font decoration, logo, artwork and visualizer areas.
+- Provide clean transparent PNGs and genuine 3D assets where available. Do not describe a flat PNG as a volumetric 3D model. Retain source/license attribution and duplicate/storage management.
+
+## 31. Expanded voice characters and high-resolution filter pack
+- Add generic synthetic voice styles across youthful/teen-sounding, young adult, mature and older-sounding ranges, with masculine/feminine-sounding and character-style options where supported. Do not imitate a real person's identity or infer body type from voice.
+- Every selected voice preset must still expose independent pitch up/down, speed, volume, tone/formant where supported, effects, preview, reset and save-preset controls.
+- Keep each processed voice layer independent from background music and instruments.
+- Provide 50+ distinct photo/video filter presets for backgrounds and imported media, inspired by modern premium-phone camera looks without claiming manufacturer affiliation.
+- Offer high-quality processing and up to 16K export only where source dimensions, device memory, GPU/renderer and encoder support it. Filter quality and output pixel resolution are separate settings.
+- Apply filters non-destructively to photo or video backgrounds, with intensity, before/after preview, enable/disable and reset.
+- Use lower-resolution preview proxies when needed, then render at the highest supported quality during export. Give clear fallbacks instead of freezing or crashing on unsupported devices.
