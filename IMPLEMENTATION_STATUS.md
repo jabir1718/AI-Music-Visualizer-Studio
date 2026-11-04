@@ -2,7 +2,7 @@
 
 This file is the delivery checklist for the 31 groups in `ROADMAP.md`. It is deliberately conservative: **Partial** means some working code exists, not that the complete request is finished. **Not started** means there is no verified implementation in the current source.
 
-Last source audit: 2026-11-04 (after editable object layers, image import, 50 filters, master-track effects, video audio extraction, word-sync karaoke, tap tempo and chroma key).
+Last source audit: 2026-11-04 (after undo/redo, AI person cutout, spectral noise cleanup, keyframe animation, OpenMoji catalogue, SoundTouch pitch preservation, Three.js object studio, extruded 3D text and LPC formant correction).
 
 ## Status definitions
 - **Partial** — working foundation exists, but one or more requested capabilities are missing or unverified.
@@ -107,6 +107,6 @@ Last source audit: 2026-11-04 (after editable object layers, image import, 50 fi
 
 - Added an on-demand Three.js 3D object studio. It creates real WebGL meshes (box, sphere, torus, torus knot, cone, cylinder, octahedron, dodecahedron, icosahedron and tetrahedron), supports XYZ positioning/rotation, scale, material and lighting controls, touch rotation, and exports a transparent 1024×1024 PNG logo. Three.js is MIT-licensed and loads from jsDelivr on first use; WebGL and internet access are required. This is a primitive object studio, not a full 3D scene editor or live 3D video compositor.
 
-- Extended the 3D studio with extruded 3D text geometry, editable text and depth. It uses the Helvetiker bold typeface from the Three.js examples package; the 100-family typography studio remains the 2D text workflow. The font and addon modules load on demand.
+- Extended the 3D studio with extruded 3D text geometry, editable text and depth. It now offers eight selectable typeface variants from the Three.js examples package; the 100-family typography studio remains the separate 2D text workflow. The font and addon modules load on demand.
 
 - Added optional LPC formant correction for voice mixer layers using `@soundtouchjs/formant-correction-worklet` (MPL-2.0). Voice, Ad-lib, Humming, Harmony and Voice FX layers default to full formant preservation when pitch-preserving mode is enabled; the formant slider blends corrected and uncorrected sound. This is DSP-based timbre preservation, not AI voice conversion or voice identity cloning.
