@@ -1,10 +1,16 @@
 'use strict';
 const assert=require('assert');
-class MockVideo{constructor(){this.duration=6;this.videoWidth=1280;this.videoHeight=720;this.readyState=2;this.currentTime=0;this.paused=true;this.src='';}setAttribute(){}load(){if(this.onloadedmetadata)this.onloadedmetadata();}pause(){this.paused=true;}play(){this.paused=false;return Promise.resolve();}}
+class MockVideo{
+ constructor(){this.duration=6;this.videoWidth=1280;this.videoHeight=720;this.readyState=2;this._currentTime=0;this.paused=true;this.src='';this.listeners={};}
+ setAttribute(){}load(){if(this.onloadedmetadata)this.onloadedmetadata();}
+ pause(){this.paused=true;}play(){this.paused=false;return Promise.resolve();}
+ get currentTime(){return this._currentTime;}set currentTime(v){this._currentTime=v;queueMicrotask(()=>{(this.listeners.seeked||[]).forEach(fn=>fn());if(this.onseeked)this.onseeked();});}
+ addEventListener(n,fn){(this.listeners[n]||(this.listeners[n]=[])).push(fn);}removeEventListener(n,fn){this.listeners[n]=(this.listeners[n]||[]).filter(x=>x!==fn);}
+}
 class MockImage{constructor(){this.naturalWidth=1200;this.naturalHeight=800;this.src='';this.decoding='';}set src(v){this._src=v;queueMicrotask(()=>{if(this.onload)this.onload();});}get src(){return this._src;}}
-const root={document:{createElement:tag=>tag==='video'?new MockVideo():tag==='img'?new MockImage():null},URL:{createObjectURL:file=>'blob:'+file.name,revokeObjectURL(){}},setTimeout:()=>1,clearTimeout(){}};root.window=root;root.Image=MockImage;
+const root={document:{createElement:tag=>tag==='video'?new MockVideo():tag==='img'?new MockImage():null},URL:{createObjectURL:file=>'blob:'+file.name,revokeObjectURL(){}},setTimeout,clearTimeout};root.window=root;root.Image=MockImage;
 const source=require('fs').readFileSync(require('path').join(__dirname,'..','auto-video-editor.js'),'utf8');
-new Function('window','document','URL','setTimeout','clearTimeout',source)(root,root.document,root.URL,root.setTimeout,root.clearTimeout);
+new Function('window','document','URL','setTimeout','clearTimeout',source)(root,root.document,root.URL,setTimeout,clearTimeout);
 const api=root.WaveForgeAutoVideo,stored=new Map();
 const bridge={saveMediaAsset:async(id,file)=>{stored.set(id,{blob:file,name:file.name,type:file.type});return true;},getMediaAsset:async id=>stored.get(id),deleteMediaAsset:async()=>{},onChange:()=>{},getBpm:()=>120,getMusicDuration:()=>18};
 api.mount({querySelector:()=>null},bridge);
@@ -19,9 +25,11 @@ const file=(name,type,size=1024)=>Object.assign({name,type,size,arrayBuffer:asyn
  assert.strictEqual(api.getState().segments.length,result.count);
  assert.ok(api.getState().segments.some(s=>api.getState().assets.find(a=>a.id===s.assetId).kind==='image'),'auto cut should include photo segments');
  assert.strictEqual(Object.keys(api.PRESETS).length,10,'exactly ten editing templates should be available');
+ const first=api.getState().segments[0];assert.strictEqual(api.setSpeedRamp(first.id,.7,1.5),true,'speed ramp should be editable');assert.ok(api.getState().segments[0].rateStart===.7&&api.getState().segments[0].rateEnd===1.5);
+ assert.strictEqual(api.setTransition(first.id,'fade'),true,'transition should be editable');assert.strictEqual(api.getVisualEffect(first.timelineStart).type,'fade');
  api.move(1,-1);const before=api.getCount();assert.strictEqual(api.splitSegment(api.getState().segments[0].id),true);assert.strictEqual(api.getCount(),before+1);
  const frame=api.sync(0,false);assert.ok(frame instanceof MockVideo||frame instanceof MockImage,'playhead should resolve active video or photo');
  assert.ok(api.getMotion(0).scale>=1,'photo template should provide gentle motion');
  api.removeSegment(api.getState().segments[0].id);assert.strictEqual(api.getCount(),before);
- console.log('Auto Video tests passed: mixed local photo/video import, 10 templates, music-length photo montage, beat cuts, photo motion, preview mapping, reorder/split/remove.');
+ console.log('Auto Video tests passed: mixed media import, ten templates, song-length photo montage, beat cuts, speed ramps, transitions, preview mapping and segment edits.');
 })().catch(error=>{console.error(error);process.exit(1);});
