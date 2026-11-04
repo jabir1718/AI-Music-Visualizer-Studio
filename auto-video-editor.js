@@ -29,7 +29,7 @@
    const time=document.createElement('small');time.textContent=segment.timelineStart.toFixed(1)+'s · '+(segment.sourceEnd-segment.sourceStart).toFixed(1)+'s';
    top.append(name,time);card.append(top);
    const actions=document.createElement('div');actions.className='auto-video-clip-actions';
-   [['↑',()=>move(index,-1),'Move earlier'],['↓',()=>move(index,1),'Move later'],['Remove',()=>removeSegment(segment.id),'Remove segment']].forEach(([label,fn,title])=>{const b=document.createElement('button');b.type='button';b.className='btn small';b.textContent=label;b.title=title;b.disabled=(label==='↑'&&index===0)||(label==='↓'&&index===segments.length-1);b.addEventListener('click',fn);actions.appendChild(b);});
+   [['↑',()=>move(index,-1),'Move earlier'],['↓',()=>move(index,1),'Move later'],['Split',()=>splitSegment(segment.id),'Split at midpoint'],['Remove',()=>removeSegment(segment.id),'Remove segment']].forEach(([label,fn,title])=>{const b=document.createElement('button');b.type='button';b.className='btn small';b.textContent=label;b.title=title;b.disabled=(label==='↑'&&index===0)||(label==='↓'&&index===segments.length-1);b.addEventListener('click',fn);actions.appendChild(b);});
    card.append(actions);
    const trim=document.createElement('label');trim.className='auto-video-trim';const trimText=document.createElement('span');trimText.textContent='Segment length · '+(segment.sourceEnd-segment.sourceStart).toFixed(1)+' sec';
    const range=document.createElement('input');range.type='range';range.min='.2';range.max=Math.max(.2,Math.min(20,segment.sourceEnd-segment.sourceStart));range.step='.1';range.value=Math.max(.2,segment.sourceEnd-segment.sourceStart);
@@ -66,6 +66,7 @@
   relayout();render();updateStatus('Imported '+files.length+' video(s). Your source files are stored locally.');persist();return segments.length;
  }
  function move(index,delta){const next=index+delta;if(next<0||next>=segments.length)return;[segments[index],segments[next]]=[segments[next],segments[index]];relayout();render();persist();}
+ function splitSegment(segmentId){const index=segments.findIndex(s=>s.id===segmentId);if(index<0||segments.length>=MAX_SEGMENTS)return false;const source=segments[index],mid=(source.sourceStart+source.sourceEnd)/2;if(mid-source.sourceStart<.1||source.sourceEnd-mid<.1)return false;const first={...source,id:id(),sourceEnd:mid},second={...source,id:id(),sourceStart:mid};segments.splice(index,1,first,second);relayout();selected=first.id;render();persist();return true;}
  function removeSegment(segmentId){segments=segments.filter(s=>s.id!==segmentId);relayout();render();persist();}
  function generateAutoCut(options={}){
   if(!assets.size)throw new Error('Import video clips first.');
@@ -119,6 +120,6 @@
   render();
  }
  function dispose(){assets.forEach(a=>{a.video.pause();URL.revokeObjectURL(a.video.src);});assets.clear();segments=[];}
- root.WaveForgeAutoVideo={mount,addFiles,generateAutoCut,move,removeSegment,sync,getState,restore,dispose,getDuration:totalDuration,getCount:()=>segments.length,PRESETS};
+ root.WaveForgeAutoVideo={mount,addFiles,generateAutoCut,move,splitSegment,removeSegment,sync,getState,restore,dispose,getDuration:totalDuration,getCount:()=>segments.length,PRESETS};
  if(typeof module!=='undefined'&&module.exports)module.exports=root.WaveForgeAutoVideo;
 })(typeof window!=='undefined'?window:globalThis);
