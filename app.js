@@ -118,6 +118,13 @@ function draw(){
  raf=requestAnimationFrame(draw);
 }
 function startDraw(){if(!raf)draw();}
+async function enableLayerPitchNode(layer,eng){
+ if(layer.formantStrength>0){
+  try{await eng.enableLayerFormantCorrection(layer.id,layer.pitch,layer.rate,layer.formantStrength/100);return 'formant';}
+  catch(error){await eng.enableLayerPitchPreserving(layer.id,layer.pitch,layer.rate);layer.formantStrength=0;setStatus('Formant correction unavailable; standard pitch-preserving mode is active. '+error.message);return 'soundtouch';}
+ }
+ await eng.enableLayerPitchPreserving(layer.id,layer.pitch,layer.rate);return 'soundtouch';
+}
 async function ensureEngine(){
  if(!engine)engine=new AudioEngine(audio);
  await engine.connect();await engine.resume();engine.setVolume(Number($('volume').value));applyMainEffects();
@@ -125,7 +132,7 @@ async function ensureEngine(){
  for(const layer of mixerLayers){
   if(!layer.connected){const soloActive=mixerLayers.some(x=>x.solo);engine.addLayer(layer.id,layer.audio,(!layer.muted&&(!soloActive||layer.solo))?layer.volume:0,layer);layer.connected=true;}
   if(layer.pitchPreserving&&!engine.layers.get(layer.id).pitchNode){
-   try{await engine.enableLayerPitchPreserving(layer.id,layer.pitch,layer.rate);}
+   try{await enableLayerPitchNode(layer,engine);}
    catch(error){layer.pitchPreserving=false;layer.rate=Math.pow(2,layer.pitch/12);layer.audio.playbackRate=layer.rate;fallback=true;setStatus('Pitch-preserving DSP unavailable; standard pitch/rate restored. '+error.message);}
   }
  }
@@ -234,9 +241,9 @@ function addMixerLayer(file,role,restore={},persist=true){
  if(!file.type.startsWith('audio/')){alert('Choose a supported audio file.');return;}
  const id=restore.id||('mix-'+Date.now()+'-'+Math.random().toString(36).slice(2,7)),url=URL.createObjectURL(file);
  const el=document.createElement('audio');el.preload='auto';el.hidden=true;el.src=url;el.preservesPitch=false;
- const layer={id,file,url,audio:el,role,volume:.85,rate:1,pitch:0,offset:0,muted:false,solo:false,pan:0,bass:0,treble:0,delay:0,reverb:0,distortion:0,voiceStyle:'natural',pitchPreserving:false,trimStart:0,trimEnd:0,loop:false,connected:false,...restore,id,file,url,audio:el,role};
+ const layer={id,file,url,audio:el,role,volume:.85,rate:1,pitch:0,offset:0,muted:false,solo:false,pan:0,bass:0,treble:0,delay:0,reverb:0,distortion:0,voiceStyle:'natural',pitchPreserving:false,formantStrength:['Voice','Ad-lib','Humming','Harmony','Voice FX'].includes(role)?100:0,trimStart:0,trimEnd:0,loop:false,connected:false,...restore,id,file,url,audio:el,role};
  el.playbackRate=layer.rate||1;mixerLayers.push(layer);mixerPanel.appendChild(el);renderMixerLayers();
- if(engine&&engine.ready){engine.addLayer(id,el,layer.volume,layer);layer.connected=true;if(layer.pitchPreserving)engine.enableLayerPitchPreserving(id,layer.pitch,layer.rate).catch(error=>{layer.pitchPreserving=false;layer.rate=Math.pow(2,layer.pitch/12);layer.audio.playbackRate=layer.rate;renderMixerLayers();setStatus('Pitch-preserving DSP unavailable: '+error.message);});applyMixerSoloState();}
+ if(engine&&engine.ready){engine.addLayer(id,el,layer.volume,layer);layer.connected=true;if(layer.pitchPreserving)enableLayerPitchNode(layer,engine).catch(error=>{layer.pitchPreserving=false;layer.rate=Math.pow(2,layer.pitch/12);layer.audio.playbackRate=layer.rate;renderMixerLayers();setStatus('Pitch-preserving DSP unavailable: '+error.message);});applyMixerSoloState();}
  syncMixerLayers();if(persist)saveMediaAsset(id,file);saveSettings();setStatus('Audio layer added');
 }
 function applyMixerSoloState(){
@@ -254,7 +261,7 @@ function applyVoiceStyle(layer,style){
   alien:{rate:.92,pitch:-1.5,bass:2,treble:6,delay:.18,reverb:.32,distortion:.22}
  };
  const p=styles[style]||styles.natural;Object.assign(layer,p,{voiceStyle:style});
- if(layer.pitchPreserving){layer.audio.playbackRate=layer.rate;if(engine&&layer.connected){engine.setLayerPitch(layer.id,layer.pitch);engine.setLayerRate(layer.id,layer.rate);}}
+ if(layer.pitchPreserving){layer.audio.playbackRate=layer.rate;if(engine&&layer.connected)enableLayerPitchNode(layer,engine).catch(error=>setStatus('Voice processing unavailable: '+error.message));}
  else{layer.audio.playbackRate=layer.rate;layer.audio.preservesPitch=false;}
  if(engine&&layer.connected){engine.setLayerEQ(layer.id,layer.bass,layer.treble);engine.setLayerDelay(layer.id,layer.delay);engine.setLayerReverb(layer.id,layer.reverb);engine.setLayerDistortion(layer.id,layer.distortion*100);}
  renderMixerLayers();saveSettings();setStatus('Applied '+style+' voice style');
@@ -270,7 +277,7 @@ function applyLayerPreset(layer,preset){
  };
  const p=presets[preset]||presets.clean;Object.assign(layer,p,{preset});
  layer.audio.playbackRate=layer.rate;layer.audio.preservesPitch=false;
- if(engine&&layer.connected){if(layer.pitchPreserving){engine.setLayerPitch(layer.id,layer.pitch);engine.setLayerRate(layer.id,layer.rate);}engine.setLayerEQ(layer.id,layer.bass,layer.treble);engine.setLayerPan(layer.id,layer.pan);engine.setLayerDelay(layer.id,layer.delay);engine.setLayerReverb(layer.id,layer.reverb);engine.setLayerDistortion(layer.id,layer.distortion*100);}
+ if(engine&&layer.connected){if(layer.pitchPreserving)enableLayerPitchNode(layer,engine).catch(error=>setStatus('Voice processing unavailable: '+error.message));engine.setLayerEQ(layer.id,layer.bass,layer.treble);engine.setLayerPan(layer.id,layer.pan);engine.setLayerDelay(layer.id,layer.delay);engine.setLayerReverb(layer.id,layer.reverb);engine.setLayerDistortion(layer.id,layer.distortion*100);}
  renderMixerLayers();saveSettings();setStatus('Applied '+preset+' audio preset');
 }
 function renderMixerLayers(){
@@ -302,8 +309,10 @@ function renderMixerLayers(){
   addRange('Pitch (semitones)','pitch',-12,12,1,' st',v=>{if(layer.pitchPreserving&&engine&&layer.connected)engine.setLayerPitch(layer.id,v);else{layer.rate=Math.pow(2,v/12);layer.audio.playbackRate=layer.rate;layer.audio.preservesPitch=false;}syncMixerLayers();});
   const speedControl=addRange('Speed','rate',.5,2,.05,'×',v=>{layer.rate=v;if(layer.pitchPreserving&&engine&&layer.connected)engine.setLayerRate(layer.id,v);else layer.audio.playbackRate=v;syncMixerLayers();});
   speedControl.hidden=!layer.pitchPreserving;
+  const formantControl=addRange('Formant preservation','formantStrength',0,100,5,'%',v=>{if(layer.pitchPreserving&&engine&&layer.connected)enableLayerPitchNode(layer,engine).then(()=>{if(layer.formantStrength===0)renderMixerLayers();}).catch(error=>setStatus('Formant processing unavailable: '+error.message));});
+  formantControl.hidden=!layer.pitchPreserving;
   const preserveWrap=document.createElement('label');preserveWrap.className='mixer-pitch-preserve';preserveWrap.title='SoundTouchJS AudioWorklet (MPL-2.0) loads from jsDelivr on first use; internet and AudioWorklet support are required.';const preserve=document.createElement('input');preserve.type='checkbox';preserve.checked=!!layer.pitchPreserving;const preserveText=document.createElement('span');preserveText.textContent='Pitch preserving · separate pitch from speed';preserveWrap.append(preserve,preserveText);row.append(preserveWrap);
-  preserve.onchange=async()=>{if(preserve.checked){try{const eng=await ensureEngine();await eng.enableLayerPitchPreserving(layer.id,layer.pitch,layer.rate);layer.pitchPreserving=true;speedControl.hidden=false;setStatus('Pitch and speed are independent for this layer.');}catch(error){layer.pitchPreserving=false;preserve.checked=false;setStatus('Pitch-preserving DSP unavailable: '+error.message);}}else{const effective=Math.pow(2,layer.pitch/12);if(engine&&layer.connected)engine.disableLayerPitchPreserving(layer.id,effective);layer.pitchPreserving=false;layer.rate=effective;layer.audio.playbackRate=effective;speedControl.hidden=true;setStatus('Pitch-preserving mode disabled; speed is linked to pitch again.');}renderMixerLayers();syncMixerLayers();saveSettings();};
+  preserve.onchange=async()=>{if(preserve.checked){try{const eng=await ensureEngine();await enableLayerPitchNode(layer,eng);layer.pitchPreserving=true;speedControl.hidden=false;formantControl.hidden=false;setStatus('Pitch and speed are independent for this layer.');}catch(error){layer.pitchPreserving=false;preserve.checked=false;setStatus('Pitch-preserving DSP unavailable: '+error.message);}}else{const effective=Math.pow(2,layer.pitch/12);if(engine&&layer.connected)engine.disableLayerPitchPreserving(layer.id,effective);layer.pitchPreserving=false;layer.rate=effective;layer.audio.playbackRate=effective;speedControl.hidden=true;formantControl.hidden=true;setStatus('Pitch-preserving mode disabled; speed is linked to pitch again.');}renderMixerLayers();syncMixerLayers();saveSettings();};
   addRange('Stereo pan','pan',-1,1,.05,'',v=>{if(engine&&layer.connected)engine.setLayerPan(layer.id,v);});
   addRange('Bass EQ','bass',-12,12,1,' dB',()=>{if(engine&&layer.connected)engine.setLayerEQ(layer.id,layer.bass,layer.treble);});
   addRange('Treble EQ','treble',-12,12,1,' dB',()=>{if(engine&&layer.connected)engine.setLayerEQ(layer.id,layer.bass,layer.treble);});
@@ -315,7 +324,7 @@ function renderMixerLayers(){
   const startWrap=document.createElement('label');startWrap.textContent='Clip in (seconds)';const trimStart=document.createElement('input');trimStart.type='number';trimStart.min='0';trimStart.max='3600';trimStart.step='.05';trimStart.value=layer.trimStart||0;trimStart.onchange=()=>{const result=window.WaveForgeTimeline.setTrim(layer,trimStart.value,layer.trimEnd,layer.audio.duration);if(!result.valid){trimStart.value=layer.trimStart||0;setStatus('Clip start must be before clip end.');return;}syncMixerLayers();saveSettings();};startWrap.append(trimStart);
   const endWrap=document.createElement('label');endWrap.textContent='Clip out (seconds) · blank = full';const trimEnd=document.createElement('input');trimEnd.type='number';trimEnd.min='0';trimEnd.max='3600';trimEnd.step='.05';trimEnd.placeholder='Full duration';trimEnd.value=layer.trimEnd||'';trimEnd.onchange=()=>{const result=window.WaveForgeTimeline.setTrim(layer,layer.trimStart,trimEnd.value,layer.audio.duration);if(!result.valid){trimEnd.value=layer.trimEnd||'';setStatus('Clip end must be after clip start.');return;}syncMixerLayers();saveSettings();};endWrap.append(trimEnd);
   const loopWrap=document.createElement('label');loopWrap.className='mixer-loop-toggle';const loop=document.createElement('input');loop.type='checkbox';loop.checked=!!layer.loop;loop.onchange=()=>{layer.loop=loop.checked;syncMixerLayers();saveSettings();};loopWrap.append(loop,document.createTextNode('Loop trimmed clip'));
-  const split=document.createElement('button');split.type='button';split.className='btn small';split.textContent='Split at playhead';split.onclick=()=>{if(!window.WaveForgeTimeline||!audio.src){setStatus('Load and position the main track before splitting.');return;}if(!Number.isFinite(layer.audio.duration)||layer.audio.duration<=0){setStatus('Wait for this audio layer to finish loading before splitting.');return;}const parts=window.WaveForgeTimeline.splitLayer(layer,audio.currentTime,layer.audio.duration);if(!parts){setStatus('Move the playhead inside this clip, away from its edges.');return;}layer.trimEnd=parts.first.trimEnd;const restore={volume:layer.volume,rate:layer.rate,pitch:layer.pitch,offset:audio.currentTime,muted:false,solo:false,pan:layer.pan,bass:layer.bass,treble:layer.treble,delay:layer.delay,reverb:layer.reverb,distortion:layer.distortion,voiceStyle:layer.voiceStyle,pitchPreserving:layer.pitchPreserving,preset:layer.preset,trimStart:parts.second.trimStart,trimEnd:parts.second.trimEnd,loop:false};addMixerLayer(layer.file,layer.role,restore,true);syncMixerLayers();saveSettings();setStatus('Layer split into two editable clips.');};
+  const split=document.createElement('button');split.type='button';split.className='btn small';split.textContent='Split at playhead';split.onclick=()=>{if(!window.WaveForgeTimeline||!audio.src){setStatus('Load and position the main track before splitting.');return;}if(!Number.isFinite(layer.audio.duration)||layer.audio.duration<=0){setStatus('Wait for this audio layer to finish loading before splitting.');return;}const parts=window.WaveForgeTimeline.splitLayer(layer,audio.currentTime,layer.audio.duration);if(!parts){setStatus('Move the playhead inside this clip, away from its edges.');return;}layer.trimEnd=parts.first.trimEnd;const restore={volume:layer.volume,rate:layer.rate,pitch:layer.pitch,offset:audio.currentTime,muted:false,solo:false,pan:layer.pan,bass:layer.bass,treble:layer.treble,delay:layer.delay,reverb:layer.reverb,distortion:layer.distortion,voiceStyle:layer.voiceStyle,pitchPreserving:layer.pitchPreserving,formantStrength:layer.formantStrength,preset:layer.preset,trimStart:parts.second.trimStart,trimEnd:parts.second.trimEnd,loop:false};addMixerLayer(layer.file,layer.role,restore,true);syncMixerLayers();saveSettings();setStatus('Layer split into two editable clips.');};
   clipTools.append(startWrap,endWrap,loopWrap,split);row.append(clipTools);
   row.append(controls);list.append(row);
  });applyMixerSoloState();decorateButtonIcons(list);
@@ -503,7 +512,7 @@ function initHistoryUI(){
  history.seed(captureUndoState());
 }
 function saveSettings(){
- const data={mainPitch:$('mainPitch')?$('mainPitch').value:0,mainEffects:readMainEffects(),typography:window.WaveForgeTypography?window.WaveForgeTypography.getAll():null,layers:mixerLayers.map(l=>({id:l.id,role:l.role,volume:l.volume,rate:l.rate,pitch:l.pitch,offset:l.offset,muted:l.muted,solo:l.solo,pan:l.pan,bass:l.bass,treble:l.treble,delay:l.delay,reverb:l.reverb,distortion:l.distortion||0,voiceStyle:l.voiceStyle||'natural',pitchPreserving:!!l.pitchPreserving,trimStart:l.trimStart||0,trimEnd:l.trimEnd||0,loop:!!l.loop,preset:l.preset||'clean'})),title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,lyricPosition:$('lyricPosition').value,positions,objectSettings,objectKeyframes,manualBpm,tapBeatOffset,filterPreset:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterPreset:'f01',filterIntensity:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterIntensity:100,chromaKey:window.WaveForgeChromaKey?window.WaveForgeChromaKey.getSettings():null,aiSegmentation:window.WaveForgeSegmentation?window.WaveForgeSegmentation.getSettings():null,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
+ const data={mainPitch:$('mainPitch')?$('mainPitch').value:0,mainEffects:readMainEffects(),typography:window.WaveForgeTypography?window.WaveForgeTypography.getAll():null,layers:mixerLayers.map(l=>({id:l.id,role:l.role,volume:l.volume,rate:l.rate,pitch:l.pitch,offset:l.offset,muted:l.muted,solo:l.solo,pan:l.pan,bass:l.bass,treble:l.treble,delay:l.delay,reverb:l.reverb,distortion:l.distortion||0,voiceStyle:l.voiceStyle||'natural',pitchPreserving:!!l.pitchPreserving,formantStrength:Number(l.formantStrength)||0,trimStart:l.trimStart||0,trimEnd:l.trimEnd||0,loop:!!l.loop,preset:l.preset||'clean'})),title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,lyricPosition:$('lyricPosition').value,positions,objectSettings,objectKeyframes,manualBpm,tapBeatOffset,filterPreset:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterPreset:'f01',filterIntensity:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterIntensity:100,chromaKey:window.WaveForgeChromaKey?window.WaveForgeChromaKey.getSettings():null,aiSegmentation:window.WaveForgeSegmentation?window.WaveForgeSegmentation.getSettings():null,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
  try{localStorage.setItem('waveforge-v1',JSON.stringify(data));setStatus('Saved locally');}catch(e){setStatus('Ready');}
  if(history&&!historyRestoring)history.record(captureUndoState());
 }
