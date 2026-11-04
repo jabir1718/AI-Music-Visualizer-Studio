@@ -14,3 +14,10 @@ assert.strictEqual(recorder.MAX_DURATION_MS,180000);
 assert.strictEqual(recorder.MAX_BYTES,30*1024*1024);
 assert.strictEqual(recorder.mount(null,'Voice',()=>{}),null,'mount must safely skip without a DOM host');
 console.log('Voice recording helper tests passed.');
+
+const {addMicrophonePermission}=require('./patch-android-manifest.js');
+const manifest='<manifest xmlns:android="http://schemas.android.com/apk/res/android"><application /></manifest>';
+const patched=addMicrophonePermission(manifest);
+assert(patched.includes('android.permission.RECORD_AUDIO'),'Android manifest must declare microphone permission');
+assert.strictEqual(addMicrophonePermission(patched),patched,'permission patch must be idempotent');
+assert.throws(()=>addMicrophonePermission('<application />'),/manifest root/);
