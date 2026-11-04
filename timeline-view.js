@@ -11,6 +11,7 @@ function clipLayout(layer,totalDuration,pixelsPerSecond){
  const pps=Math.max(1,Number(pixelsPerSecond)||40);
  return{left:offset*pps,width:span*pps,start:offset,end:offset+span,span,trimStart,trimEnd};
 }
+function videoSegmentLayout(segment,pixelsPerSecond){const rate=Math.max(.25,((Number(segment&&segment.rateStart)||Number(segment&&segment.rate)||1)+(Number(segment&&segment.rateEnd)||Number(segment&&segment.rate)||1))/2),duration=Math.max(0,Number(segment&&segment.sourceEnd)-Number(segment&&segment.sourceStart))/rate,pps=Math.max(1,Number(pixelsPerSecond)||40),start=Math.max(0,Number(segment&&segment.timelineStart)||0);return{left:start*pps,width:duration*pps,start,end:start+duration,duration};}
 function formatTime(value){
  const s=Math.max(0,Number(value)||0),m=Math.floor(s/60),sec=Math.floor(s%60);
  return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
@@ -28,8 +29,8 @@ function mount(host,before,options={}){
  function mainDuration(){return Math.max(0,Number(opts.getMainDuration&&opts.getMainDuration())||0);}
  function totalDuration(){
   const main=mainDuration(),layers=getLayers();
-  const end=layers.reduce((max,l)=>{const b=clipLayout(l,0,1);return Math.max(max,b.end);},0);
-  return Math.max(30,main,end+5);
+  const end=layers.reduce((max,l)=>{const b=clipLayout(l,0,1);return Math.max(max,b.end);},0),videoEnd=Math.max(0,Number(opts.getVideoDuration&&opts.getVideoDuration())||0);
+  return Math.max(30,main,end+5,videoEnd+5);
  }
  function seekAt(event,lane){
   const rect=lane.getBoundingClientRect(),time=Math.max(0,(event.clientX-rect.left)/pps);
@@ -45,7 +46,7 @@ function mount(host,before,options={}){
   pps=Number(zoom.value)||40;
   const duration=totalDuration(),width=Math.max(620,duration*pps);
   stage.style.width=(LABEL+width)+'px';$('wfTimelineZoomValue').textContent=pps+' px/s';
-  $('wfTimelineDuration').textContent=(mainDuration()?formatTime(mainDuration()):'Main track not loaded')+' · '+getLayers().length+' extra layer(s)';
+  $('wfTimelineDuration').textContent=(mainDuration()?formatTime(mainDuration()):'Main track not loaded')+' · '+getLayers().length+' audio layer(s) · '+(opts.getVideoSegments?opts.getVideoSegments().length:0)+' video clip(s)';
   ruler.style.width=width+'px';ruler.innerHTML='';
   const tickStep=pps>=60?2:pps>=28?5:10;
   for(let t=0;t<=duration;t+=tickStep){
@@ -84,7 +85,7 @@ function mount(host,before,options={}){
  const api={render,updatePlayhead,dispose(){disposed=true;if(opts.audioElement){['timeupdate','seeked'].forEach(event=>opts.audioElement.removeEventListener(event,updatePlayhead));['durationchange','loadedmetadata'].forEach(event=>opts.audioElement.removeEventListener(event,onMetadata));}panel.remove();}};
  panel.__api=api;render();return api;
 }
-const api={clipLayout,formatTime,mount};
+const api={clipLayout,videoSegmentLayout,formatTime,mount};
 root.WaveForgeTimelineView=api;
 if(typeof module!=='undefined'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);
