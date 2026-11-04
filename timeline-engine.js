@@ -16,6 +16,7 @@ function resolveLayerTime(layer,mainTime,duration){
  return{active:true,currentTime:b.start+(layer.loop?elapsed%b.span:elapsed),reason:'playing'};
 }
 function splitLayer(layer,mainTime,duration){
+ if(!Number.isFinite(duration)||duration<=0)return null;
  const b=bounds(layer,duration),offset=Math.max(0,Number(layer.offset)||0),rate=Math.max(.1,Math.min(4,Number(layer.rate)||1));
  if(!b.valid)return null;
  const mediaTime=b.start+(mainTime-offset)*rate;
