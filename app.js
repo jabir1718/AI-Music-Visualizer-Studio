@@ -130,8 +130,9 @@ async function ensureEngine(){
  await engine.connect();await engine.resume();engine.setVolume(Number($('volume').value));applyMainEffects();
  let fallback=false;
  for(const layer of mixerLayers){
-  if(!layer.connected){const soloActive=mixerLayers.some(x=>x.solo);engine.addLayer(layer.id,layer.audio,(!layer.muted&&(!soloActive||layer.solo))?layer.volume:0,layer);layer.connected=true;}
-  if(layer.pitchPreserving&&!engine.layers.get(layer.id).pitchNode){
+  let graphLayer=engine.layers.get(layer.id);
+  if(!layer.connected||!graphLayer){const soloActive=mixerLayers.some(x=>x.solo);engine.addLayer(layer.id,layer.audio,(!layer.muted&&(!soloActive||layer.solo))?layer.volume:0,layer);layer.connected=true;graphLayer=engine.layers.get(layer.id);}
+  if(layer.pitchPreserving&&!graphLayer.pitchNode){
    try{const wantsFormant=layer.formantStrength>0;await enableLayerPitchNode(layer,engine);if(wantsFormant&&layer.formantStrength===0)fallback=true;}
    catch(error){layer.pitchPreserving=false;layer.rate=Math.pow(2,layer.pitch/12);layer.audio.playbackRate=layer.rate;fallback=true;setStatus('Pitch-preserving DSP unavailable; standard pitch/rate restored. '+error.message);}
   }
