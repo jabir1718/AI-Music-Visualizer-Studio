@@ -54,6 +54,7 @@ assert(/chromaKey:window\.WaveForgeChromaKey/.test(app),'Chroma key settings are
 assert(/chroma-key\.js/.test(index)&&/processPixels/.test(chroma),'Chroma key module or UI is missing');
 assert(/ai-segmentation\.js/.test(index)&&/WaveForgeSegmentation\.mount/.test(app)&&/WaveForgeSegmentation\.draw/.test(app),'AI person segmentation is not integrated');
 assert(/audio-cleanup\.js/.test(index)&&/WaveForgeCleanup\.mount/.test(app),'Spectral noise cleanup is not integrated');
+assert(/symbol-library\.js/.test(index)&&/WaveForgeSymbols\.mount/.test(app)&&/loadLogoFile/.test(app),'OpenMoji symbol library is not connected to logo import');
 assert(/aiSegmentation:window\.WaveForgeSegmentation/.test(app),'AI segmentation settings are not saved');
 assert(/WaveForgeSoundLibrary\.mount/.test(app)&&/addMixerLayer\(file,item\.role\)/.test(app),'Open audio library is not connected to the mixer');
 assert(/WaveForgeTimeline\.resolveLayerTime/.test(app)&&/Split at playhead/.test(app),'Mixer timeline trim/split controls are missing');
