@@ -12,7 +12,7 @@ A browser-based, local-first music visualizer editor. Version 1.0 foundation.
 - TikTok-style lyric/poetry templates, editable subtitle imports, and touch-drag text positioning.
 - 9:16, 16:9 and 1:1 preview canvases.
 - Real-time canvas recording using MediaRecorder; the browser's supported codec determines MP4 vs WebM.
-- Browser-local autosave for editor settings (media files are not uploaded or persisted).
+- Browser-local autosave for editor settings and imported audio assets using IndexedDB (subject to browser storage quota and user-cleared site data).
 - Rights checklist reminder (not an automated copyright-detection service).
 
 ## Run
@@ -20,9 +20,10 @@ Open `index.html` in a modern browser. For best results, serve the folder from a
 
 ## Independent audio mixer (Phase 1)
 - The mixer accepts additional local audio files as separate Voice, Ad-lib, Sound effect, Bass stem, Drums, Piano, Guitar, Instrumental or Other layers.
-- Each added layer has independent volume, pitch/rate and start offset controls, plus mute/remove.
-- Background music remains on its own gain path; changing a voice/effect layer's volume does not change the background music volume.
-- Pitch shifting uses playback-rate changes and therefore also changes speed. This foundation mixes separately supplied stems; it does not split vocals/instruments out of one mixed song.
+- Each added layer has independent volume, pitch/rate, start offset, stereo pan, bass/treble EQ, echo and reverb controls, plus mute, solo and remove.
+- Mixer settings and imported audio files are restored from local browser storage on the same browser installation when IndexedDB data remains available.
+- Background music remains on its own gain path; changing a voice/effect layer's volume or per-layer effects does not change the background music path.
+- Pitch shifting currently uses playback-rate changes and therefore also changes speed; independent pitch-preserving DSP is not implemented yet. This foundation mixes separately supplied stems; it does not split vocals/instruments out of one mixed song.
 - Extra layers follow the main track timeline and are included in the mixed audio export stream. Real-device and exported-file verification is still required.
 
 ## Export limitations
@@ -33,7 +34,7 @@ Open `index.html` in a modern browser. For best results, serve the folder from a
 - Fades are exposed as controls in this foundation; automated fade automation is not yet wired into the rendered audio output.
 
 ## Not included yet
-Robust beat-grid analysis and beat snapping, AI grading/background generation/thumbnails, project file import/export, multi-layer timeline, GPU acceleration, and advanced effects. These need dedicated implementation and/or optional models/services. Copyright risk is only a user checklist, not a copyright scan.
+AI vocal/instrument separation, generated humming/ad-libs, a full voice-character model suite, independent pitch-preserving DSP, a multi-track visual timeline, project-file export/import, full 3D scene editing, chroma-key/background removal, Google Images provider integration, a licensed 2,000+ artwork library, 50+ photo/video filters, YouTube-authorized media integration, sound-effect catalogues, GPU acceleration and 4K/8K/16K export. These need dedicated implementation and/or optional models/services. Copyright risk is only a user checklist, not a copyright scan.
 
 ## Automatic lyrics
 - The app uses Transformers.js with an ONNX Whisper model downloaded from Hugging Face on first use; transcription runs in the browser/WebView and the selected audio is not uploaded to a WaveForge server.
@@ -42,4 +43,4 @@ Robust beat-grid analysis and beat snapping, AI grading/background generation/th
 - Model files are cached by the browser when supported. If model download or WebAssembly execution is blocked by the device/browser, transcription will not run.
 
 ## Privacy
-Media is handled in the browser and is not sent to a WaveForge server by this static application. Local browser storage contains editor settings only.
+Media is handled in the browser and is not sent to a WaveForge server by this static application. Local browser storage contains editor settings and user-selected audio assets for project restoration. Data may be removed by clearing site data or by browser storage management.
