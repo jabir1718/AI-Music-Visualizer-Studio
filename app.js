@@ -303,7 +303,7 @@ function renderMixerLayers(){
   function addRange(labelText,key,min,max,step,unit,apply){
    const wrap=document.createElement('label');wrap.textContent=labelText;const input=document.createElement('input');input.type='range';input.min=String(min);input.max=String(max);input.step=String(step);input.value=String(layer[key]??0);const readout=document.createElement('small');
    const show=()=>{const v=Number(input.value);readout.textContent=(v>0&&min<0?'+':'')+v+unit;};
-   input.oninput=()=>{layer[key]=Number(input.value);show();if(['pitch','pan','bass','treble','delay','reverb','distortion','rate'].includes(key)){layer.voiceStyle='custom';voiceStyle.value='custom';}apply(layer[key]);saveSettings();};show();wrap.append(input,readout);controls.append(wrap);return wrap;
+   input.oninput=()=>{layer[key]=Number(input.value);show();if(['pitch','pan','bass','treble','delay','reverb','distortion','rate','formantStrength'].includes(key)){layer.voiceStyle='custom';voiceStyle.value='custom';}apply(layer[key]);saveSettings();};show();wrap.append(input,readout);controls.append(wrap);return wrap;
   }
   addRange('Volume','volume',0,1,.01,'',()=>applyMixerSoloState());
   addRange('Pitch (semitones)','pitch',-12,12,1,' st',v=>{if(layer.pitchPreserving&&engine&&layer.connected)engine.setLayerPitch(layer.id,v);else{layer.rate=Math.pow(2,v/12);layer.audio.playbackRate=layer.rate;layer.audio.preservesPitch=false;}syncMixerLayers();});
