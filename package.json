@@ -4,7 +4,8 @@
   "private": true,
   "description": "WaveForge Music Visualizer Studio Android wrapper",
   "scripts": {
-    "build:web": "node scripts/build-web.js"
+    "build:web": "node scripts/build-web.js",
+    "test": "node scripts/test-audio-engine.js"
   },
   "dependencies": {
     "@capacitor/android": "6.2.0",
