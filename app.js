@@ -103,7 +103,7 @@ function manualLyrics(){
  const lines=$('captionInput').value.split(/\n+/).map(x=>x.trim()).filter(Boolean),duration=audio.duration||Math.max(4,lines.length*4);
  lyrics=lines.map((text,i)=>({text,start:duration*i/Math.max(1,lines.length),end:duration*(i+1)/Math.max(1,lines.length)}));renderLyricList();saveSettings();
 }
-function parseTime(t){const v=t.trim().replace(',', '.').split(':').map(Number);if(v.length===3)return v[0]*3600+v[1]*60+v[2];if(v.length===2)return v[0]*60+v[1];return 0;}
+function parseTime(t){const m=t.trim().replace(',', '.').match(/(?:(\\d+):)?(\\d{2}):(\\d{2}(?:\\.\\d+)?)/);return m?Number(m[1]||0)*3600+Number(m[2])*60+Number(m[3]):0;}
 function importSubtitles(text){
  const blocks=text.replace(/\r/g,'').split(/\n\s*\n/);const parsed=[];
  blocks.forEach(block=>{const lines=block.split('\n').filter(Boolean),idx=lines.findIndex(x=>x.includes('-->'));if(idx<0)return;const times=lines[idx].split('-->');const words=lines.slice(idx+1).join(' ').trim();if(words)parsed.push({start:parseTime(times[0]),end:parseTime(times[1]),text:words});});
