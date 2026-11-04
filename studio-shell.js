@@ -80,7 +80,7 @@ function init(){
   modal.querySelector('#wfModalPreviewText').textContent=desc;
   const tabs=modal.querySelector('#wfModalTabs');tabs.replaceChildren();
   const related=tools.filter(t=>panelFor(t[0])===p);
-  related.forEach(t=>{const tab=document.createElement('button');tab.type='button';tab.textContent=t[2];tab.className=t[0]===id?'active':'';tab.addEventListener('click',()=>{modal.querySelector('#wfModalTitle').textContent=t[2];modal.querySelector('#wfModalPreviewTitle').textContent=t[2];modal.querySelector('#wfModalPreviewText').textContent=t[3];tabs.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===tab));});tabs.append(tab);});
+  related.forEach(t=>{const tab=document.createElement('button');tab.type='button';tab.textContent=t[2];tab.className=t[0]===id?'active':'';tab.addEventListener('click',()=>{modal.querySelector('#wfModalTitle').textContent=t[2];modal.querySelector('#wfModalPreviewTitle').textContent=t[2];modal.querySelector('#wfModalPreviewText').textContent=t[3];tabs.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===tab));const targets={filterStudio:['#filterStudio','.filter-studio'],colorTools:['#visualColor'],stickerTools:['#symbolLibrary','.symbol-library'],overlayTools:['#artworkLayerPanel'],transitionTools:['#autoVideoSegments'],speedTools:['#autoVideoSegments']};const selectors=targets[t[0]]||[];let target=null;for(const selector of selectors){target=p.querySelector(selector);if(target)break;}if(target)target.scrollIntoView({block:'start',behavior:'smooth'});});tabs.append(tab);});
   const host=modal.querySelector('#wfModalContent');host.replaceChildren();host.append(p);p.hidden=false;
   modal.querySelector('.wf-modal-sheet').scrollTop=0;
  }
