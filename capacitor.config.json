@@ -1,0 +1,6 @@
+{
+  "appId": "com.jabir1718.waveforge",
+  "appName": "WaveForge Studio",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
