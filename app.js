@@ -248,11 +248,11 @@ async function restoreSavedMedia(){
 }
 
 function saveSettings(){
- const data={mainPitch:$('mainPitch')?$('mainPitch').value:0,layers:mixerLayers.map(l=>({id:l.id,role:l.role,volume:l.volume,rate:l.rate,pitch:l.pitch,offset:l.offset,muted:l.muted,solo:l.solo,pan:l.pan,bass:l.bass,treble:l.treble,delay:l.delay,reverb:l.reverb})),title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,positions,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
+ const data={mainPitch:$('mainPitch')?$('mainPitch').value:0,layers:mixerLayers.map(l=>({id:l.id,role:l.role,volume:l.volume,rate:l.rate,pitch:l.pitch,offset:l.offset,muted:l.muted,solo:l.solo,pan:l.pan,bass:l.bass,treble:l.treble,delay:l.delay,reverb:l.reverb})),title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,lyricPosition:$('lyricPosition').value,positions,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
  try{localStorage.setItem('waveforge-v1',JSON.stringify(data));setStatus('Saved locally');}catch(e){setStatus('Ready');}
 }
 function loadSettings(){
- try{const d=JSON.parse(localStorage.getItem('waveforge-v1')||'{}');if(d.title!==undefined)$('titleInput').value=d.title;if(d.subtitle!==undefined)$('subtitleInput').value=d.subtitle;if(d.caption!==undefined)$('captionInput').value=d.caption;if(d.color)$('visualColor').value=d.color;if(d.ratio)$('exportRatio').value=d.ratio;if(d.quality)$('quality').value=d.quality;if(d.font)$('fontStyle').value=d.font;if(d.textColor)$('textColor').value=d.textColor;if(d.style)style=d.style;if(d.template)template=d.template;savedProjectData=d;if(d.lyricSize)$('lyricSize').value=d.lyricSize;if(d.positions)Object.assign(positions,d.positions);if(Array.isArray(d.lyrics))lyrics=d.lyrics;savedTrackName=d.trackName||'';}catch(e){}
+ try{const d=JSON.parse(localStorage.getItem('waveforge-v1')||'{}');if(d.title!==undefined)$('titleInput').value=d.title;if(d.subtitle!==undefined)$('subtitleInput').value=d.subtitle;if(d.caption!==undefined)$('captionInput').value=d.caption;if(d.color)$('visualColor').value=d.color;if(d.ratio)$('exportRatio').value=d.ratio;if(d.quality)$('quality').value=d.quality;if(d.font)$('fontStyle').value=d.font;if(d.textColor)$('textColor').value=d.textColor;if(d.style)style=d.style;if(d.template)template=d.template;savedProjectData=d;if(d.lyricSize)$('lyricSize').value=d.lyricSize;if(d.lyricPosition)$('lyricPosition').value=d.lyricPosition;if(d.positions)Object.assign(positions,d.positions);if(Array.isArray(d.lyrics))lyrics=d.lyrics;savedTrackName=d.trackName||'';}catch(e){}
  updateText();selectTemplate(template);renderLyricList();resizeCanvas();
 }
 function selectTemplate(value){template=value;document.querySelectorAll('.template-card').forEach(b=>b.classList.toggle('selected',b.dataset.template===template));}
@@ -264,11 +264,12 @@ function loadAudio(file){
 function renderLyricList(){
  const host=$('lyricList');host.innerHTML='';
  if(!lyrics.length){host.innerHTML='<span class="hint">Generated or imported lyric lines will appear here.</span>';return;}
- lyrics.forEach((line,i)=>{const row=document.createElement('div');row.className='lyric-row';const time=document.createElement('time');time.textContent=fmt(line.start);const text=document.createElement('span');text.textContent=line.text;const edit=document.createElement('button');edit.textContent='Edit';decorateActionButton(edit);edit.onclick=()=>{const v=prompt('Edit lyric line',line.text);if(v!==null){line.text=v;renderLyricList();}};row.append(time,text,edit);host.appendChild(row);});
+ lyrics.forEach((line,i)=>{const row=document.createElement('div');row.className='lyric-row';const time=document.createElement('time');time.textContent=fmt(line.start);const text=document.createElement('span');text.textContent=line.text;const edit=document.createElement('button');edit.textContent='Edit';decorateActionButton(edit);edit.onclick=()=>{const v=prompt('Edit lyric line',line.text);if(v!==null){line.text=v;if(Array.isArray(line.words))delete line.words;$('captionInput').value=lyrics.map(x=>x.text).join('\\n');renderLyricList();saveSettings();}};row.append(time,text,edit);host.appendChild(row);});
 }
 function manualLyrics(){
- const lines=$('captionInput').value.split(/\n+/).map(x=>x.trim()).filter(Boolean),duration=audio.duration||Math.max(4,lines.length*4);
- lyrics=lines.map((text,i)=>({text,start:duration*i/Math.max(1,lines.length),end:duration*(i+1)/Math.max(1,lines.length)}));renderLyricList();saveSettings();
+ const lines=$('captionInput').value.split(/\\n+/).map(x=>x.trim()).filter(Boolean),duration=audio.duration||Math.max(4,lines.length*4),previous=lyrics;
+ lyrics=lines.map((text,i)=>{const prior=previous[i];if(prior){const next={...prior,text};if(prior.text!==text&&Array.isArray(prior.words))delete next.words;return next;}return{text,start:duration*i/Math.max(1,lines.length),end:duration*(i+1)/Math.max(1,lines.length)};});
+ renderLyricList();saveSettings();
 }
 function parseTime(t){const p=t.trim().replace(',', '.').split(':');if(p.length===3)return Number(p[0])*3600+Number(p[1])*60+Number(p[2].split(' ')[0]);if(p.length===2)return Number(p[0])*60+Number(p[1].split(' ')[0]);return 0;}
 function importSubtitles(text){
