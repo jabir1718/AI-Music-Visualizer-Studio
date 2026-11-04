@@ -17,8 +17,8 @@ for(const object of ['title','subtitle','lyric','logo']){
 }
 assert(/objectSettings,objectKeyframes,manualBpm,tapBeatOffset,filterPreset:/.test(app),'Object settings are not persisted in editor settings');
 assert(/d\.objectSettings/.test(app),'Object settings are not restored');
-assert(/objectSettings\.title\.visible/.test(app)&&/objectSettings\.subtitle\.visible/.test(app),'Text visibility not applied to canvas');
-assert(/objectSettings\.lyric\.visible/.test(app)&&/objectSettings\.logo\.visible/.test(app),'Lyric/logo visibility not applied to canvas');
+assert(/titleState\.settings\.visible/.test(app)&&/subtitleState\.settings\.visible/.test(app),'Animated text visibility not applied to canvas');
+assert(/lyricState\.settings\.visible/.test(app)&&/logoState\.settings\.visible/.test(app),'Animated lyric/logo visibility not applied to canvas');
 assert(/beginObjectTransform/.test(app)&&/moveObjectTransform/.test(app)&&/endObjectTransform/.test(app),'Touch resize and rotate handles are missing');
 assert(/object-selection-overlay/.test(app)&&/updateSelectionOverlay/.test(app),'Canvas selection outline is not connected');
 assert(/function beginWordSync/.test(app)&&/function markSyncWord/.test(app)&&/function finishWordSync/.test(app),'Manual word-level karaoke timing workflow missing');
