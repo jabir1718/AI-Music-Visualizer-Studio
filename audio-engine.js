@@ -80,7 +80,7 @@
     getWaveform(){const a=new Uint8Array(this.analyser?this.analyser.fftSize:128);if(this.analyser)this.analyser.getByteTimeDomainData(a);return a;}
     detectBeat(sensitivity){const f=this.getFrequency();let sum=0;for(let i=2;i<Math.min(18,f.length);i++)sum+=f[i];const low=sum/16,now=performance.now(),threshold=90-(sensitivity*.55);const hit=low>threshold&&low>this.energy*1.23&&now-this.lastBeat>220;if(hit)this.lastBeat=now;this.energy=this.energy*.82+low*.18;return{hit,energy:low/255};}
     get duration(){return this.audio.duration||0;}
-    destroy(){this.layers.forEach(l=>{l.audio.pause();['source','gain','low','high','pan','delay','feedback','delaySend','convolver','reverbSend','shaper','pitchNode'].forEach(k=>{try{if(l[k])l[k].disconnect();}catch(e){}});});this.layers.clear();if(this.context)this.context.close();this.ready=false;}
+    destroy(){this.layers.forEach(l=>{l.audio.pause();['source','gain','low','high','pan','delay','feedback','delaySend','convolver','reverbSend','shaper','pitchNode'].forEach(k=>{try{if(l[k])l[k].disconnect();}catch(e){}});});this.layers.clear();if(this.context)this.context.close();this.ready=false;this.soundTouchRegistered=false;this.soundTouchLoadPromise=null;}
   }
   window.AudioEngine=AudioEngine;
 })();
