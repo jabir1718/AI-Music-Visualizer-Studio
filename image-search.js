@@ -35,7 +35,7 @@ async function search(){
   }else{
    const u=new URL('https://commons.wikimedia.org/w/api.php');u.search=new URLSearchParams({action:'query',format:'json',origin:'*',generator:'search',gsrsearch:'filetype:bitmap '+q,gsrnamespace:'6',gsrlimit:'18',prop:'imageinfo',iiprop:'url|size|extmetadata',iiurlwidth:'480'}).toString();
    const r=await fetch(u);if(!r.ok)throw new Error('Wikimedia Commons request failed ('+r.status+').');const data=await r.json();
-   items=Object.values(data.query&&data.query.pages||{}).map(x=>{const i=x.imageinfo&&x.imageinfo[0]||{},m=i.extmetadata||{};return{title:x.title.replace(/^File:/,''),url:i.url,thumb:i.thumburl||i.url,width:i.width||0,height:i.height||0,source:'Wikimedia Commons',license:(m.LicenseShortName&&m.LicenseShortName.value||'Licence not stated')+' · '+(m.Artist&&m.Artist.value||'Attribution check required')}}).filter(x=>x.url);
+   items=Object.values(data.query&&data.query.pages||{}).map(x=>{const i=x.imageinfo&&x.imageinfo[0]||{},m=i.extmetadata||{};return{title:x.title.replace(/^File:/,''),url:i.url,thumb:i.thumburl||i.url,width:i.width||0,height:i.height||0,source:'Wikimedia Commons',sourceUrl:'https://commons.wikimedia.org/wiki/'+encodeURIComponent(x.title),license:(m.LicenseShortName&&m.LicenseShortName.value||'Licence not stated')+' · '+(m.Artist&&m.Artist.value||'Attribution check required')}}).filter(x=>x.url);
   }
   if(!items.length){status('No images found. Try a shorter search.');return}
   status(items.length+' image results. Choose Background or Logo to import.');
@@ -51,7 +51,7 @@ function makeCard(item){
  const actions=document.createElement('div');actions.className='asset-result-actions';
  const bg=document.createElement('button');bg.type='button';bg.className='btn small';bg.textContent='Use as background';bg.addEventListener('click',()=>importImage(item,'background',bg));
  const logo=document.createElement('button');logo.type='button';logo.className='btn small';logo.textContent='Use as logo';logo.addEventListener('click',()=>importImage(item,'logo',logo));
- const source=document.createElement('a');source.href=item.source&&/^https?:/.test(item.source)?item.source:item.url;source.target='_blank';source.rel='noopener';source.textContent='Source / licence';
+ const source=document.createElement('a');source.href=item.sourceUrl||(/^https?:/.test(item.source||'')?item.source:item.url);source.target='_blank';source.rel='noopener';source.textContent='Source / licence';
  actions.append(bg,logo,source);card.append(img,title,meta,actions);return card;
 }
 async function importImage(item,target,button){
