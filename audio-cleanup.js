@@ -46,7 +46,7 @@ function estimateNoise(samples,sampleRate,start,end){
 }
 function denoiseChannel(samples,sampleRate,options={}){
  const start=Math.max(0,Number(options.noiseStart)||0),end=Math.max(start+.02,Number(options.noiseEnd)||.5);
- const strength=Math.max(0,Math.min(3,Number(options.strength)||1.25)),floor=Math.max(.02,Math.min(.5,Number(options.floor)||.08));
+ const strength=Math.max(0,Math.min(3,options.strength===undefined?1.25:Number(options.strength))),floor=Math.max(.02,Math.min(.5,Number(options.floor)||.08));
  const noise=estimateNoise(samples,sampleRate,start,end),out=new Float64Array(samples.length),weight=new Float64Array(samples.length);
  const real=new Float64Array(SIZE),imag=new Float64Array(SIZE),bins=SIZE/2+1;
  for(let pos=0;pos<samples.length;pos+=HOP){
