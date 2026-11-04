@@ -662,6 +662,7 @@ window.WaveForgeAssetBridge={
 };
 function initArtworkLayers(){if(window.WaveForgeArtworkLayers)window.WaveForgeArtworkLayers.mount($('artworkLayerPanel'),{saveMediaAsset,getMediaAsset,deleteMediaAsset,onChange:saveSettings});}
 function initAutoVideoEditor(){if(window.WaveForgeAutoVideo)window.WaveForgeAutoVideo.mount($('autoVideoPanel'),{saveMediaAsset,getMediaAsset,deleteMediaAsset,onChange:saveSettings,getBpm:()=>manualBpm||120});}
+function initOfflineEditAssistant(){if(window.WaveForgeOfflineAssistant)window.WaveForgeOfflineAssistant.mount(document.querySelector('.workspace'),{onApply:saveSettings});}
 
 $('mediaInput').onchange=e=>{const f=e.target.files[0];if(f)setBackgroundFile(f).catch(error=>{setStatus(error.message);$('mediaStatus').textContent=error.message;});};
 $('clearMedia').onclick=()=>{if(mediaUrl)URL.revokeObjectURL(mediaUrl);deleteMediaAsset('background');mediaUrl=null;mediaKind='';$('backgroundImage').removeAttribute('src');$('backgroundVideo').pause();$('backgroundVideo').removeAttribute('src');$('backgroundImage').classList.add('hidden');$('backgroundVideo').classList.add('hidden');$('mediaStatus').textContent='No background selected.';};
@@ -696,6 +697,6 @@ async function doExport(){
  finally{$('exportBtn').disabled=false;$('exportBtnSide').disabled=false;}
 }
 $('exportBtn').onclick=doExport;$('exportBtnSide').onclick=doExport;
-loadSettings();audio.volume=.85;initObjectEditor();initTypographyStudio();initMixerUI();initHistoryUI();initMediaTools();initFilterStudio();initChromaKey();initAISegmentation();initSymbolLibrary();initThreeStudio();initArtworkLayers();initAutoVideoEditor();restoreSavedMedia();if(window.WaveForgeAutoVideo){try{const savedAuto=JSON.parse(localStorage.getItem('waveforge-v1')||'{}').autoVideo;window.WaveForgeAutoVideo.restore(savedAuto).then(count=>{if(count)setStatus('Restored '+count+' video source(s)');}).catch(()=>{});}catch(e){}}if(window.WaveForgeArtworkLayers)window.WaveForgeArtworkLayers.restore().then(count=>{if(count)setStatus('Restored '+count+' independent artwork layer(s)');}).catch(()=>{});decorateButtonIcons();startDraw();
+loadSettings();audio.volume=.85;initObjectEditor();initTypographyStudio();initMixerUI();initHistoryUI();initMediaTools();initFilterStudio();initChromaKey();initAISegmentation();initSymbolLibrary();initThreeStudio();initArtworkLayers();initAutoVideoEditor();initOfflineEditAssistant();restoreSavedMedia();if(window.WaveForgeAutoVideo){try{const savedAuto=JSON.parse(localStorage.getItem('waveforge-v1')||'{}').autoVideo;window.WaveForgeAutoVideo.restore(savedAuto).then(count=>{if(count)setStatus('Restored '+count+' video source(s)');}).catch(()=>{});}catch(e){}}if(window.WaveForgeArtworkLayers)window.WaveForgeArtworkLayers.restore().then(count=>{if(count)setStatus('Restored '+count+' independent artwork layer(s)');}).catch(()=>{});decorateButtonIcons();startDraw();
 window.addEventListener('beforeunload',()=>{if(history)history.flush();if(mediaUrl)URL.revokeObjectURL(mediaUrl);if(logoUrl)URL.revokeObjectURL(logoUrl);if(audio.src)URL.revokeObjectURL(audio.src);});
 })();
