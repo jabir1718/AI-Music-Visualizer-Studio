@@ -2,7 +2,7 @@
 
 This file is the delivery checklist for the 31 groups in `ROADMAP.md`. It is deliberately conservative: **Partial** means some working code exists, not that the complete request is finished. **Not started** means there is no verified implementation in the current source.
 
-Last source audit: 2026-11-04 (after mixer, lyric-edit and export reliability fixes).
+Last source audit: 2026-11-04 (after editable object layers, media persistence and image-import fixes).
 
 ## Status definitions
 - **Partial** — working foundation exists, but one or more requested capabilities are missing or unverified.
@@ -63,7 +63,7 @@ Last source audit: 2026-11-04 (after mixer, lyric-edit and export reliability fi
 - Added Save project / Open project controls to the export inspector and included `project-file.js` in the Android workflow's JavaScript syntax validation. This project-file feature is source-implemented but awaits CI and real-browser/device testing; browser storage quota and Android WebView file handling remain device-dependent.
 
 - Added six per-layer audio effect presets in the mixer. Choosing Clean, Telephone, Radio, Small room, Echo or Dreamy immediately applies the preset's EQ, pan, delay and reverb values to that imported track and saves the selection.
-- Added a native editable object inspector in the Text & Logo workspace. Select title, subtitle, lyrics/captions or logo; change each object's position, scale, rotation, opacity and visibility independently. Title/subtitle text and color are editable in the selected-object panel. Object settings are saved with editor settings and `.waveforge` projects and are applied to the canvas renderer used by preview/export. This supports app-native layers, not automatic separation of flattened downloaded artwork. Device interaction still needs testing.\n- Fixed downloaded image filename extensions so imported JPEG/WebP/GIF/SVG/PNG files retain a matching extension instead of being mislabeled as PNG.\n- Added an offline BPM analyser in `bpm-engine.js`; it decodes the imported audio, analyses its energy-onset envelope and estimates tempo. Music Studio exposes a Detect BPM action with an approximate result and rhythm-confidence indicator. This is not a guaranteed beat grid and needs device testing. The new engine is included in CI syntax checks.
+- Added a native editable object inspector in the Text & Logo workspace. Select title, subtitle, lyrics/captions or logo; change each object's position, scale, rotation, opacity and visibility independently. Title/subtitle text and color are editable in the selected-object panel. Object settings are saved with editor settings and `.waveforge` projects and are applied to the canvas renderer used by preview/export. Uploaded logos and background media are now also stored in IndexedDB and included in portable project files. This supports app-native layers, not automatic separation of flattened downloaded artwork. Device interaction still needs testing.\n- Fixed downloaded image filename extensions so imported JPEG/WebP/GIF/SVG/PNG files retain a matching extension instead of being mislabeled as PNG.\n- Added an offline BPM analyser in `bpm-engine.js`; it decodes the imported audio, analyses its energy-onset envelope and estimates tempo. Music Studio exposes a Detect BPM action with an approximate result and rhythm-confidence indicator. This is not a guaranteed beat grid and needs device testing. The new engine is included in CI syntax checks.
 
 ## Important accuracy rules
 
