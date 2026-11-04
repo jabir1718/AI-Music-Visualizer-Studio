@@ -59,6 +59,8 @@ assert(/WaveForgeSoundLibrary\.mount/.test(app)&&/addMixerLayer\(file,item\.role
 assert(/WaveForgeTimeline\.resolveLayerTime/.test(app)&&/Split at playhead/.test(app),'Mixer timeline trim/split controls are missing');
 assert(/historyUndo/.test(app)&&/historyRedo/.test(app)&&/captureUndoState/.test(app),'Visual editor undo/redo controls are missing');
 assert(/history-engine\.js/.test(index)&&/WaveForgeHistory\.create/.test(app),'History engine is not loaded and initialized');
+assert(/keyframe-engine\.js/.test(index)&&/WaveForgeKeyframes\.upsert/.test(app)&&/objectKeyframeAdd/.test(app),'Object keyframe animation controls are missing');
+assert(/objectKeyframes,manualBpm/.test(app),'Object keyframes are not persisted in project settings');
 assert(/timeline-engine\.js/.test(index),'Timeline engine is not loaded');
 assert(/trimStart:l\.trimStart/.test(app)&&/trimEnd:l\.trimEnd/.test(app),'Timeline clip trim settings are not saved');
 assert(/sound-library\.js/.test(index)&&/Wikimedia Commons/.test(sounds),'Open sound library module is missing');
