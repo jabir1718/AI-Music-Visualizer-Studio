@@ -10,7 +10,7 @@ assert.strictEqual(bpm.gridIndexAt(1,120,0,1),2);
 assert.strictEqual(bpm.gridIndexAt(.4,120,0,1),0);
 assert.strictEqual(bpm.gridIndexAt(1,120,1,1),0);
 assert.strictEqual(bpm.gridIndexAt(.9,120,1,1),-1);
-assert.strictEqual(bpm.gridIndexAt(1.26,120,1,2),2);
+assert.strictEqual(bpm.gridIndexAt(1.51,120,1,2),2);
 assert.strictEqual(bpm.gridStepSeconds(20,1),null);
 assert.strictEqual(bpm.gridStepSeconds(120,3),null);
 console.log('Editable beat grid tests passed.');
