@@ -403,3 +403,5 @@ This is an order for development, not a reduction of the full scope:
 - Direct cuts are the only implemented transition behavior in this milestone. Scene analysis, speech-pause cuts, AI captions, transition effects, speed ramps and advanced compositing remain future work and must be clearly marked unavailable until built and tested.
 - Tune previews and storage for the user's Infinix ZERO 40 (X6860 / 4G configuration), while detecting actual browser/codec support at runtime. Never force 4K/16K export or keep all video sources decoding simultaneously.
 - Free local editing assistant is preferred over any billable ChatGPT API integration. Keep paid/cloud AI disabled unless the user explicitly opts in later.
+
+- Added a small free offline Quick Edit Assistant for a limited set of supported edits. It previews changes and requires user confirmation; it is a rules-based helper, not ChatGPT. The full ChatGPT/API-powered assistant remains skipped unless a genuinely free and secure integration becomes available.
