@@ -571,7 +571,17 @@ $('lyricPosition').onchange=e=>{positions.lyric.y=e.target.value==='upper'?.36:e
 $('exportRatio').onchange=()=>{resizeCanvas();saveSettings();};document.querySelectorAll('.ratio').forEach(b=>b.onclick=()=>{$('exportRatio').value=b.dataset.ratio;resizeCanvas();saveSettings();});$('quality').onchange=()=>{resizeCanvas();saveSettings();};
 document.querySelectorAll('[data-scroll]').forEach(b=>b.onclick=()=>$(b.dataset.scroll).scrollIntoView({behavior:'smooth'}));
 $('themeToggle').onclick=()=>{document.body.classList.toggle('light');$('themeToggle').textContent=document.body.classList.contains('light')?'Dark mode':'Light mode';};
-$('logoInput').onchange=e=>{const f=e.target.files[0];if(!f)return;if(logoUrl)URL.revokeObjectURL(logoUrl);logoUrl=URL.createObjectURL(f);const img=new Image();img.onload=()=>{logoImage=img;};img.src=logoUrl;saveMediaAsset('logo',f);$('stageLogo').innerHTML='';saveSettings();};
+function loadLogoFile(file){
+ if(!file||!file.type.startsWith('image/')){setStatus('Choose a valid image or SVG logo.');return;}
+ if(logoUrl)URL.revokeObjectURL(logoUrl);
+ logoUrl=URL.createObjectURL(file);
+ const img=new Image();
+ img.onload=()=>{logoImage=img;$('stageLogo').innerHTML='';saveMediaAsset('logo',file);saveSettings();setStatus('Logo loaded');};
+ img.onerror=()=>{if(logoUrl)URL.revokeObjectURL(logoUrl);logoUrl=null;logoImage=null;setStatus('Could not decode this logo image.');};
+ img.src=logoUrl;
+}
+function initSymbolLibrary(){if(window.WaveForgeSymbols)window.WaveForgeSymbols.mount($('overlayPanel'),{onLogo:loadLogoFile});}
+ $('logoInput').onchange=e=>loadLogoFile(e.target.files[0]);
 $('clearLogo').onclick=()=>{$('stageLogo').innerHTML='';if(logoUrl)URL.revokeObjectURL(logoUrl);logoUrl=null;logoImage=null;deleteMediaAsset('logo');saveSettings();};
 $('mediaInput').onchange=e=>{
  const f=e.target.files[0];if(!f)return;if(!f.type.startsWith('image/')&&!f.type.startsWith('video/')){alert('Choose an image or video file.');return;}
@@ -612,6 +622,6 @@ async function doExport(){
  finally{$('exportBtn').disabled=false;$('exportBtnSide').disabled=false;}
 }
 $('exportBtn').onclick=doExport;$('exportBtnSide').onclick=doExport;
-loadSettings();audio.volume=.85;initObjectEditor();initTypographyStudio();initMixerUI();initHistoryUI();initMediaTools();initFilterStudio();initChromaKey();initAISegmentation();restoreSavedMedia();decorateButtonIcons();startDraw();
+loadSettings();audio.volume=.85;initObjectEditor();initTypographyStudio();initMixerUI();initHistoryUI();initMediaTools();initFilterStudio();initChromaKey();initAISegmentation();initSymbolLibrary();restoreSavedMedia();decorateButtonIcons();startDraw();
 window.addEventListener('beforeunload',()=>{if(history)history.flush();if(mediaUrl)URL.revokeObjectURL(mediaUrl);if(logoUrl)URL.revokeObjectURL(logoUrl);if(audio.src)URL.revokeObjectURL(audio.src);});
 })();
