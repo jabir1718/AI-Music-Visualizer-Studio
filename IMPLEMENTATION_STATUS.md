@@ -175,3 +175,5 @@ Last source audit: 2026-11-05 (after connecting image-search and OpenMoji import
 - Added local quiet-gap analysis for imported video audio tracks using Web Audio decoding and short-window RMS energy. Quiet-gap midpoints can guide the next Auto Cut segmentation alongside visual scene boundaries. This does not identify words or reliably detect speech pauses under background music; no speech-recognition model or cloud API was added.
 
 - Expanded the offline Quick Edit Assistant to preview/apply transition and start/end speed-ramp changes on the selected Auto Cut segment. The user must select a segment; the helper still only accepts a defined English/Roman Urdu command set.
+
+- Integrated the Auto Cut sequence into the shared multi-track arrangement as a selectable video montage lane alongside the main music and independent audio layers. Timeline blocks can seek/select the matching clip. This remains a single sequential video lane, not a multi-layer video compositor.
