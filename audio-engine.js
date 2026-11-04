@@ -29,6 +29,7 @@
     async enableLayerPitchPreserving(id,semitones=0,rate=1){
       const layer=this.layers.get(id);if(!layer)throw new Error('Mixer layer not found.');
       await this.loadSoundTouch();
+      if(this.layers.get(id)!==layer)throw new Error('Mixer layer was removed before pitch processing finished.');
       if(layer.pitchNode){this.setLayerPitch(id,semitones);this.setLayerRate(id,rate);return true;}
       const node=new this.SoundTouchNode({context:this.context});
       layer.high.disconnect(layer.pan);layer.high.disconnect(layer.delay);layer.high.disconnect(layer.convolver);layer.high.connect(node);node.connect(layer.pan);node.connect(layer.delay);node.connect(layer.convolver);layer.pitchNode=node;
