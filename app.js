@@ -114,14 +114,14 @@ $('audioDrop').ondragover=e=>{e.preventDefault();$('audioDrop').style.borderColo
 $('audioDrop').ondrop=e=>{e.preventDefault();$('audioDrop').style.borderColor='';loadAudio(e.dataTransfer.files[0]);};
 $('playBtn').onclick=async()=>{if(!audio.src){$('audioInput').click();return;}try{await ensureEngine();if(audio.paused){await audio.play();playing=true;$('playBtn').textContent='Ⅱ';}else{audio.pause();playing=false;$('playBtn').textContent='▶';}}catch(e){alert(e.message);}};
 audio.addEventListener('loadedmetadata',()=>{$('trackMeta').textContent=fmt(audio.duration)+' · Ready to play';$('timeLabel').textContent='00:00 / '+fmt(audio.duration);});
-audio.addEventListener('timeupdate',()=>{if(engine)engine.applyFade(Number($('fadeIn').value),Number($('fadeOut').value));if(audio.duration){$('seekBar').value=Math.round(audio.currentTime/audio.duration*1000);$('timeLabel').textContent=fmt(audio.currentTime)+' / '+fmt(audio.duration);}});
+audio.addEventListener('timeupdate',()=>{if(engine)engine.applyFade(Number($('fadeIn').value),Number($('fadeOut').value));if(audio.duration){$('seekBar').value=Math.round(audio.currentTime/audio.duration*1000);$('timeLabel').textContent=fmt(audio.currentTime)+' / '+fmt(audio.duration);}const active=lyrics.findIndex(line=>audio.currentTime>=line.start&&audio.currentTime<line.end);document.querySelectorAll('.lyric-row').forEach((row,i)=>row.classList.toggle('active',i===active));});
 audio.addEventListener('ended',()=>{playing=false;$('playBtn').textContent='▶';});
 $('seekBar').oninput=e=>{if(audio.duration)audio.currentTime=Number(e.target.value)/1000*audio.duration;};
 $('volume').oninput=e=>{if(engine)engine.setVolume(Number(e.target.value));else audio.volume=Number(e.target.value);};
 $('fadeIn').oninput=e=>$('fadeInValue').textContent=e.target.value+'s';$('fadeOut').oninput=e=>$('fadeOutValue').textContent=e.target.value+'s';
 document.querySelectorAll('.style-card').forEach(b=>b.onclick=()=>{style=b.dataset.style;document.querySelectorAll('.style-card').forEach(x=>x.classList.toggle('selected',x===b));saveSettings();});
 ['titleInput','subtitleInput','textColor','fontStyle','visualColor','intensity','sensitivity'].forEach(id=>$(id).addEventListener('input',()=>{updateText();saveSettings();}));
-$('captionInput').addEventListener('change',manualLyrics);$('captionInput').addEventListener('blur',manualLyrics);
+$('captionInput').addEventListener('input',manualLyrics);
 document.querySelectorAll('.template-card').forEach(b=>b.onclick=()=>{selectTemplate(b.dataset.template);saveSettings();});
 $('lyricSize').oninput=saveSettings;
 $('lyricPosition').onchange=e=>{positions.lyric.y=e.target.value==='upper'?.36:e.target.value==='middle'?.56:.80;saveSettings();};
