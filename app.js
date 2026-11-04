@@ -17,7 +17,7 @@ let engine=null,raf=0,playing=false,style='bars',logoUrl=null,logoImage=null,med
 const palette={aurora:['#9b8cff','#65e5c0','#e8f5ff'],sunset:['#ff8c75','#ffca7a','#f8a8cf'],ice:['#62d8ff','#9fbaff','#e4f7ff'],mono:['#fff','#b9c4d5','#eef3fb']};
 const positions={title:{x:.5,y:.23},subtitle:{x:.5,y:.29},lyric:{x:.5,y:.80},logo:{x:.82,y:.08}};
 const objectDefaults={title:{visible:true,scale:1,rotation:0,opacity:1,color:''},subtitle:{visible:true,scale:1,rotation:0,opacity:1,color:''},lyric:{visible:true,scale:1,rotation:0,opacity:1,color:''},logo:{visible:true,scale:1,rotation:0,opacity:1,color:''}};
-let objectSettings=JSON.parse(JSON.stringify(objectDefaults)),selectedObject='title',wordSync=null;
+let objectSettings=JSON.parse(JSON.stringify(objectDefaults)),selectedObject='title',wordSync=null,selectionBox=null,transformGesture=null;
 function setStatus(t){$('saveState').textContent='● '+t;}
 function fmt(s){if(!isFinite(s))s=0;return String(Math.floor(s/60)).padStart(2,'0')+':'+String(Math.floor(s%60)).padStart(2,'0');}
 function resizeCanvas(){
@@ -37,7 +37,7 @@ function currentLyric(){
  return lyrics.find(line=>t>=line.start&&t<line.end)||null;
 }
 function draw(){
- const w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);
+ const w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);updateSelectionOverlay();
  const bg=$('backgroundImage'),vid=$('backgroundVideo');
  let source=null;
  if(mediaKind==='image'&&bg.complete&&bg.naturalWidth>0)source=bg;
@@ -261,11 +261,58 @@ function initTypographyStudio(){if(window.WaveForgeTypography)window.WaveForgeTy
 function initFilterStudio(){if(window.WaveForgeFilters)window.WaveForgeFilters.mount($('visualPanel'),saveSettings);}
 function initChromaKey(){if(window.WaveForgeChromaKey)window.WaveForgeChromaKey.mount($('visualPanel'),saveSettings);}
 function initMediaTools(){if(window.WaveForgeMediaTools)window.WaveForgeMediaTools.mount($('audioPanel'),{onMain:loadAudio,onLayer:file=>addMixerLayer(file,'Other')});}
+function updateSelectionOverlay(){
+ if(!selectionBox)return;
+ const key=selectedObject||'title',p=positions[key],o=objectSettings[key];
+ const dims={title:[82,9],subtitle:[82,7],lyric:[84,17],logo:[20,14]}[key]||[30,12];
+ selectionBox.style.left=(p.x*100)+'%';selectionBox.style.top=(p.y*100)+'%';
+ selectionBox.style.width=dims[0]+'%';selectionBox.style.height=dims[1]+'%';
+ selectionBox.style.transform='translate(-50%,-50%) rotate('+o.rotation+'deg)';
+ selectionBox.hidden=!o.visible;
+}
+function beginObjectTransform(e,mode){
+ e.preventDefault();e.stopPropagation();
+ const stage=$('stage'),r=stage.getBoundingClientRect(),p=positions[selectedObject],o=objectSettings[selectedObject];
+ const cx=r.left+p.x*r.width,cy=r.top+p.y*r.height;
+ const angle=Math.atan2(e.clientY-cy,e.clientX-cx),distance=Math.max(1,Math.hypot(e.clientX-cx,e.clientY-cy));
+ transformGesture={mode,pointerId:e.pointerId,cx,cy,startAngle:angle,startDistance:distance,startScale:o.scale,startRotation:o.rotation};
+ e.currentTarget.setPointerCapture(e.pointerId);
+}
+function moveObjectTransform(e){
+ const g=transformGesture;if(!g||g.pointerId!==e.pointerId)return;
+ const o=objectSettings[selectedObject];
+ if(g.mode==='scale'){
+  const d=Math.max(1,Math.hypot(e.clientX-g.cx,e.clientY-g.cy));
+  o.scale=Math.max(.25,Math.min(2.5,g.startScale*d/g.startDistance));
+  const input=$('objectScale');if(input){input.value=Math.round(o.scale*100);$('objectScaleValue').textContent=input.value+'%';}
+ }else{
+  const a=Math.atan2(e.clientY-g.cy,e.clientX-g.cx);
+  o.rotation=Math.max(-180,Math.min(180,g.startRotation+(a-g.startAngle)*180/Math.PI));
+  const input=$('objectRotation');if(input){input.value=Math.round(o.rotation);$('objectRotationValue').textContent=input.value+'°';}
+ }
+ updateSelectionOverlay();saveSettings();
+}
+function endObjectTransform(e){
+ if(!transformGesture||transformGesture.pointerId!==e.pointerId)return;
+ transformGesture=null;saveSettings();updateSelectionOverlay();
+}
 function initObjectEditor(){
  const host=$('overlayPanel');if(!host||$('objectEditor'))return;
  const panel=document.createElement('section');panel.id='objectEditor';panel.className='object-editor';
  panel.innerHTML='<div class="object-editor-head"><div><span class="eyebrow">TEMPLATE OBJECTS</span><h3>Editable layer list</h3><p>Select one object. Changes affect only that layer and are included in project saves and video export.</p></div></div><div class="object-layer-list" id="objectLayerList"><button type="button" data-object="title">T Title</button><button type="button" data-object="subtitle">Aa Subtitle</button><button type="button" data-object="lyric">♫ Lyrics</button><button type="button" data-object="logo">▧ Logo</button></div><label>Selected object<select id="objectSelect"><option value="title">Title text</option><option value="subtitle">Subtitle text</option><option value="lyric">Lyrics / captions</option><option value="logo">Logo artwork</option></select></label><div id="objectTextWrap"><label>Object text<input id="objectTextValue" maxlength="120" type="text"></label></div><div class="object-editor-grid"><label>Position X <output id="objectXValue"></output><input id="objectX" type="range" min="5" max="95" value="50"></label><label>Position Y <output id="objectYValue"></output><input id="objectY" type="range" min="5" max="95" value="23"></label><label>Size <output id="objectScaleValue"></output><input id="objectScale" type="range" min="25" max="250" value="100"></label><label>Rotation <output id="objectRotationValue"></output><input id="objectRotation" type="range" min="-180" max="180" value="0"></label><label>Opacity <output id="objectOpacityValue"></output><input id="objectOpacity" type="range" min="0" max="100" value="100"></label><label class="object-color" id="objectColorWrap">Object color<input id="objectColor" type="color" value="#ffffff"></label></div><label class="object-visible"><input id="objectVisible" type="checkbox" checked> Show this object in preview and export</label><div class="object-editor-actions"><button type="button" class="btn small" id="objectReset">Reset selected object</button><button type="button" class="btn small" id="objectCenter">Center selected object</button></div><p class="object-editor-note" id="objectEditorNote">Canvas layers can also be moved by dragging them directly in the preview. Flattened third-party images remain single images; only WaveForge-native layers are individually editable.</p>';
  host.appendChild(panel);
+ const stage=$('stage');
+ if(stage&&!$('objectSelectionOverlay')){
+  const overlay=document.createElement('div');overlay.id='objectSelectionOverlay';overlay.className='object-selection-overlay';
+  overlay.innerHTML='<div class="object-selection-box"><button type="button" class="object-transform-handle resize" data-transform="scale" aria-label="Resize selected object"></button><button type="button" class="object-transform-handle rotate" data-transform="rotate" aria-label="Rotate selected object"></button></div>';
+  stage.appendChild(overlay);selectionBox=overlay.querySelector('.object-selection-box');
+  overlay.querySelectorAll('[data-transform]').forEach(handle=>{
+   handle.addEventListener('pointerdown',e=>beginObjectTransform(e,handle.dataset.transform));
+   handle.addEventListener('pointermove',moveObjectTransform);
+   handle.addEventListener('pointerup',endObjectTransform);
+   handle.addEventListener('pointercancel',endObjectTransform);
+  });
+ }
  const $o=id=>document.getElementById(id);
  function sync(){
   const k=selectedObject,o=objectSettings[k],p=positions[k],isText=k==='title'||k==='subtitle';
@@ -274,7 +321,7 @@ function initObjectEditor(){
   $o('objectX').value=Math.round(p.x*100);$o('objectY').value=Math.round(p.y*100);
   $o('objectScale').value=Math.round(o.scale*100);$o('objectRotation').value=o.rotation;
   $o('objectOpacity').value=Math.round(o.opacity*100);$o('objectColor').value=o.color||'#ffffff';$o('objectVisible').checked=o.visible;
-  ['X','Y','Scale','Rotation','Opacity'].forEach(key=>{$o('object'+key+'Value').textContent=key==='X'||key==='Y'?$o('object'+key).value+'%':key==='Scale'?$o('object'+key).value+'%':key==='Rotation'?$o('object'+key).value+'°':$o('object'+key).value+'%';});
+  ['X','Y','Scale','Rotation','Opacity'].forEach(key=>{$o('object'+key+'Value').textContent=key==='X'||key==='Y'?$o('object'+key).value+'%':key==='Scale'?$o('object'+key).value+'%':key==='Rotation'?$o('object'+key).value+'°':$o('object'+key).value+'%';});updateSelectionOverlay();
  }
  function commit(){sync();saveSettings();}
  $o('objectSelect').onchange=e=>{selectedObject=e.target.value;sync();};panel.querySelectorAll('[data-object]').forEach(b=>b.onclick=()=>{selectedObject=b.dataset.object;sync();});
@@ -435,11 +482,11 @@ function point(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.l
 canvas.addEventListener('pointerdown',e=>{
  const p=point(e),near=(pos,rx,ry)=>Math.abs(p.x-pos.x)<rx&&Math.abs(p.y-pos.y)<ry;
  dragTarget=near(positions.lyric,.46,.12)&&currentLyric()?'lyric':near(positions.title,.46,.07)?'title':near(positions.subtitle,.46,.06)?'subtitle':logoImage&&near(positions.logo,.15,.1)?'logo':null;
- if(dragTarget){selectedObject=dragTarget;const sel=document.getElementById('objectSelect');if(sel){sel.value=dragTarget;['objectSelect'].forEach(()=>sel.dispatchEvent(new Event('change')));}dragOffset={x:p.x-positions[dragTarget].x,y:p.y-positions[dragTarget].y};canvas.setPointerCapture(e.pointerId);$('dragHint').textContent='Moving '+dragTarget+' layer — release to place it.';}
+ if(dragTarget){selectedObject=dragTarget;const sel=document.getElementById('objectSelect');if(sel){sel.value=dragTarget;sel.dispatchEvent(new Event('change'));}dragOffset={x:p.x-positions[dragTarget].x,y:p.y-positions[dragTarget].y};canvas.setPointerCapture(e.pointerId);$('dragHint').textContent='Moving '+dragTarget+' layer — release to place it.';updateSelectionOverlay();}
 });
-canvas.addEventListener('pointermove',e=>{if(!dragTarget)return;const p=point(e);positions[dragTarget]={x:Math.max(.08,Math.min(.92,p.x-dragOffset.x)),y:Math.max(.05,Math.min(.94,p.y-dragOffset.y))};});
-canvas.addEventListener('pointerup',()=>{if(dragTarget){dragTarget=null;$('dragHint').textContent='Position saved. Touch another text layer to move it.';const x=document.getElementById('objectX'),y=document.getElementById('objectY');if(x){x.value=Math.round(positions[selectedObject].x*100);y.value=Math.round(positions[selectedObject].y*100);x.dispatchEvent(new Event('input'));}saveSettings();}});
-canvas.addEventListener('pointercancel',()=>{dragTarget=null;});
+canvas.addEventListener('pointermove',e=>{if(!dragTarget)return;const p=point(e);positions[dragTarget]={x:Math.max(.08,Math.min(.92,p.x-dragOffset.x)),y:Math.max(.05,Math.min(.94,p.y-dragOffset.y))};updateSelectionOverlay();});
+canvas.addEventListener('pointerup',()=>{if(dragTarget){dragTarget=null;$('dragHint').textContent='Position saved. Touch another text layer to move it.';const x=document.getElementById('objectX'),y=document.getElementById('objectY');if(x){x.value=Math.round(positions[selectedObject].x*100);y.value=Math.round(positions[selectedObject].y*100);x.dispatchEvent(new Event('input'));}saveSettings();updateSelectionOverlay();}});
+canvas.addEventListener('pointercancel',()=>{dragTarget=null;updateSelectionOverlay();});
 async function doExport(){
  if(!audio.src){alert('Add an audio track first.');return;}const status=$('exportStatus');
  try{resizeCanvas();await ensureEngine();audio.currentTime=0;status.textContent='Preparing recording…';$('exportBtn').disabled=true;$('exportBtnSide').disabled=true;
