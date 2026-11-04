@@ -14,6 +14,9 @@ assert(/objectSettings,lyrics/.test(app),'Object settings are not persisted in e
 assert(/d\.objectSettings/.test(app),'Object settings are not restored');
 assert(/objectSettings\.title\.visible/.test(app)&&/objectSettings\.subtitle\.visible/.test(app),'Text visibility not applied to canvas');
 assert(/objectSettings\.lyric\.visible/.test(app)&&/objectSettings\.logo\.visible/.test(app),'Lyric/logo visibility not applied to canvas');
+assert(/getMediaAsset\('logo'\)/.test(app)&&/saveMediaAsset\('logo',f\)/.test(app),'Logo media is not restored and persisted');
+assert(/getMediaAsset\('background'\)/.test(app)&&/saveMediaAsset\('background',f\)/.test(app),'Background media is not restored and persisted');
+assert(/deleteMediaAsset\('logo'\)/.test(app)&&/deleteMediaAsset\('background'\)/.test(app),'Clearing media does not remove saved assets');
 assert(/image\/jpeg':'jpg'/.test(images)&&/image\/webp':'webp'/.test(images),'Image import must preserve supported file extensions');
 assert(/commons\.wikimedia\.org\/w\/api\.php/.test(images),'Wikimedia Commons search endpoint missing');
 assert(/safeName\(item\.title,blob\.type\)/.test(images),'Imported image filename does not use MIME type');
