@@ -22,7 +22,7 @@ function init(){
  projectInfo.innerHTML='<span><b id="wfDuration">00:00</b><small>DURATION</small></span><span><b id="wfResolution">1080P</b><small>QUALITY</small></span><span><b>9:16</b><small>CANVAS</small></span>';
  hero.append(heroTop,stageWrap,projectInfo);
  const timeline=document.createElement('section');timeline.className='wf-timeline';
- timeline.innerHTML='<div class="wf-timeline-head"><div><span class="wf-kicker">EDIT TIMELINE</span><b>Media & music tracks</b></div><span class="wf-timeline-hint">Tap a tool below to edit</span></div><div class="wf-transport"><span class="wf-time-readout" id="wfTimeReadout">00:00 / 00:00</span><button type="button" data-transport="prev" aria-label="Back five seconds">|◀</button><button type="button" data-transport="play" aria-label="Play or pause">▶</button><button type="button" data-transport="next" aria-label="Forward five seconds">▶|</button><span class="wf-transport-spacer"></span><button type="button" data-transport="undo" aria-label="Undo">↶</button><button type="button" data-transport="redo" aria-label="Redo">↷</button><button type="button" data-transport="fullscreen" aria-label="Fullscreen">⛶</button></div><div class="wf-clip-lane"><button type="button" class="wf-add-clip" id="wfAddClip">＋<small>Add photo / video clips</small></button><div class="wf-clip-placeholder"><span>PHOTO / VIDEO TRACK</span><b>Import media to build your timeline</b></div></div><div class="wf-audio-lane"><span class="wf-audio-icon">♫</span><div class="wf-audio-lane-main"><b id="wfAudioName">No music track</b><div class="wf-waveform" aria-hidden="true"></div></div><span class="wf-audio-lane-end">♫</span></div>';
+ timeline.innerHTML='<div class="wf-timeline-head"><div><span class="wf-kicker">EDIT TIMELINE</span><b>Media & music tracks</b></div><span class="wf-timeline-hint">Tap a tool below to edit</span></div><div class="wf-transport"><span class="wf-time-readout" id="wfTimeReadout">00:00 / 00:00</span><button type="button" data-transport="prev" aria-label="Back five seconds">|◀</button><button type="button" data-transport="play" aria-label="Play or pause">▶</button><button type="button" data-transport="next" aria-label="Forward five seconds">▶|</button><span class="wf-transport-spacer"></span><button type="button" data-transport="undo" aria-label="Undo">↶</button><button type="button" data-transport="redo" aria-label="Redo">↷</button><button type="button" data-transport="fullscreen" aria-label="Fullscreen">⛶</button></div><div class="wf-clip-lane"><button type="button" class="wf-add-clip" id="wfAddClip">＋<small>Add photo / video clips</small></button><div class="wf-clip-placeholder" id="wfDashboardClips"><span>PHOTO / VIDEO TRACK</span><b>Import media to build your timeline</b></div></div><div class="wf-audio-lane"><span class="wf-audio-icon">♫</span><div class="wf-audio-lane-main"><b id="wfAudioName">No music track</b><div class="wf-waveform" aria-hidden="true"></div></div><span class="wf-audio-lane-end">♫</span></div>';
  const toolSection=document.createElement('section');toolSection.className='wf-tools-section';
  toolSection.innerHTML='<div class="wf-section-title"><div><span class="wf-kicker">YOUR CREATIVE TOOLKIT</span><b>Studio tools</b></div><span>14 TOOLS</span></div><div class="wf-tool-grid" id="wfToolGrid"></div>';
  const bottom=document.createElement('nav');bottom.className='wf-bottom-dock';bottom.setAttribute('aria-label','Main navigation');
@@ -99,6 +99,23 @@ function init(){
   modal.querySelector('.wf-modal-sheet').scrollTop=0;
   requestAnimationFrame(()=>focusToolTarget(id,p));
  }
+ function renderDashboardClips(state){
+  const lane=timeline.querySelector('#wfDashboardClips');if(!lane)return;
+  lane.replaceChildren();
+  const assets=state&&Array.isArray(state.assets)?state.assets:[],segments=state&&Array.isArray(state.segments)?state.segments:[];
+  if(!segments.length){const label=document.createElement('span');label.textContent='PHOTO / VIDEO TRACK';const empty=document.createElement('b');empty.textContent=assets.length?'Press Create beat-synced Auto Cut to arrange your clips':'Import media to build your timeline';lane.append(label,empty);return;}
+  const heading=document.createElement('span');heading.textContent='PHOTO / VIDEO TRACK · '+segments.length+' CLIPS';lane.append(heading);
+  segments.forEach((segment,index)=>{
+   const asset=assets.find(item=>item.id===segment.assetId);if(!asset)return;
+   const card=document.createElement('button');card.type='button';card.className='wf-mini-clip';card.title=asset.name;
+   if(asset.previewUrl){const img=document.createElement('img');img.src=asset.previewUrl;img.alt='';card.append(img);}
+   else{const glyph=document.createElement('span');glyph.className='wf-mini-clip-glyph';glyph.textContent='▶';card.append(glyph);}
+   const caption=document.createElement('small');caption.textContent=(index+1)+' · '+(asset.kind==='image'?'PHOTO':'VIDEO');card.append(caption);
+   card.addEventListener('click',()=>{const panel=panelMap.get('autoVideoPanel');if(panel){openTool('autoVideoPanel','Auto Cut','Build beat-synced photo and video montages.',panel);if(window.WaveForgeAutoVideo)window.WaveForgeAutoVideo.selectSegment(segment.id);}});
+   lane.append(card);
+  });
+ }
+ document.addEventListener('waveforge:video-timeline-change',event=>renderDashboardClips(event.detail));
  function close(){modal.hidden=true;document.body.classList.remove('wf-modal-open');modal.querySelectorAll('.wf-modal-content>.panel').forEach(p=>p.hidden=true);}
  modal.addEventListener('click',e=>{if(e.target.closest('[data-close]'))close();});
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)close();});
