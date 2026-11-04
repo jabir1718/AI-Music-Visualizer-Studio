@@ -285,6 +285,8 @@ async function deleteMediaAsset(id){
  try{const db=await openMediaDB();if(!db)return;await new Promise((resolve,reject)=>{const tx=db.transaction('assets','readwrite');tx.objectStore('assets').delete(id);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});}catch(e){}
 }
 async function restoreSavedMedia(){
+ const logo=await getMediaAsset('logo');if(logo&&logo.blob&&!logoImage){const file=new File([logo.blob],logo.name||'Restored logo.png',{type:logo.type||'image/png',lastModified:logo.lastModified||Date.now()});logoUrl=URL.createObjectURL(file);const image=new Image();image.onload=()=>{logoImage=image;};image.src=logoUrl;}
+ const background=await getMediaAsset('background');if(background&&background.blob&&!mediaUrl){const file=new File([background.blob],background.name||'Restored background',{type:background.type||background.blob.type,lastModified:background.lastModified||Date.now()});const input=$('mediaInput'),transfer=new DataTransfer();transfer.items.add(file);input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));}
  const main=await getMediaAsset('main');
  if(main&&main.blob&&!audioFile){const file=new File([main.blob],main.name||'Restored track', {type:main.type||'audio/mpeg',lastModified:main.lastModified||Date.now()});loadAudio(file);}
  const layers=Array.isArray(savedProjectData.layers)?savedProjectData.layers:[];
@@ -346,16 +348,16 @@ $('lyricPosition').onchange=e=>{positions.lyric.y=e.target.value==='upper'?.36:e
 $('exportRatio').onchange=()=>{resizeCanvas();saveSettings();};document.querySelectorAll('.ratio').forEach(b=>b.onclick=()=>{$('exportRatio').value=b.dataset.ratio;resizeCanvas();saveSettings();});$('quality').onchange=()=>{resizeCanvas();saveSettings();};
 document.querySelectorAll('[data-scroll]').forEach(b=>b.onclick=()=>$(b.dataset.scroll).scrollIntoView({behavior:'smooth'}));
 $('themeToggle').onclick=()=>{document.body.classList.toggle('light');$('themeToggle').textContent=document.body.classList.contains('light')?'Dark mode':'Light mode';};
-$('logoInput').onchange=e=>{const f=e.target.files[0];if(!f)return;if(logoUrl)URL.revokeObjectURL(logoUrl);logoUrl=URL.createObjectURL(f);const img=new Image();img.onload=()=>{logoImage=img;};img.src=logoUrl;$('stageLogo').innerHTML='';};
-$('clearLogo').onclick=()=>{$('stageLogo').innerHTML='';if(logoUrl)URL.revokeObjectURL(logoUrl);logoUrl=null;logoImage=null;};
+$('logoInput').onchange=e=>{const f=e.target.files[0];if(!f)return;if(logoUrl)URL.revokeObjectURL(logoUrl);logoUrl=URL.createObjectURL(f);const img=new Image();img.onload=()=>{logoImage=img;};img.src=logoUrl;saveMediaAsset('logo',f);$('stageLogo').innerHTML='';saveSettings();};
+$('clearLogo').onclick=()=>{$('stageLogo').innerHTML='';if(logoUrl)URL.revokeObjectURL(logoUrl);logoUrl=null;logoImage=null;deleteMediaAsset('logo');saveSettings();};
 $('mediaInput').onchange=e=>{
  const f=e.target.files[0];if(!f)return;if(!f.type.startsWith('image/')&&!f.type.startsWith('video/')){alert('Choose an image or video file.');return;}
- if(mediaUrl)URL.revokeObjectURL(mediaUrl);mediaUrl=URL.createObjectURL(f);
+ if(mediaUrl)URL.revokeObjectURL(mediaUrl);mediaUrl=URL.createObjectURL(f);saveMediaAsset('background',f);
  const img=$('backgroundImage'),vid=$('backgroundVideo');img.classList.add('hidden');vid.classList.add('hidden');vid.pause();vid.removeAttribute('src');img.removeAttribute('src');
  if(f.type.startsWith('image/')){mediaKind='image';img.onload=()=>{$('mediaStatus').textContent='Photo ready · '+f.name;};img.onerror=()=>{$('mediaStatus').textContent='Could not load this photo.';};img.src=mediaUrl;img.classList.remove('hidden');}
  else{mediaKind='video';vid.muted=true;vid.loop=true;vid.playsInline=true;vid.onloadeddata=()=>{$('mediaStatus').textContent='Video ready · '+f.name;vid.play().catch(()=>{});};vid.src=mediaUrl;vid.classList.remove('hidden');}
 };
-$('clearMedia').onclick=()=>{if(mediaUrl)URL.revokeObjectURL(mediaUrl);mediaUrl=null;mediaKind='';$('backgroundImage').removeAttribute('src');$('backgroundVideo').pause();$('backgroundVideo').removeAttribute('src');$('backgroundImage').classList.add('hidden');$('backgroundVideo').classList.add('hidden');$('mediaStatus').textContent='No background selected.';};
+$('clearMedia').onclick=()=>{if(mediaUrl)URL.revokeObjectURL(mediaUrl);deleteMediaAsset('background');mediaUrl=null;mediaKind='';$('backgroundImage').removeAttribute('src');$('backgroundVideo').pause();$('backgroundVideo').removeAttribute('src');$('backgroundImage').classList.add('hidden');$('backgroundVideo').classList.add('hidden');$('mediaStatus').textContent='No background selected.';};
 $('srtInput').onchange=async e=>{const f=e.target.files[0];if(f)importSubtitles(await f.text());};
 $('transcribeBtn').onclick=async()=>{
  if(!audioFile){$('lyricStatus').textContent='Add an audio track first.';return;}
