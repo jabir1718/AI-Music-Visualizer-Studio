@@ -123,3 +123,6 @@ body.wf-dashboard-app .wf-project-info span{min-width:0}
  body.wf-dashboard-app .topbar .top-actions{display:flex!important}
  body.wf-dashboard-app .topbar #wfMenuToggle,body.wf-dashboard-app .topbar #wfHeaderSettings{width:30px;height:30px;min-width:30px}
 }
+
+body.wf-dashboard-app .wf-waveform{position:relative;overflow:hidden}
+body.wf-dashboard-app .wf-waveform:after{content:"";position:absolute;inset:0 auto 0 0;width:var(--wf-audio-progress,0%);background:linear-gradient(90deg,#e23cff22,#20dfff44);border-right:1px solid #b7f7ff;box-shadow:0 0 10px #25dcff88;pointer-events:none}
