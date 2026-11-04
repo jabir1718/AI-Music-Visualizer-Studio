@@ -160,3 +160,11 @@ button[data-action-icon]:disabled{opacity:.45;cursor:not-allowed}
 .object-transform-handle.rotate{left:50%;top:-34px;transform:translateX(-50%);cursor:grab}
 .object-transform-handle.rotate:after{content:"↻";color:#fff;font-size:17px;line-height:24px}
 .object-transform-handle.resize:after{content:"↘";color:#fff;font-size:16px;line-height:24px}
+
+.mixer-clip-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:end;padding:12px 0;border-top:1px solid var(--line)}
+.mixer-clip-tools label{display:grid;gap:6px;font-size:.76rem;color:var(--muted)}
+.mixer-clip-tools input[type=number]{width:100%;min-width:0}
+.mixer-loop-toggle{display:flex!important;align-items:center;gap:8px;min-height:38px}
+.mixer-loop-toggle input{width:auto!important}
+.mixer-clip-tools .btn{justify-self:start}
+@media(max-width:560px){.mixer-clip-tools{grid-template-columns:1fr 1fr}}
