@@ -384,7 +384,7 @@ This is an order for development, not a reduction of the full scope:
 
 ## 33. AI Auto Video Editor and social-media styles
 - Add a dedicated Auto Video workspace that imports multiple clips and a selected music track, analyzes the audio beat grid and video metadata, and creates a non-destructive editable draft.
-- Support beat-synchronized cuts, clip selection/reordering, scene-change suggestions, speech-pause cuts, configurable clip duration, speed ramps, slow motion, punch-in/punch-out zooms, transitions, motion effects, color/filter looks, captions, lyric overlays, stickers, sound effects and music ducking where supported.
+- Support beat-synchronized cuts, clip selection/reordering, sampled-frame scene-change suggestions, configurable clip duration, speed ramps, zoom reveal and canvas transition treatments, motion effects, color/filter looks, captions/lyric overlays and stickers. Speech-pause cuts, sound-effect placement and music ducking remain future work.
 - Offer selectable editing styles such as fast TikTok/Reels montage, cinematic, travel, vlog, product promo, lyric video, calm aesthetic, energetic beat edit and story/highlight recap. Style presets must be original generic styles, not copied proprietary templates or unlicensed content.
 - Offer output presets for vertical 9:16, square 1:1 and horizontal 16:9; let the user set target duration, cut intensity, transition density, caption style and preferred clips.
 - Analyze beat positions and optional speech transcription/pauses. Let users choose whether cuts follow every beat, strong beats, bars, phrase boundaries or speech pauses. Never assume every beat should become a cut.
@@ -400,7 +400,7 @@ This is an order for development, not a reduction of the full scope:
 
 - Start the Auto Video Editor with a local-only, deterministic beat-cut workflow using the existing BPM detector/grid. Do not require paid APIs or accounts for basic montage creation.
 - Initial implementation now includes 8 local source clips, storage/length guardrails, five original cut styles, editable segment order/length/removal, playhead-synchronized canvas preview, and portable project metadata.
-- Direct cuts are the only implemented transition behavior in this milestone. Scene analysis, speech-pause cuts, AI captions, transition effects, speed ramps and advanced compositing remain future work and must be clearly marked unavailable until built and tested.
+- The current free milestone includes local sampled-frame scene detection, speed ramps and canvas transition treatments; it does not include speech-pause cuts, AI captions, true overlapping crossfades or advanced multi-layer compositing.
 - Tune previews and storage for the user's Infinix ZERO 40 (X6860 / 4G configuration), while detecting actual browser/codec support at runtime. Never force 4K/16K export or keep all video sources decoding simultaneously.
 - Free local editing assistant is preferred over any billable ChatGPT API integration. Keep paid/cloud AI disabled unless the user explicitly opts in later.
 
