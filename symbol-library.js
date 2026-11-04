@@ -44,7 +44,7 @@ function mount(host,options={}){
   if(!filtered.length)$('openmojiStatus').textContent='No matching symbols. Try another search.';
   else $('openmojiStatus').textContent='Showing '+filtered.length+' matches (up to 72 per search).';
  }
- $('openmojiSearch').oninput=render;
+ $('openmojiSearch').oninput=render;$('openmojiGroup').onchange=render;
  $('openmojiLoad').onclick=async()=>{ $('openmojiLoad').disabled=true;$('openmojiStatus').textContent='Downloading catalogue metadata…';try{entries=await loadData();const groups=[...new Set(entries.map(x=>x.group).filter(Boolean))].sort();groups.forEach(group=>{const option=root.document.createElement('option');option.value=group;option.textContent=group;$('openmojiGroup').append(option);});$('openmojiSearch').disabled=false;$('openmojiGroup').disabled=false;$('openmojiLoad').textContent='Catalogue ready';$('openmojiCount').textContent=entries.length.toLocaleString();render();}catch(error){$('openmojiStatus').textContent='Symbol catalogue unavailable: '+error.message+' — check internet access.';$('openmojiLoad').disabled=false;}};
  $('openmojiUse').onclick=async()=>{
   if(!selected)return;$('openmojiUse').disabled=true;
