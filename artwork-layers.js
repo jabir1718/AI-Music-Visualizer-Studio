@@ -3,7 +3,7 @@
  const KEY='waveforge-artwork-layers-v1',MAX_LAYERS=12,MAX_FILE=20*1024*1024;
  let layers=[],host=null,bridge=null,selected=null;
  const $=id=>host&&host.querySelector('#'+id);
- function persist(){try{localStorage.setItem(KEY,JSON.stringify(layers.map(({id,name,type,x,y,scale,opacity,rotation,visible,target})=>({id,name,type,x,y,scale,opacity,rotation,visible,target}))));}catch(e){}}
+ function persist(){try{const data=layers.map(({id,name,type,x,y,scale,opacity,rotation,visible,target})=>({id,name,type,x,y,scale,opacity,rotation,visible,target}));localStorage.setItem(KEY,JSON.stringify(data));const project=JSON.parse(localStorage.getItem('waveforge-v1')||'{}');project.artworkLayers=data;localStorage.setItem('waveforge-v1',JSON.stringify(project));}catch(e){}}
  function safe(v,min,max){return Math.max(min,Math.min(max,Number(v)||0));}
  function render(){
   if(!host)return;
@@ -49,7 +49,7 @@
   });
  }
  async function restore(){
-  let metadata=[];try{metadata=JSON.parse(localStorage.getItem(KEY)||'[]');}catch(e){}
+  let metadata=[];try{const stored=localStorage.getItem(KEY);metadata=stored?JSON.parse(stored):(JSON.parse(localStorage.getItem('waveforge-v1')||'{}').artworkLayers||[]);}catch(e){}
   for(const meta of metadata.slice(0,MAX_LAYERS)){
    const stored=await bridge.getMediaAsset(meta.id);if(!stored||!stored.blob)continue;
    const url=URL.createObjectURL(stored.blob),img=new Image();
