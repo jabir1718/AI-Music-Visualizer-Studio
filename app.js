@@ -19,6 +19,19 @@ const palette={aurora:['#9b8cff','#65e5c0','#e8f5ff'],sunset:['#ff8c75','#ffca7a
 const positions={title:{x:.5,y:.23},subtitle:{x:.5,y:.29},lyric:{x:.5,y:.80},logo:{x:.82,y:.08}};
 const objectDefaults={title:{visible:true,scale:1,rotation:0,opacity:1,color:''},subtitle:{visible:true,scale:1,rotation:0,opacity:1,color:''},lyric:{visible:true,scale:1,rotation:0,opacity:1,color:''},logo:{visible:true,scale:1,rotation:0,opacity:1,color:''}};
 let objectSettings=JSON.parse(JSON.stringify(objectDefaults)),selectedObject='title',wordSync=null,selectionBox=null,transformGesture=null;
+let objectKeyframes={title:[],subtitle:[],lyric:[],logo:[]};
+function getObjectState(key,time=audio.currentTime||0){
+ const p=positions[key],o=objectSettings[key],base={x:p.x,y:p.y,scale:o.scale,rotation:o.rotation,opacity:o.opacity};
+ const animated=window.WaveForgeKeyframes?window.WaveForgeKeyframes.evaluate(objectKeyframes[key]||[],time,base):base;
+ return{position:{x:animated.x,y:animated.y},settings:{...o,scale:animated.scale,rotation:animated.rotation,opacity:animated.opacity}};
+}
+function getBaseKeyframe(key,time=audio.currentTime||0){
+ const p=positions[key],o=objectSettings[key];
+ return{time,x:p.x,y:p.y,scale:o.scale,rotation:o.rotation,opacity:o.opacity};
+}
+function updateKeyframeControls(){
+ const count=$('objectKeyframeCount');if(count){const frames=objectKeyframes[selectedObject]||[];count.textContent=frames.length+' keyframes · playhead '+fmt(audio.currentTime||0);}
+}
 function setStatus(t){$('saveState').textContent='● '+t;}
 function fmt(s){if(!isFinite(s))s=0;return String(Math.floor(s/60)).padStart(2,'0')+':'+String(Math.floor(s%60)).padStart(2,'0');}
 function resizeCanvas(){
@@ -70,12 +83,14 @@ function draw(){
  }
  ctx.restore();ctx.shadowBlur=0;ctx.globalAlpha=1;ctx.textAlign='center';ctx.textBaseline='middle';
  const title=$('titleInput').value||'',subtitle=$('subtitleInput').value||'';
- if(objectSettings.title.visible){const o=objectSettings.title;ctx.save();ctx.globalAlpha=o.opacity;ctx.translate(positions.title.x*w,positions.title.y*h);ctx.rotate(o.rotation*Math.PI/180);ctx.fillStyle=o.color||$('textColor').value;ctx.font='800 '+Math.round(w*.052*o.scale)+'px '+($('fontStyle').value==='serif'?'Georgia':$('fontStyle').value==='mono'?'monospace':'sans-serif');ctx.shadowColor='#000';ctx.shadowBlur=14;if(window.WaveForgeTypography)window.WaveForgeTypography.apply(ctx,'title',Math.round(w*.052*o.scale),'sans-serif');drawWrapped(title,0,0,w*.82,Math.round(w*.06*o.scale),'title');ctx.restore();}
- if(objectSettings.subtitle.visible){const o=objectSettings.subtitle;ctx.save();ctx.globalAlpha=o.opacity;ctx.translate(positions.subtitle.x*w,positions.subtitle.y*h);ctx.rotate(o.rotation*Math.PI/180);ctx.font='500 '+Math.round(w*.025*o.scale)+'px sans-serif';ctx.fillStyle=o.color||'#ffffffed';if(window.WaveForgeTypography)window.WaveForgeTypography.apply(ctx,'subtitle',Math.round(w*.025*o.scale),'sans-serif');drawWrapped(subtitle,0,0,w*.82,Math.round(w*.035*o.scale),'subtitle');ctx.restore();}
+ const titleState=getObjectState('title',audio.currentTime),subtitleState=getObjectState('subtitle',audio.currentTime);
+ if(titleState.settings.visible){const o=titleState.settings;ctx.save();ctx.globalAlpha=o.opacity;ctx.translate(titleState.position.x*w,titleState.position.y*h);ctx.rotate(o.rotation*Math.PI/180);ctx.fillStyle=o.color||$('textColor').value;ctx.font='800 '+Math.round(w*.052*o.scale)+'px '+($('fontStyle').value==='serif'?'Georgia':$('fontStyle').value==='mono'?'monospace':'sans-serif');ctx.shadowColor='#000';ctx.shadowBlur=14;if(window.WaveForgeTypography)window.WaveForgeTypography.apply(ctx,'title',Math.round(w*.052*o.scale),'sans-serif');drawWrapped(title,0,0,w*.82,Math.round(w*.06*o.scale),'title');ctx.restore();}
+ if(subtitleState.settings.visible){const o=subtitleState.settings;ctx.save();ctx.globalAlpha=o.opacity;ctx.translate(subtitleState.position.x*w,subtitleState.position.y*h);ctx.rotate(o.rotation*Math.PI/180);ctx.font='500 '+Math.round(w*.025*o.scale)+'px sans-serif';ctx.fillStyle=o.color||'#ffffffed';if(window.WaveForgeTypography)window.WaveForgeTypography.apply(ctx,'subtitle',Math.round(w*.025*o.scale),'sans-serif');drawWrapped(subtitle,0,0,w*.82,Math.round(w*.035*o.scale),'subtitle');ctx.restore();}
  const lyric=currentLyric();
- if(lyric&&lyric.text&&objectSettings.lyric.visible){
-  const o=objectSettings.lyric,size=Math.round(w*Number($('lyricSize').value)/1000*o.scale),max=w*.84;
-  ctx.save();ctx.globalAlpha=o.opacity;ctx.translate(positions.lyric.x*w,positions.lyric.y*h);ctx.rotate(o.rotation*Math.PI/180);ctx.textAlign='left';ctx.textBaseline='middle';ctx.font=(template==='poetry'?'italic 700 ':'900 ')+size+'px '+(template==='poetry'?'Georgia,serif':template==='minimal'?'Georgia,serif':'sans-serif');if(window.WaveForgeTypography)window.WaveForgeTypography.apply(ctx,'lyric',size,template==='poetry'||template==='minimal'?'Georgia,serif':'sans-serif');
+ const lyricState=getObjectState('lyric',audio.currentTime);
+ if(lyric&&lyric.text&&lyricState.settings.visible){
+  const o=lyricState.settings,size=Math.round(w*Number($('lyricSize').value)/1000*o.scale),max=w*.84;
+  ctx.save();ctx.globalAlpha=o.opacity;ctx.translate(lyricState.position.x*w,lyricState.position.y*h);ctx.rotate(o.rotation*Math.PI/180);ctx.textAlign='left';ctx.textBaseline='middle';ctx.font=(template==='poetry'?'italic 700 ':'900 ')+size+'px '+(template==='poetry'?'Georgia,serif':template==='minimal'?'Georgia,serif':'sans-serif');if(window.WaveForgeTypography)window.WaveForgeTypography.apply(ctx,'lyric',size,template==='poetry'||template==='minimal'?'Georgia,serif':'sans-serif');
   const words=Array.isArray(lyric.words)&&lyric.words.length?lyric.words:lyric.text.split(' ').map((text,i,a)=>({text,start:lyric.start+(lyric.end-lyric.start)*i/a.length,end:lyric.start+(lyric.end-lyric.start)*(i+1)/a.length}));
   const rows=[[]],rowWidths=[0],space=ctx.measureText(' ').width;
   words.forEach(word=>{const width=ctx.measureText(word.text).width,idx=rows.length-1;if(rowWidths[idx]+(rows[idx].length?space:0)+width>max*.9&&rows[idx].length){rows.push([]);rowWidths.push(0);}const n=rows.length-1;rows[n].push({word,width});rowWidths[n]+=width+(rows[n].length>1?space:0);});
@@ -96,7 +111,8 @@ function draw(){
   });
   ctx.restore();
  }
- if(objectSettings.logo.visible&&logoImage&&logoImage.complete&&logoImage.naturalWidth){const o=objectSettings.logo;ctx.save();ctx.globalAlpha=o.opacity;ctx.translate(positions.logo.x*w,positions.logo.y*h);ctx.rotate(o.rotation*Math.PI/180);const lw=w*.2*o.scale,lh=lw*(logoImage.naturalHeight/logoImage.naturalWidth);ctx.drawImage(logoImage,-lw/2,-lh/2,lw,lh);ctx.restore();}
+ const logoState=getObjectState('logo',audio.currentTime);
+ if(logoState.settings.visible&&logoImage&&logoImage.complete&&logoImage.naturalWidth){const o=logoState.settings;ctx.save();ctx.globalAlpha=o.opacity;ctx.translate(logoState.position.x*w,logoState.position.y*h);ctx.rotate(o.rotation*Math.PI/180);const lw=w*.2*o.scale,lh=lw*(logoImage.naturalHeight/logoImage.naturalWidth);ctx.drawImage(logoImage,-lw/2,-lh/2,lw,lh);ctx.restore();}
  ctx.shadowBlur=0;ctx.font='600 '+Math.round(w*.012)+'px sans-serif';ctx.fillStyle='#ffffff88';ctx.fillText('WAVEFORGE',w/2,h*.96);
  if(!playing&&!audio.src){ctx.fillStyle='#ffffffb0';ctx.font='600 '+Math.round(w*.018)+'px sans-serif';ctx.fillText('ADD A TRACK TO START THE VISUALIZER',w/2,h*.84);}
  raf=requestAnimationFrame(draw);
@@ -295,7 +311,7 @@ function initAISegmentation(){if(window.WaveForgeSegmentation)window.WaveForgeSe
 function initMediaTools(){if(window.WaveForgeMediaTools)window.WaveForgeMediaTools.mount($('audioPanel'),{onMain:loadAudio,onLayer:file=>addMixerLayer(file,'Other')});}
 function updateSelectionOverlay(){
  if(!selectionBox)return;
- const key=selectedObject||'title',p=positions[key],o=objectSettings[key];
+ const key=selectedObject||'title',state=getObjectState(key,audio.currentTime),p=state.position,o=state.settings;
  const dims={title:[82,9],subtitle:[82,7],lyric:[84,17],logo:[20,14]}[key]||[30,12];
  selectionBox.style.left=(p.x*100)+'%';selectionBox.style.top=(p.y*100)+'%';
  selectionBox.style.width=dims[0]+'%';selectionBox.style.height=dims[1]+'%';
@@ -304,7 +320,7 @@ function updateSelectionOverlay(){
 }
 function beginObjectTransform(e,mode){
  e.preventDefault();e.stopPropagation();
- const stage=$('stage'),r=stage.getBoundingClientRect(),p=positions[selectedObject],o=objectSettings[selectedObject];
+ const stage=$('stage'),r=stage.getBoundingClientRect(),state=getObjectState(selectedObject,audio.currentTime),p=state.position,o=state.settings;
  const cx=r.left+p.x*r.width,cy=r.top+p.y*r.height;
  const angle=Math.atan2(e.clientY-cy,e.clientX-cx),distance=Math.max(1,Math.hypot(e.clientX-cx,e.clientY-cy));
  transformGesture={mode,pointerId:e.pointerId,cx,cy,startAngle:angle,startDistance:distance,startScale:o.scale,startRotation:o.rotation};
@@ -322,7 +338,8 @@ function moveObjectTransform(e){
   o.rotation=Math.max(-180,Math.min(180,g.startRotation+(a-g.startAngle)*180/Math.PI));
   const input=$('objectRotation');if(input){input.value=Math.round(o.rotation);$('objectRotationValue').textContent=input.value+'°';}
  }
- updateSelectionOverlay();saveSettings();
+ if((objectKeyframes[selectedObject]||[]).length)objectKeyframes[selectedObject]=window.WaveForgeKeyframes.upsert(objectKeyframes[selectedObject],audio.currentTime,getBaseKeyframe(selectedObject));
+ updateSelectionOverlay();updateKeyframeControls();saveSettings();
 }
 function endObjectTransform(e){
  if(!transformGesture||transformGesture.pointerId!==e.pointerId)return;
@@ -331,7 +348,7 @@ function endObjectTransform(e){
 function initObjectEditor(){
  const host=$('overlayPanel');if(!host||$('objectEditor'))return;
  const panel=document.createElement('section');panel.id='objectEditor';panel.className='object-editor';
- panel.innerHTML='<div class="object-editor-head"><div><span class="eyebrow">TEMPLATE OBJECTS</span><h3>Editable layer list</h3><p>Select one object. Changes affect only that layer and are included in project saves and video export.</p></div></div><div class="object-layer-list" id="objectLayerList"><button type="button" data-object="title">T Title</button><button type="button" data-object="subtitle">Aa Subtitle</button><button type="button" data-object="lyric">♫ Lyrics</button><button type="button" data-object="logo">▧ Logo</button></div><label>Selected object<select id="objectSelect"><option value="title">Title text</option><option value="subtitle">Subtitle text</option><option value="lyric">Lyrics / captions</option><option value="logo">Logo artwork</option></select></label><div id="objectTextWrap"><label>Object text<input id="objectTextValue" maxlength="120" type="text"></label></div><div class="object-editor-grid"><label>Position X <output id="objectXValue"></output><input id="objectX" type="range" min="5" max="95" value="50"></label><label>Position Y <output id="objectYValue"></output><input id="objectY" type="range" min="5" max="95" value="23"></label><label>Size <output id="objectScaleValue"></output><input id="objectScale" type="range" min="25" max="250" value="100"></label><label>Rotation <output id="objectRotationValue"></output><input id="objectRotation" type="range" min="-180" max="180" value="0"></label><label>Opacity <output id="objectOpacityValue"></output><input id="objectOpacity" type="range" min="0" max="100" value="100"></label><label class="object-color" id="objectColorWrap">Object color<input id="objectColor" type="color" value="#ffffff"></label></div><label class="object-visible"><input id="objectVisible" type="checkbox" checked> Show this object in preview and export</label><div class="object-editor-actions"><button type="button" class="btn small" id="objectReset">Reset selected object</button><button type="button" class="btn small" id="objectCenter">Center selected object</button></div><p class="object-editor-note" id="objectEditorNote">Canvas layers can also be moved by dragging them directly in the preview. Flattened third-party images remain single images; only WaveForge-native layers are individually editable.</p>';
+ panel.innerHTML='<div class="object-editor-head"><div><span class="eyebrow">TEMPLATE OBJECTS</span><h3>Editable layer list</h3><p>Select one object. Changes affect only that layer and are included in project saves and video export.</p></div></div><div class="object-layer-list" id="objectLayerList"><button type="button" data-object="title">T Title</button><button type="button" data-object="subtitle">Aa Subtitle</button><button type="button" data-object="lyric">♫ Lyrics</button><button type="button" data-object="logo">▧ Logo</button></div><label>Selected object<select id="objectSelect"><option value="title">Title text</option><option value="subtitle">Subtitle text</option><option value="lyric">Lyrics / captions</option><option value="logo">Logo artwork</option></select></label><div id="objectTextWrap"><label>Object text<input id="objectTextValue" maxlength="120" type="text"></label></div><div class="object-editor-grid"><label>Position X <output id="objectXValue"></output><input id="objectX" type="range" min="5" max="95" value="50"></label><label>Position Y <output id="objectYValue"></output><input id="objectY" type="range" min="5" max="95" value="23"></label><label>Size <output id="objectScaleValue"></output><input id="objectScale" type="range" min="25" max="250" value="100"></label><label>Rotation <output id="objectRotationValue"></output><input id="objectRotation" type="range" min="-180" max="180" value="0"></label><label>Opacity <output id="objectOpacityValue"></output><input id="objectOpacity" type="range" min="0" max="100" value="100"></label><label class="object-color" id="objectColorWrap">Object color<input id="objectColor" type="color" value="#ffffff"></label></div><label class="object-visible"><input id="objectVisible" type="checkbox" checked> Show this object in preview and export</label><div class="object-editor-actions"><button type="button" class="btn small" id="objectReset">Reset selected object</button><button type="button" class="btn small" id="objectCenter">Center selected object</button></div><div class="object-keyframe-tools"><div><span class="eyebrow">ANIMATION TRACK</span><b>Transform keyframes</b><small id="objectKeyframeCount">0 keyframes · playhead 00:00</small></div><div class="object-editor-actions"><button type="button" class="btn small" id="objectKeyframeAdd">＋ Add keyframe</button><button type="button" class="btn small" id="objectKeyframeRemove">Remove nearest</button></div></div><p class="object-editor-note" id="objectEditorNote">Canvas layers can also be moved by dragging them directly in the preview. Flattened third-party images remain single images; only WaveForge-native layers are individually editable.</p>';
  host.appendChild(panel);
  const stage=$('stage');
  if(stage&&!$('objectSelectionOverlay')){
@@ -347,7 +364,7 @@ function initObjectEditor(){
  }
  const $o=id=>document.getElementById(id);
  function sync(){
-  const k=selectedObject,o=objectSettings[k],p=positions[k],isText=k==='title'||k==='subtitle';
+  const k=selectedObject,state=getObjectState(k,audio.currentTime),o=state.settings,p=state.position,isText=k==='title'||k==='subtitle';
   $o('objectSelect').value=k;$o('objectTextWrap').hidden=!isText;$o('objectColorWrap').hidden=!isText;document.querySelectorAll('[data-object]').forEach(b=>b.classList.toggle('active',b.dataset.object===k));
   if(isText)$o('objectTextValue').value=$(k==='title'?'titleInput':'subtitleInput').value;
   $o('objectX').value=Math.round(p.x*100);$o('objectY').value=Math.round(p.y*100);
@@ -355,7 +372,7 @@ function initObjectEditor(){
   $o('objectOpacity').value=Math.round(o.opacity*100);$o('objectColor').value=o.color||'#ffffff';$o('objectVisible').checked=o.visible;
   ['X','Y','Scale','Rotation','Opacity'].forEach(key=>{$o('object'+key+'Value').textContent=key==='X'||key==='Y'?$o('object'+key).value+'%':key==='Scale'?$o('object'+key).value+'%':key==='Rotation'?$o('object'+key).value+'°':$o('object'+key).value+'%';});updateSelectionOverlay();
  }
- function commit(){sync();saveSettings();}
+ function commit(){if((objectKeyframes[selectedObject]||[]).length)objectKeyframes[selectedObject]=window.WaveForgeKeyframes.upsert(objectKeyframes[selectedObject],audio.currentTime,getBaseKeyframe(selectedObject));sync();saveSettings();}
  $o('objectSelect').onchange=e=>{selectedObject=e.target.value;sync();};panel.querySelectorAll('[data-object]').forEach(b=>b.onclick=()=>{selectedObject=b.dataset.object;sync();});
  $o('objectTextValue').oninput=e=>{if(selectedObject==='title')$('titleInput').value=e.target.value;else if(selectedObject==='subtitle')$('subtitleInput').value=e.target.value;updateText();saveSettings();};
  [['X','x'],['Y','y']].forEach(([id,key])=>$o('object'+id).oninput=e=>{positions[selectedObject][key]=Number(e.target.value)/100;commit();});
@@ -364,9 +381,12 @@ function initObjectEditor(){
  $o('objectOpacity').oninput=e=>{objectSettings[selectedObject].opacity=Number(e.target.value)/100;commit();};
  $o('objectColor').oninput=e=>{objectSettings[selectedObject].color=e.target.value;commit();};
  $o('objectVisible').onchange=e=>{objectSettings[selectedObject].visible=e.target.checked;saveSettings();};
- $o('objectReset').onclick=()=>{objectSettings[selectedObject]={...objectDefaults[selectedObject]};positions[selectedObject]={...({title:{x:.5,y:.23},subtitle:{x:.5,y:.29},lyric:{x:.5,y:.8},logo:{x:.82,y:.08}}[selectedObject])};commit();};
+ $o('objectReset').onclick=()=>{objectSettings[selectedObject]={...objectDefaults[selectedObject]};positions[selectedObject]={...({title:{x:.5,y:.23},subtitle:{x:.5,y:.29},lyric:{x:.5,y:.8},logo:{x:.82,y:.08}}[selectedObject])};objectKeyframes[selectedObject]=[];commit();};
  $o('objectCenter').onclick=()=>{positions[selectedObject]={x:.5,y:.5};commit();};
- sync();
+ $o('objectKeyframeAdd').onclick=()=>{const state=getObjectState(selectedObject,audio.currentTime);objectKeyframes[selectedObject]=window.WaveForgeKeyframes.upsert(objectKeyframes[selectedObject],audio.currentTime,{...state.position,scale:state.settings.scale,rotation:state.settings.rotation,opacity:state.settings.opacity});updateKeyframeControls();saveSettings();setStatus('Keyframe added at '+fmt(audio.currentTime));};
+ $o('objectKeyframeRemove').onclick=()=>{const result=window.WaveForgeKeyframes.removeNearest(objectKeyframes[selectedObject],audio.currentTime,.25);if(!result.removed){setStatus('No keyframe near the playhead.');return;}objectKeyframes[selectedObject]=result.frames;updateKeyframeControls();saveSettings();setStatus('Nearest keyframe removed');};
+ audio.addEventListener('timeupdate',updateKeyframeControls);
+ sync();updateKeyframeControls();
 }
 
 function openMediaDB(){
@@ -408,7 +428,7 @@ function captureUndoState(){
   color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,
   font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,
   lyricPosition:$('lyricPosition').value,positions:JSON.parse(JSON.stringify(positions)),
-  objectSettings:JSON.parse(JSON.stringify(objectSettings)),
+  objectSettings:JSON.parse(JSON.stringify(objectSettings)),objectKeyframes:JSON.parse(JSON.stringify(objectKeyframes)),
   typography:window.WaveForgeTypography?window.WaveForgeTypography.getAll():null,
   filter:window.WaveForgeFilters?window.WaveForgeFilters.getSettings():null,
   chromaKey:window.WaveForgeChromaKey?window.WaveForgeChromaKey.getSettings():null,
@@ -435,6 +455,7 @@ function restoreUndoState(state){
  if(state.lyricPosition)$('lyricPosition').value=state.lyricPosition;
  if(state.positions)Object.assign(positions,state.positions);
  if(state.objectSettings)Object.keys(objectDefaults).forEach(k=>objectSettings[k]={...objectDefaults[k],...(state.objectSettings[k]||{})});
+ if(state.objectKeyframes)Object.keys(objectKeyframes).forEach(k=>objectKeyframes[k]=Array.isArray(state.objectKeyframes[k])?state.objectKeyframes[k]:[]);
  if(window.WaveForgeTypography&&state.typography)window.WaveForgeTypography.setAll(state.typography);
  if(window.WaveForgeFilters&&state.filter)window.WaveForgeFilters.set(state.filter.filterPreset,state.filter.filterIntensity);
  if(window.WaveForgeChromaKey&&state.chromaKey)window.WaveForgeChromaKey.set(state.chromaKey);
@@ -464,12 +485,12 @@ function initHistoryUI(){
  history.seed(captureUndoState());
 }
 function saveSettings(){
- const data={mainPitch:$('mainPitch')?$('mainPitch').value:0,mainEffects:readMainEffects(),typography:window.WaveForgeTypography?window.WaveForgeTypography.getAll():null,layers:mixerLayers.map(l=>({id:l.id,role:l.role,volume:l.volume,rate:l.rate,pitch:l.pitch,offset:l.offset,muted:l.muted,solo:l.solo,pan:l.pan,bass:l.bass,treble:l.treble,delay:l.delay,reverb:l.reverb,distortion:l.distortion||0,voiceStyle:l.voiceStyle||'natural',trimStart:l.trimStart||0,trimEnd:l.trimEnd||0,loop:!!l.loop,preset:l.preset||'clean'})),title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,lyricPosition:$('lyricPosition').value,positions,objectSettings,manualBpm,tapBeatOffset,filterPreset:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterPreset:'f01',filterIntensity:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterIntensity:100,chromaKey:window.WaveForgeChromaKey?window.WaveForgeChromaKey.getSettings():null,aiSegmentation:window.WaveForgeSegmentation?window.WaveForgeSegmentation.getSettings():null,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
+ const data={mainPitch:$('mainPitch')?$('mainPitch').value:0,mainEffects:readMainEffects(),typography:window.WaveForgeTypography?window.WaveForgeTypography.getAll():null,layers:mixerLayers.map(l=>({id:l.id,role:l.role,volume:l.volume,rate:l.rate,pitch:l.pitch,offset:l.offset,muted:l.muted,solo:l.solo,pan:l.pan,bass:l.bass,treble:l.treble,delay:l.delay,reverb:l.reverb,distortion:l.distortion||0,voiceStyle:l.voiceStyle||'natural',trimStart:l.trimStart||0,trimEnd:l.trimEnd||0,loop:!!l.loop,preset:l.preset||'clean'})),title:$('titleInput').value,subtitle:$('subtitleInput').value,caption:$('captionInput').value,color:$('visualColor').value,style,ratio:$('exportRatio').value,quality:$('quality').value,font:$('fontStyle').value,textColor:$('textColor').value,template,lyricSize:$('lyricSize').value,lyricPosition:$('lyricPosition').value,positions,objectSettings,objectKeyframes,manualBpm,tapBeatOffset,filterPreset:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterPreset:'f01',filterIntensity:window.WaveForgeFilters?window.WaveForgeFilters.getSettings().filterIntensity:100,chromaKey:window.WaveForgeChromaKey?window.WaveForgeChromaKey.getSettings():null,aiSegmentation:window.WaveForgeSegmentation?window.WaveForgeSegmentation.getSettings():null,lyrics,trackName:audioFile?audioFile.name:savedTrackName};
  try{localStorage.setItem('waveforge-v1',JSON.stringify(data));setStatus('Saved locally');}catch(e){setStatus('Ready');}
  if(history&&!historyRestoring)history.record(captureUndoState());
 }
 function loadSettings(){
- try{const d=JSON.parse(localStorage.getItem('waveforge-v1')||'{}');if(d.title!==undefined)$('titleInput').value=d.title;if(d.subtitle!==undefined)$('subtitleInput').value=d.subtitle;if(d.caption!==undefined)$('captionInput').value=d.caption;if(d.color)$('visualColor').value=d.color;if(d.ratio)$('exportRatio').value=d.ratio;if(d.quality)$('quality').value=d.quality;if(d.font)$('fontStyle').value=d.font;if(d.textColor)$('textColor').value=d.textColor;if(window.WaveForgeTypography&&d.typography)window.WaveForgeTypography.setAll(d.typography);if(Number.isFinite(d.manualBpm))manualBpm=d.manualBpm;if(Number.isFinite(d.tapBeatOffset))tapBeatOffset=d.tapBeatOffset;if(window.WaveForgeFilters)window.WaveForgeFilters.set(d.filterPreset||'f01',d.filterIntensity===undefined?100:d.filterIntensity);if(window.WaveForgeChromaKey&&d.chromaKey)window.WaveForgeChromaKey.set(d.chromaKey);if(window.WaveForgeSegmentation&&d.aiSegmentation)window.WaveForgeSegmentation.setSettings(d.aiSegmentation);if(d.style)style=d.style;if(d.template)template=d.template;savedProjectData=d;if(d.lyricSize)$('lyricSize').value=d.lyricSize;if(d.lyricPosition)$('lyricPosition').value=d.lyricPosition;if(d.positions)Object.assign(positions,d.positions);if(d.objectSettings)Object.keys(objectDefaults).forEach(k=>objectSettings[k]={...objectDefaults[k],...(d.objectSettings[k]||{})});if(Array.isArray(d.lyrics))lyrics=d.lyrics;savedTrackName=d.trackName||'';}catch(e){}
+ try{const d=JSON.parse(localStorage.getItem('waveforge-v1')||'{}');if(d.title!==undefined)$('titleInput').value=d.title;if(d.subtitle!==undefined)$('subtitleInput').value=d.subtitle;if(d.caption!==undefined)$('captionInput').value=d.caption;if(d.color)$('visualColor').value=d.color;if(d.ratio)$('exportRatio').value=d.ratio;if(d.quality)$('quality').value=d.quality;if(d.font)$('fontStyle').value=d.font;if(d.textColor)$('textColor').value=d.textColor;if(window.WaveForgeTypography&&d.typography)window.WaveForgeTypography.setAll(d.typography);if(Number.isFinite(d.manualBpm))manualBpm=d.manualBpm;if(Number.isFinite(d.tapBeatOffset))tapBeatOffset=d.tapBeatOffset;if(window.WaveForgeFilters)window.WaveForgeFilters.set(d.filterPreset||'f01',d.filterIntensity===undefined?100:d.filterIntensity);if(window.WaveForgeChromaKey&&d.chromaKey)window.WaveForgeChromaKey.set(d.chromaKey);if(window.WaveForgeSegmentation&&d.aiSegmentation)window.WaveForgeSegmentation.setSettings(d.aiSegmentation);if(d.style)style=d.style;if(d.template)template=d.template;savedProjectData=d;if(d.lyricSize)$('lyricSize').value=d.lyricSize;if(d.lyricPosition)$('lyricPosition').value=d.lyricPosition;if(d.positions)Object.assign(positions,d.positions);if(d.objectKeyframes)Object.keys(objectKeyframes).forEach(k=>objectKeyframes[k]=Array.isArray(d.objectKeyframes[k])?d.objectKeyframes[k]:[]);if(d.objectSettings)Object.keys(objectDefaults).forEach(k=>objectSettings[k]={...objectDefaults[k],...(d.objectSettings[k]||{})});if(Array.isArray(d.lyrics))lyrics=d.lyrics;savedTrackName=d.trackName||'';}catch(e){}
  updateText();selectTemplate(template);renderLyricList();resizeCanvas();
 }
 function selectTemplate(value){template=value;document.querySelectorAll('.template-card').forEach(b=>b.classList.toggle('selected',b.dataset.template===template));}
@@ -575,10 +596,11 @@ $('riskCheck').onclick=()=>{const a=$('ownAudio').checked,v=$('licensedVisuals')
 function point(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width,y:(e.clientY-r.top)/r.height};}
 canvas.addEventListener('pointerdown',e=>{
  const p=point(e),near=(pos,rx,ry)=>Math.abs(p.x-pos.x)<rx&&Math.abs(p.y-pos.y)<ry;
- dragTarget=near(positions.lyric,.46,.12)&&currentLyric()?'lyric':near(positions.title,.46,.07)?'title':near(positions.subtitle,.46,.06)?'subtitle':logoImage&&near(positions.logo,.15,.1)?'logo':null;
+ const lyricPos=getObjectState('lyric',audio.currentTime).position,titlePos=getObjectState('title',audio.currentTime).position,subtitlePos=getObjectState('subtitle',audio.currentTime).position,logoPos=getObjectState('logo',audio.currentTime).position;
+ dragTarget=near(lyricPos,.46,.12)&&currentLyric()?'lyric':near(titlePos,.46,.07)?'title':near(subtitlePos,.46,.06)?'subtitle':logoImage&&near(logoPos,.15,.1)?'logo':null;
  if(dragTarget){selectedObject=dragTarget;const sel=document.getElementById('objectSelect');if(sel){sel.value=dragTarget;sel.dispatchEvent(new Event('change'));}dragOffset={x:p.x-positions[dragTarget].x,y:p.y-positions[dragTarget].y};canvas.setPointerCapture(e.pointerId);$('dragHint').textContent='Moving '+dragTarget+' layer — release to place it.';updateSelectionOverlay();}
 });
-canvas.addEventListener('pointermove',e=>{if(!dragTarget)return;const p=point(e);positions[dragTarget]={x:Math.max(.08,Math.min(.92,p.x-dragOffset.x)),y:Math.max(.05,Math.min(.94,p.y-dragOffset.y))};updateSelectionOverlay();});
+canvas.addEventListener('pointermove',e=>{if(!dragTarget)return;const p=point(e);positions[dragTarget]={x:Math.max(.08,Math.min(.92,p.x-dragOffset.x)),y:Math.max(.05,Math.min(.94,p.y-dragOffset.y))};if((objectKeyframes[dragTarget]||[]).length)objectKeyframes[dragTarget]=window.WaveForgeKeyframes.upsert(objectKeyframes[dragTarget],audio.currentTime,getBaseKeyframe(dragTarget));updateSelectionOverlay();});
 canvas.addEventListener('pointerup',()=>{if(dragTarget){dragTarget=null;$('dragHint').textContent='Position saved. Touch another text layer to move it.';const x=document.getElementById('objectX'),y=document.getElementById('objectY');if(x){x.value=Math.round(positions[selectedObject].x*100);y.value=Math.round(positions[selectedObject].y*100);x.dispatchEvent(new Event('input'));}saveSettings();updateSelectionOverlay();}});
 canvas.addEventListener('pointercancel',()=>{dragTarget=null;updateSelectionOverlay();});
 async function doExport(){
