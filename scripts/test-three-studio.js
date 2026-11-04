@@ -1,6 +1,7 @@
 'use strict';
 const assert=require('assert');
 const studio=require('../three-studio.js');
+const source=require('fs').readFileSync(require('path').join(__dirname,'..','three-studio.js'),'utf8');
 assert(studio.SHAPES.length>=8,'3D studio should expose multiple primitive geometries');
 assert(studio.SHAPES.includes('torus-knot'));
 assert(studio.SHAPES.includes('text'),'3D text must be a supported geometry type');
@@ -23,4 +24,6 @@ assert.strictEqual(clean.scale,1.4);
 assert.strictEqual(clean.rotationY,45);
 const text=studio.normalizeConfig({shape:'text',text:'WAVEFORGE 3D',textDepth:.42});
 assert.strictEqual(text.shape,'text');assert.strictEqual(text.text,'WAVEFORGE 3D');assert.strictEqual(text.textDepth,.42);
+assert(/TextGeometryClass/.test(source)&&/depth:config\.textDepth/.test(source),'3D text must use extruded TextGeometry depth');
+assert(/loadTextTools/.test(source),'3D font and text addons should load lazily');
 console.log('3D object studio tests passed.');
