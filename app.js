@@ -251,6 +251,7 @@ function renderMixerLayers(){
 function updateText(){ $('previewTitle').textContent=$('titleInput').value||' ';$('previewSubtitle').textContent=$('subtitleInput').value||'';$('stageCopy').style.color=$('textColor').value;$('stageCopy').style.fontFamily=$('fontStyle').value==='serif'?'Georgia,serif':$('fontStyle').value==='mono'?'monospace':'Manrope,sans-serif';}
 
 function initFilterStudio(){if(window.WaveForgeFilters)window.WaveForgeFilters.mount($('visualPanel'),saveSettings);}
+function initMediaTools(){if(window.WaveForgeMediaTools)window.WaveForgeMediaTools.mount($('audioPanel'),{onMain:loadAudio,onLayer:file=>addMixerLayer(file,'Other')});}
 function initObjectEditor(){
  const host=$('overlayPanel');if(!host||$('objectEditor'))return;
  const panel=document.createElement('section');panel.id='objectEditor';panel.className='object-editor';
@@ -402,6 +403,6 @@ async function doExport(){
  finally{$('exportBtn').disabled=false;$('exportBtnSide').disabled=false;}
 }
 $('exportBtn').onclick=doExport;$('exportBtnSide').onclick=doExport;
-initFilterStudio();loadSettings();audio.volume=.85;initObjectEditor();initMixerUI();restoreSavedMedia();decorateButtonIcons();startDraw();
+initFilterStudio();loadSettings();audio.volume=.85;initObjectEditor();initMixerUI();initMediaTools();restoreSavedMedia();decorateButtonIcons();startDraw();
 window.addEventListener('beforeunload',()=>{if(mediaUrl)URL.revokeObjectURL(mediaUrl);if(logoUrl)URL.revokeObjectURL(logoUrl);if(audio.src)URL.revokeObjectURL(audio.src);});
 })();
