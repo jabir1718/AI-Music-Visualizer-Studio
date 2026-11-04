@@ -30,6 +30,8 @@
         <div class="stage-watermark">WAVEFORGE</div>
       </div>
       <div class="stage-toolbar"><span><i class="live-dot"></i> LIVE PREVIEW</span><div class="ratio-control"><button class="ratio active" data-ratio="9:16">9:16</button><button class="ratio" data-ratio="16:9">16:9</button><button class="ratio" data-ratio="1:1">1:1</button></div><span id="resolutionLabel">1080 × 1920</span></div>
+      <div class="media-tools"><label class="file-button">＋ Add photo / video<input type="file" id="mediaInput" accept="image/*,video/*" hidden></label><button class="btn small" id="clearMedia">Remove background</button><span id="mediaStatus" class="hint">Your photo/video fills the visualizer background.</span></div>
+      <p class="drag-hint" id="dragHint">Touch a text layer in the preview and drag it to reposition.</p>
     </div>
     <section class="panel" id="audioPanel">
       <div class="panel-head"><div><div class="eyebrow">01 / SOUND SOURCE</div><h2>Audio track</h2></div><button class="btn small" id="audioPickBtn">＋ Add MP3</button></div>
@@ -52,9 +54,28 @@
       <label class="file-button">＋ Upload PNG logo<input type="file" id="logoInput" accept="image/png" hidden></label><button class="btn text-btn" id="clearLogo">Remove logo</button>
     </section>
     <section class="panel" id="captionPanel">
-      <div class="panel-head"><div><div class="eyebrow">04 / WORDS ON BEAT</div><h2>Captions</h2></div><span class="tag">Caption tools</span></div>
-      <label>Caption text<textarea id="captionInput" rows="2" placeholder="Type a lyric or caption to show in the preview..."></textarea></label>
-      <div class="inline-actions"><label class="file-button">Import .SRT captions<input id="srtInput" type="file" accept=".srt,.vtt,text/vtt" hidden></label><span class="hint">Automatic AI transcription needs a speech-to-text model/service; this starter supports manual captions and subtitle import.</span></div>
+      <div class="panel-head"><div><div class="eyebrow">04 / LYRICS & POETRY</div><h2>Auto lyrics studio</h2></div><span class="tag">TikTok-style text</span></div>
+      <div class="lyric-actions">
+        <button class="btn primary" id="transcribeBtn">✦ Listen & generate lyrics</button>
+        <label class="model-select">Recognition model<select id="whisperModel"><option value="onnx-community/whisper-tiny">Fast · Tiny</option><option value="onnx-community/whisper-base">Better detail · Base</option></select></label>
+        <label class="file-button">Import .SRT / .VTT<input id="srtInput" type="file" accept=".srt,.vtt,text/vtt" hidden></label>
+      </div>
+      <div class="lyric-progress"><div id="lyricProgressBar"></div></div><p class="hint" id="lyricStatus">Add a song, then tap Listen & generate lyrics. The speech model downloads on first use and runs on this device.</p>
+      <label>Manual lyrics / poetry<textarea id="captionInput" rows="3" placeholder="One lyric or poetry line per row..."></textarea></label>
+      <div class="template-head"><b>Choose a text template</b><span class="hint">Preview updates instantly</span></div>
+      <div class="template-grid">
+        <button class="template-card selected" data-template="trend"><span class="template-sample trend-sample">YOUR<br>LYRICS</span><b>Trending bold</b></button>
+        <button class="template-card" data-template="karaoke"><span class="template-sample karaoke-sample">sing along</span><b>Karaoke glow</b></button>
+        <button class="template-card" data-template="poetry"><span class="template-sample poetry-sample">دل کی بات</span><b>Poetry</b></button>
+        <button class="template-card" data-template="minimal"><span class="template-sample minimal-sample">soft words</span><b>Minimal</b></button>
+        <button class="template-card" data-template="neon"><span class="template-sample neon-sample">FEEL IT</span><b>Neon pulse</b></button>
+      </div>
+      <div class="control-grid">
+        <label>Lyrics size <input id="lyricSize" type="range" min="20" max="90" value="48"></label>
+        <label>Text position <select id="lyricPosition"><option value="lower">Lower center</option><option value="middle">Middle</option><option value="upper">Upper center</option></select></label>
+      </div>
+      <div id="lyricList" class="lyric-list"><span class="hint">Generated or imported lyric lines will appear here.</span></div>
+      <p class="hint">Note: music vocals can be difficult to recognize. Results may contain mistakes or miss sung words; check and edit lyrics before export. This is transcription, not a licensed lyrics database.</p>
     </section>
     <section class="panel" id="riskPanel">
       <div class="panel-head"><div><div class="eyebrow">05 / RELEASE CHECK</div><h2>Copyright risk estimate</h2></div></div>
@@ -74,5 +95,5 @@
   </aside>
 </main>
 </div>
-<script src="audio-engine.js"></script><script src="export.js"></script><script src="app.js"></script>
+<script src="audio-engine.js"></script><script src="lyrics-engine.js"></script><script src="export.js"></script><script src="app.js"></script>
 </body></html>
