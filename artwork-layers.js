@@ -38,7 +38,7 @@
   const id='artwork-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8);
   const ok=await bridge.saveMediaAsset(id,file);if(!ok)throw new Error('Could not save this layer on the device. Free some browser storage and try again.');
   const url=URL.createObjectURL(file),img=new Image();
-  await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(new Error('Image could not be decoded.'));img.src=url;});
+  try{await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(new Error('Image could not be decoded.'));img.src=url;});}catch(error){URL.revokeObjectURL(url);await bridge.deleteMediaAsset(id);throw error;}
   const layer={id,name:file.name||'Artwork layer',type:file.type,url,image:img,x:.5,y:target==='text-decoration'?.34:.55,scale:target==='text-decoration'?.55:.8,opacity:1,rotation:0,visible:true,target};
   layers.push(layer);selected=id;persist();render();bridge.onChange();return true;
  }
