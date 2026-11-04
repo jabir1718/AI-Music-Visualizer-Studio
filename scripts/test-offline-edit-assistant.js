@@ -15,4 +15,8 @@ assert.strictEqual(v.lyricSize,58);
 const unsupported=assistant.parsePrompt('make a 3D dragon walk through the city');
 assert.strictEqual(unsupported.actions.length,0,'unsupported AI requests must not be guessed or executed');
 assert.ok(unsupported.unsupported.length);
+const mixed=assistant.parsePrompt('title to Night Drive, bass +3 dB');
+const mixedValues=Object.fromEntries(mixed.actions.map(x=>[x.id,x.value]));
+assert.strictEqual(mixedValues.titleInput,'Night Drive','title text should stop at the command separator');
+assert.strictEqual(mixedValues.mainBass,3);
 console.log('Offline assistant tests passed: supported prompts, safe preview values and unsupported request rejection.');
