@@ -83,6 +83,15 @@ function mount(host,options={}){
   $('threeScaleValue').textContent=Math.round(config.scale*100)+'%';$('threeMetalValue').textContent=Math.round(config.metalness*100)+'%';$('threeRoughValue').textContent=Math.round(config.roughness*100)+'%';$('threeLightValue').textContent=Math.round(config.light*100)+'%';
   $('threeXValue').textContent=Math.round(config.rotationX)+'°';$('threeYValue').textContent=Math.round(config.rotationY)+'°';$('threeZValue').textContent=Math.round(config.rotationZ)+'°';$('threePXValue').textContent=config.positionX.toFixed(2);$('threePYValue').textContent=config.positionY.toFixed(2);$('threePZValue').textContent=config.positionZ.toFixed(2);
  }
+ function syncControls(){
+  $('threeShape').value=config.shape;$('threeText').value=config.text;$('threeFont').value=config.fontFamily;$('threeDepth').value=Math.round(config.textDepth*100);$('threeDepthValue').textContent=config.textDepth.toFixed(2);
+  $('threeColor').value=config.color;$('threeScale').value=Math.round(config.scale*100);$('threeMetal').value=Math.round(config.metalness*100);$('threeRough').value=Math.round(config.roughness*100);$('threeLight').value=Math.round(config.light*100);
+  $('threeX').value=Math.round(config.rotationX);$('threeY').value=Math.round(config.rotationY);$('threeZ').value=Math.round(config.rotationZ);
+  $('threePX').value=Math.round(config.positionX*100);$('threePY').value=Math.round(config.positionY*100);$('threePZ').value=Math.round(config.positionZ*100);
+  $('threeAuto').checked=config.autoRotate;$('threeComposite').checked=config.overlayEnabled;
+  $('threeOverlayScale').value=Math.round(config.overlayScale*100);$('threeOverlayX').value=Math.round(config.overlayX*100);$('threeOverlayY').value=Math.round(config.overlayY*100);
+  $('threeOverlayScaleValue').textContent=Math.round(config.overlayScale*100)+'%';$('threeOverlayXValue').textContent=Math.round(config.overlayX*100)+'%';$('threeOverlayYValue').textContent=Math.round(config.overlayY*100)+'%';updateLabels();
+ }
  function resize(){
   if(!renderer||!camera)return;const w=Math.max(240,viewport.clientWidth||520),h=Math.max(220,viewport.clientHeight||320);
   renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();renderer.render(scene,camera);
@@ -122,7 +131,7 @@ function mount(host,options={}){
   const ambient=new T.AmbientLight(0xffffff,.75),key=new T.DirectionalLight(0xffffff,config.light);key.position.set(3,4,5);
   const rim=new T.PointLight(0x57d8ff,config.light*1.15,12);rim.position.set(-3,1.5,-2);
   scene.add(ambient,key,rim);scene.userData.keyLight=key;scene.userData.rimLight=rim;
-  await setShape(config.shape);resize();
+  await setShape(config.shape);syncControls();resize();
   if(root.ResizeObserver){resizeObserver=new root.ResizeObserver(resize);resizeObserver.observe(viewport);}else root.addEventListener('resize',resize);
   renderer.domElement.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};renderer.domElement.setPointerCapture(e.pointerId);});
   renderer.domElement.addEventListener('pointermove',e=>{if(!drag||!mesh)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;drag={x:e.clientX,y:e.clientY};mesh.rotation.y+=dx*.01;mesh.rotation.x+=dy*.01;config.rotationY=mesh.rotation.y*180/Math.PI;config.rotationX=mesh.rotation.x*180/Math.PI;$('threeX').value=Math.round(config.rotationX);$('threeY').value=Math.round(config.rotationY);updateLabels();});
