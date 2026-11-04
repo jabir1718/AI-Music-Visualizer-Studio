@@ -5,7 +5,7 @@
   "description": "WaveForge Music Visualizer Studio Android wrapper",
   "scripts": {
     "build:web": "node scripts/build-web.js",
-    "test": "node scripts/test-audio-engine.js && node scripts/test-editor-assets.js && node scripts/test-filters.js && node scripts/test-video-extractor.js && node scripts/test-chroma-key.js"
+    "test": "node scripts/test-audio-engine.js && node scripts/test-editor-assets.js && node scripts/test-filters.js && node scripts/test-video-extractor.js && node scripts/test-chroma-key.js && node scripts/test-sound-library.js"
   },
   "dependencies": {
     "@capacitor/android": "6.2.0",
