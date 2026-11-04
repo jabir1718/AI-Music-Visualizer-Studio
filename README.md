@@ -14,6 +14,7 @@ A browser-based, local-first music visualizer editor. Version 1.0 foundation.
 - Per-layer generic voice styles (Telephone, Radio, Monster, Chipmunk, Robot and Alien) with independent EQ, echo, reverb and distortion.
 - Local spectral noise reduction for short voice/audio clips using a selected noise-only sample; cleaned audio is exported as a separate WAV layer.
 - Mixer clip in/out trimming, looping and split-at-playhead controls.
+- Searchable OpenMoji symbol collection (4,000+ upstream symbols) with SVG logo import. OpenMoji graphics are CC BY-SA 4.0; follow attribution and ShareAlike requirements.
 - Bounded undo/redo for text, lyrics, object transforms, typography, visual filters, chroma key, AI cutout toggle and master effects.
 - Local audio playback, seeking and volume.
 - Text, subtitle, color, font and PNG logo overlays.
