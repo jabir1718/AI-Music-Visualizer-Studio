@@ -245,16 +245,16 @@ function applyMixerSoloState(){
 }
 function applyVoiceStyle(layer,style){
  const styles={
-  natural:{rate:1,bass:0,treble:0,delay:0,reverb:0,distortion:0},
-  telephone:{rate:1,bass:-9,treble:5,delay:0,reverb:0,distortion:0},
-  radio:{rate:1,bass:-5,treble:3,delay:.06,reverb:.02,distortion:.04},
-  monster:{rate:.78,bass:5,treble:-3,delay:.08,reverb:.22,distortion:.12},
-  chipmunk:{rate:1.32,bass:-4,treble:6,delay:0,reverb:.03,distortion:0},
-  robot:{rate:1,bass:-3,treble:5,delay:.03,reverb:.02,distortion:.42},
-  alien:{rate:.92,bass:2,treble:6,delay:.18,reverb:.32,distortion:.22}
+  natural:{rate:1,pitch:0,bass:0,treble:0,delay:0,reverb:0,distortion:0},
+  telephone:{rate:1,pitch:0,bass:-9,treble:5,delay:0,reverb:0,distortion:0},
+  radio:{rate:1,pitch:0,bass:-5,treble:3,delay:.06,reverb:.02,distortion:.04},
+  monster:{rate:.78,pitch:-4.5,bass:5,treble:-3,delay:.08,reverb:.22,distortion:.12},
+  chipmunk:{rate:1.32,pitch:5.3,bass:-4,treble:6,delay:0,reverb:.03,distortion:0},
+  robot:{rate:1,pitch:0,bass:-3,treble:5,delay:.03,reverb:.02,distortion:.42},
+  alien:{rate:.92,pitch:-1.5,bass:2,treble:6,delay:.18,reverb:.32,distortion:.22}
  };
  const p=styles[style]||styles.natural;Object.assign(layer,p,{voiceStyle:style});
- if(layer.pitchPreserving){layer.pitch=({monster:-5,chipmunk:7,alien:-2}[style]||0);layer.audio.playbackRate=layer.rate;if(engine&&layer.connected){engine.setLayerPitch(layer.id,layer.pitch);engine.setLayerRate(layer.id,layer.rate);}}
+ if(layer.pitchPreserving){layer.audio.playbackRate=layer.rate;if(engine&&layer.connected){engine.setLayerPitch(layer.id,layer.pitch);engine.setLayerRate(layer.id,layer.rate);}}
  else{layer.audio.playbackRate=layer.rate;layer.audio.preservesPitch=false;}
  if(engine&&layer.connected){engine.setLayerEQ(layer.id,layer.bass,layer.treble);engine.setLayerDelay(layer.id,layer.delay);engine.setLayerReverb(layer.id,layer.reverb);engine.setLayerDistortion(layer.id,layer.distortion*100);}
  renderMixerLayers();saveSettings();setStatus('Applied '+style+' voice style');
