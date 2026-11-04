@@ -90,3 +90,9 @@ button[data-action-icon]:disabled{opacity:.45;cursor:not-allowed}
 .project-file-actions{display:flex;gap:8px;flex-wrap:wrap}
 .project-file-panel>small{display:block;color:var(--muted);font-size:9px;line-height:1.5;margin-top:10px}
 .project-file-panel button:disabled{opacity:.5;cursor:wait}
+
+/* Offline BPM analyser */
+.bpm-tool{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:9px;background:#101b2b}
+.bpm-tool b{display:block;font-size:11px}.bpm-tool small{display:block;color:var(--muted);font-size:9px;line-height:1.5;margin-top:4px}
+.bpm-tool output{grid-column:1/-1;color:var(--mint);font-size:10px;line-height:1.5;min-height:15px}
+@media(max-width:440px){.bpm-tool{grid-template-columns:1fr}.bpm-tool button{width:100%}}
