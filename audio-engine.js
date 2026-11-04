@@ -32,7 +32,7 @@
       high.connect(delay);delay.connect(feedback);feedback.connect(delay);delay.connect(delaySend);delaySend.connect(panner);
       high.connect(convolver);convolver.connect(reverbSend);reverbSend.connect(panner);
       const layer={audio,source,gain,low,high,pan:panner,hasPan,delay,feedback,delaySend,convolver,reverbSend,shaper};this.layers.set(id,layer);
-      this.setLayerEQ(id,settings.bass||0,settings.treble||0);this.setLayerPan(id,settings.pan||0);this.setLayerDelay(id,settings.delay||0);this.setLayerReverb(id,settings.reverb||0);
+      this.setLayerEQ(id,settings.bass||0,settings.treble||0);this.setLayerPan(id,settings.pan||0);this.setLayerDelay(id,settings.delay||0);this.setLayerReverb(id,settings.reverb||0);this.setLayerDistortion(id,(settings.distortion||0)*100);
     }
     setLayerVolume(id,v){const l=this.layers.get(id);if(l)l.gain.gain.setTargetAtTime(v,this.context.currentTime,.02);}
     setLayerRate(id,v){const l=this.layers.get(id);if(l)l.audio.playbackRate=v;}
