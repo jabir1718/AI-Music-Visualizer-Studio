@@ -129,6 +129,7 @@ function initMixerUI(){
  '<button type="button" class="music-category" data-category="Separation">AI separation</button>'+
  '<button type="button" class="music-category" data-category="Cleanup">Noise cleanup</button></div>'+
  '<div class="music-category-detail" id="musicCategoryDetail" aria-live="polite"></div>'+
+ '<div class="bpm-tool"><div><b>Tempo / BPM analyser</b><small>Offline estimate from your imported song. Results are approximate.</small></div><button class="btn small" id="bpmAnalyzeBtn" type="button">Detect BPM</button><output id="bpmStatus" aria-live="polite">No analysis yet</output></div>'+
  '<div class="mixer-add"><label>Layer source<select id="mixerRole"><option>Voice</option><option>Background vocal</option><option>Ad-lib</option><option>Humming</option><option>Harmony</option><option>Bass stem</option><option>Drums</option><option>Piano</option><option>Guitar</option><option>Instrumental</option><option>Sound effect</option><option>Voice FX</option><option>Other</option></select></label><label class="mixer-file">＋ Import audio<input id="mixerFile" type="file" accept="audio/*" hidden></label><button class="btn small" id="mixerAddBtn" type="button">Add to track</button></div>'+
  '<div class="mixer-main-pitch"><label>Background music pitch <input id="mainPitch" type="range" min="-12" max="12" step="1" value="0"></label><span id="mainPitchValue">0 semitones</span></div>'+
  '<div id="mixerList" class="mixer-list"><p class="hint">No extra layers yet. Your original song remains the background music.</p></div>'+
@@ -146,6 +147,7 @@ function initMixerUI(){
  };
  document.querySelectorAll('.music-category').forEach(btn=>btn.onclick=()=>selectMusicCategory(btn.dataset.category));
  selectMusicCategory('Voice');
+ $('bpmAnalyzeBtn').onclick=async()=>{const btn=$('bpmAnalyzeBtn'),out=$('bpmStatus');if(!audioFile){out.textContent='Import your main song first.';return;}btn.disabled=true;out.textContent='Preparing analysis…';try{const result=await WaveForgeBPM.detect(audioFile,s=>out.textContent=s);out.textContent='Estimated tempo: '+result.bpm+' BPM · '+Math.round(result.confidence*100)+'% rhythm confidence';setStatus('Tempo analysis complete');}catch(err){out.textContent='Analysis failed: '+err.message;}finally{btn.disabled=false;}};
  audio.addEventListener('timeupdate',syncMixerLayers);
  audio.addEventListener('play',syncMixerLayers);
  audio.addEventListener('seeking',syncMixerLayers);
