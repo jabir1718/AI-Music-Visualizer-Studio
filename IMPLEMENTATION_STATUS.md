@@ -17,7 +17,7 @@ Last source audit: 2026-11-04 (after mixer, lyric-edit and export reliability fi
 | 2 | Fonts, typography and 3D text studio | Not started | Only a few basic font choices exist; 100+ font library, per-object typography and true 3D text are missing. |
 | 3 | Advanced music visualizer | Partial | Four canvas visualizer modes, color/intensity/sensitivity controls and audio-energy reaction exist. Advanced 3D designs, true beat maps and broader object controls are missing. |
 | 4 | Tempo, BPM and timing studio | Partial | Offline BPM estimation is connected to Music Studio and reports an approximate tempo plus rhythm confidence. Manual beat grid, tap tempo and beat-linked automation remain. |
-| 5 | Audio effects and processing | Partial | Imported mixer layers now have independent bass/treble EQ, pan, echo and reverb. Main-track effect chain, distortion/filter presets, automation and effect presets remain. |
+| 5 | Audio effects and processing | Partial | Imported mixer layers have independent bass/treble EQ, pan, echo, reverb and six working per-layer presets (Clean, Telephone, Radio, Small room, Echo, Dreamy). Main-track effect chain, distortion/filter presets and automation remain. |
 | 6 | YouTube video/effect workflow | Not started | No authorized YouTube provider integration or in-app clip workflow. |
 | 7 | Green-screen and background removal | Not started | No chroma-key/background-removal engine. |
 | 8 | PNG logo and artwork studio | Partial | PNG import and overlay exist. Full object transforms, masks, 3D depth, animation and beat sync remain. |
@@ -62,6 +62,7 @@ Last source audit: 2026-11-04 (after mixer, lyric-edit and export reliability fi
 - Added a portable `.waveforge` project-file workflow in `project-file.js`: exports editor settings plus the main audio and stored mixer-layer blobs from IndexedDB; imports validate the project format/version and media records, enforce a 250 MB unpacked-media limit, confirm before replacing saved media/settings, then reload the editor to restore the project.
 - Added Save project / Open project controls to the export inspector and included `project-file.js` in the Android workflow's JavaScript syntax validation. This project-file feature is source-implemented but awaits CI and real-browser/device testing; browser storage quota and Android WebView file handling remain device-dependent.
 
+- Added six per-layer audio effect presets in the mixer. Choosing Clean, Telephone, Radio, Small room, Echo or Dreamy immediately applies the preset's EQ, pan, delay and reverb values to that imported track and saves the selection.
 - Added an offline BPM analyser in `bpm-engine.js`; it decodes the imported audio, analyses its energy-onset envelope and estimates tempo. Music Studio exposes a Detect BPM action with an approximate result and rhythm-confidence indicator. This is not a guaranteed beat grid and needs device testing. The new engine is included in CI syntax checks.
 
 ## Important accuracy rules
