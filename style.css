@@ -310,3 +310,6 @@ button[data-action-icon]:disabled{opacity:.45;cursor:not-allowed}
 .offline-edit-preview ul{margin:8px 0;padding-left:19px;color:var(--text);font-size:.75rem;line-height:1.6}
 .offline-edit-preview p{margin:7px 0 0;color:var(--muted);font-size:.7rem;line-height:1.45}
 @media(max-width:560px){.offline-edit-actions button{flex:1 1 100%}}
+
+/* Photo + video Auto Cut templates */
+.auto-video-panel .auto-video-controls select{min-height:42px}.auto-video-clip-head small{font-variant-numeric:tabular-nums}.auto-video-panel .hint{line-height:1.55}
