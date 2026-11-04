@@ -17,7 +17,7 @@ Last source audit: 2026-11-04 (after editable object layers, media persistence, 
 | 2 | Fonts, typography and 3D text studio | Not started | Only a few basic font choices exist; 100+ font library, per-object typography and true 3D text are missing. |
 | 3 | Advanced music visualizer | Partial | Four canvas visualizer modes, color/intensity/sensitivity controls and audio-energy reaction exist. Advanced 3D designs, true beat maps and broader object controls are missing. |
 | 4 | Tempo, BPM and timing studio | Partial | Offline BPM estimation is connected to Music Studio and reports an approximate tempo plus rhythm confidence. Manual beat grid, tap tempo and beat-linked automation remain. |
-| 5 | Audio effects and processing | Partial | Imported mixer layers have independent bass/treble EQ, pan, echo, reverb and six working per-layer presets (Clean, Telephone, Radio, Small room, Echo, Dreamy). Main-track effect chain, distortion/filter presets and automation remain. |
+| 5 | Audio effects and processing | Partial | Original background track now has independent bass/treble EQ, stereo pan, echo feedback, convolution reverb and WaveShaper distortion; imported mixer layers retain their own EQ/pan/echo/reverb and six presets. Automation and independent pitch-preserving DSP remain. |
 | 6 | YouTube video/effect workflow | Not started | No authorized YouTube provider integration or in-app clip workflow. |
 | 7 | Green-screen and background removal | Not started | No chroma-key/background-removal engine. |
 | 8 | PNG logo and artwork studio | Partial | PNG import and overlay exist. Full object transforms, masks, 3D depth, animation and beat sync remain. |
@@ -40,7 +40,7 @@ Last source audit: 2026-11-04 (after editable object layers, media persistence, 
 | 25 | Clean Joker-smile and character voice effects | Not started | No isolated character-laugh library or dedicated processing studio. |
 | 26 | Realistic 3D scene, PNG and visualizer object studio | Not started | No 3D scene graph, model renderer, camera/light controls or XYZ transforms. |
 | 27 | Video project, timeline, autosave and export studio | Partial | Browser settings and imported audio assets can now be restored using localStorage/IndexedDB; real-time canvas export exists. Full project files, multi-layer video timeline, undo/redo, crash recovery and robust export presets remain. |
-| 28 | Visual effects, compositing, publishing aids and studio preferences | Not started | No complete compositing/effects/keyframe/publishing suite. |
+| 28 | Visual effects, compositing, publishing aids and studio preferences | Partial | Added 50 canvas photo/video looks and independent main-track audio effects; complete compositing, keyframes, advanced VFX and publishing tools remain. |
 | 29 | Dedicated post-import Music Studio and nested editing workflow | Partial | A dedicated nested Music Studio area has Vocal, Ad-lib, Humming, Harmony, Instruments, Sound Effects, Voice FX, AI Separation and Cleanup categories. Some categories are import-only; generated processing and AI operations are not implemented. |
 | 30 | In-app Google image search and smart template editing | Partial | Added a Google Custom Search image API configuration option plus a working no-key Wikimedia Commons search/import fallback. Google credentials are not supplied; flattened-template segmentation/OCR remains unimplemented. |
 | 31 | Expanded voice characters and high-resolution filter pack | Not started | No verified voice model suite or 50+ high-resolution filter pack. |
@@ -74,3 +74,5 @@ Last source audit: 2026-11-04 (after editable object layers, media persistence, 
 - “16K” must only be offered when source media, renderer, memory, GPU and encoder genuinely support it. Upscaling must be labelled as upscaling.
 - Google image results cannot all be fetched; use authorized provider access and respect source terms/licensing.
 - Keep every unimplemented item visible in this tracker until implementation and tests support changing its status.
+
+- Added a dedicated background-music effect chain in `audio-engine.js`: independent bass/treble shelving EQ, stereo pan, echo feedback, convolution reverb and a controllable WaveShaper distortion node. Controls are in the Music Studio and do not alter imported mixer layers. Values persist in local settings and portable project files. Mocked Web Audio tests verify each effect node and setter; device sound quality still needs listening tests.
