@@ -54,6 +54,8 @@ assert(/chromaKey:window\.WaveForgeChromaKey/.test(app),'Chroma key settings are
 assert(/chroma-key\.js/.test(index)&&/processPixels/.test(chroma),'Chroma key module or UI is missing');
 assert(/ai-segmentation\.js/.test(index)&&/WaveForgeSegmentation\.mount/.test(app)&&/WaveForgeSegmentation\.draw/.test(app),'AI person segmentation is not integrated');
 assert(/audio-cleanup\.js/.test(index)&&/WaveForgeCleanup\.mount/.test(app),'Spectral noise cleanup is not integrated');
+assert(/voice-recorder\.js/.test(index)&&/WaveForgeRecorder\.mount/.test(app),'Local microphone recording is not integrated');
+assert(/voiceRecorder\.dispose\(\)/.test(app),'Changing Music Studio categories must stop and release the previous microphone recorder');
 assert(/symbol-library\.js/.test(index)&&/WaveForgeSymbols\.mount/.test(app)&&/loadLogoFile/.test(app),'OpenMoji symbol library is not connected to logo import');
 assert(/three-studio\.js/.test(index)&&/WaveForge3D\.mount/.test(app)&&/initThreeStudio/.test(app),'3D object studio is not mounted');
 assert(/WaveForge3D\.drawToCanvas\(ctx,w,h\)/.test(app),'3D object is not composited into the visualizer canvas');
