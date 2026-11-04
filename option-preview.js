@@ -6,7 +6,7 @@ function init(){
  const content=dock.querySelector('.wf-tool-content');if(!content)return;
  const card=document.createElement('aside');card.className='wf-option-preview';card.setAttribute('aria-live','polite');
  card.innerHTML='<div class="wf-preview-art" aria-hidden="true"><span class="wf-preview-orb"></span><span class="wf-preview-glyph">✦</span></div><div class="wf-preview-copy"><small>OPTION PREVIEW</small><b>Tap any option</b><span>See a quick visual guide before choosing a style or setting.</span></div><span class="wf-preview-tag">LIVE</span>';
- content.insertBefore(card,content.firstChild);
+ dock.insertBefore(card,content);
  const art=card.querySelector('.wf-preview-art'),glyph=card.querySelector('.wf-preview-glyph'),title=card.querySelector('.wf-preview-copy b'),desc=card.querySelector('.wf-preview-copy span'),tag=card.querySelector('.wf-preview-tag');
  const info={
   bars:'Animated vertical bars react to the music energy.',
