@@ -6,6 +6,7 @@ const images=fs.readFileSync('image-search.js','utf8');
 const project=fs.readFileSync('project-file.js','utf8');
 const filters=fs.readFileSync('filter-studio.js','utf8');
 const index=fs.readFileSync('index.html','utf8');
+const mediaTools=fs.readFileSync('video-audio-extractor.js','utf8');
 for(const id of ['objectSelect','objectTextValue','objectX','objectY','objectScale','objectRotation','objectOpacity','objectColor','objectVisible','objectReset','objectCenter']){
  assert(app.includes(id),'Object editor control missing: '+id);
 }
@@ -30,4 +31,8 @@ assert(/filter-studio\.js/.test(index),'Filter studio script is not loaded');
 assert(/mainEffects:readMainEffects\(\)/.test(app),'Original music effects are not saved');
 for(const id of ['mainBass','mainTreble','mainPan','mainEcho','mainReverb','mainDistortion','mainEffectsReset'])assert(app.includes(id),'Missing main music effect control: '+id);
 assert(/profiles\.forEach/.test(filters),'Filter catalogue generation missing');
-console.log('Object editor, image import and filter integration regression tests passed.');
+assert(/video-audio-extractor\.js/.test(index),'Video extractor script is not loaded');
+assert(/WaveForgeMediaTools\.mount/.test(app),'Video extractor UI is not mounted');
+assert(/onMain:loadAudio/.test(app)&&/addMixerLayer\(file,'Other'\)/.test(app),'Extracted audio import actions are not connected');
+assert(/MediaRecorder/.test(mediaTools)&&/createMediaElementSource/.test(mediaTools),'Video audio extraction must use real media capture');
+console.log('Object editor, image import, filters and media-tool integration tests passed.');
