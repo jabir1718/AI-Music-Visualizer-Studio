@@ -437,15 +437,15 @@ function restoreUndoState(state){
  if(Number.isFinite(state.manualBpm))manualBpm=state.manualBpm;
  if(Number.isFinite(state.tapBeatOffset))tapBeatOffset=state.tapBeatOffset;
  $('intensity').value=state.intensity||65;$('sensitivity').value=state.sensitivity||55;
- if($('mainPitch')){$('mainPitch').value=state.mainPitch||0;audio.playbackRate=Math.pow(2,Number(state.mainPitch||0)/12);audio.preservesPitch=false;}
- if(state.mainEffects)Object.keys(state.mainEffects).forEach(k=>{const input=$('main'+k.charAt(0).toUpperCase()+k.slice(1));if(input)input.value=state.mainEffects[k];});
- if(state.volume!==undefined)$('volume').value=state.volume;
- if(state.fadeIn!==undefined)$('fadeIn').value=state.fadeIn;if(state.fadeOut!==undefined)$('fadeOut').value=state.fadeOut;
+ if($('mainPitch')){$('mainPitch').value=state.mainPitch||0;$('mainPitch').dispatchEvent(new Event('input'));audio.playbackRate=Math.pow(2,Number(state.mainPitch||0)/12);audio.preservesPitch=false;}
+ if(state.mainEffects)Object.keys(state.mainEffects).forEach(k=>{const input=$('main'+k.charAt(0).toUpperCase()+k.slice(1));if(input){input.value=state.mainEffects[k];input.dispatchEvent(new Event('input'));}});
+ if(state.volume!==undefined){$('volume').value=state.volume;if(engine)engine.setVolume(Number(state.volume));else audio.volume=Number(state.volume);}
+ if(state.fadeIn!==undefined){$('fadeIn').value=state.fadeIn;$('fadeIn').dispatchEvent(new Event('input'));}if(state.fadeOut!==undefined){$('fadeOut').value=state.fadeOut;$('fadeOut').dispatchEvent(new Event('input'));}
  style=state.style||style;selectTemplate(state.template||template);
  document.querySelectorAll('.style-card').forEach(b=>b.classList.toggle('selected',b.dataset.style===style));
  updateText();renderLyricList();resizeCanvas();applyMainEffects();
  const select=$('objectSelect');if(select){select.value=selectedObject;select.dispatchEvent(new Event('change'));}
- historyRestoring=false;saveSettings();updateHistoryButtons({canUndo:history.canUndo(),canRedo:history.canRedo(),undoCount:0,redoCount:0});
+ saveSettings();historyRestoring=false;updateHistoryButtons({canUndo:history.canUndo(),canRedo:history.canRedo(),undoCount:0,redoCount:0});
 }
 function initHistoryUI(){
  const host=$('overlayPanel');if(!host||$('historyStudio'))return;
