@@ -137,7 +137,7 @@
   if(input)input.addEventListener('change',async()=>{const files=input.files;input.value='';try{await addFiles(files);}catch(e){updateStatus(e.message);}});
   if(styleInput){styleInput.value=style;styleInput.addEventListener('change',()=>{style=PRESETS[styleInput.value]?styleInput.value:'social';persist();});}
   if(power){power.value=String(intensity);power.addEventListener('input',()=>{intensity=clamp(power.value,1,5);const label=$('autoVideoIntensityValue');if(label)label.textContent=String(intensity);persist();});}
-  if(run)run.addEventListener('click',()=>{try{const result=generateAutoCut({bpm:api.getBpm(),musicDuration:api.getMusicDuration?api.getMusicDuration():0});updateStatus('Draft ready · '+result.count+' cuts · '+result.duration.toFixed(1)+' sec. Press Play to preview with the music.');}catch(e){updateStatus(e.message);}});
+  if(run)run.addEventListener('click',async()=>{try{let bpm=api.getBpm?api.getBpm():0;if(!bpm&&api.detectBpm){updateStatus('Analysing your uploaded song tempo…');try{const detected=await api.detectBpm(message=>updateStatus(message));bpm=detected&&detected.bpm;}catch(error){bpm=120;updateStatus('Tempo analysis unavailable; using the clearly marked 120 BPM fallback.');}}const result=generateAutoCut({bpm:bpm||120,musicDuration:api.getMusicDuration?api.getMusicDuration():0});updateStatus('Draft ready · '+result.count+' cuts · '+result.duration.toFixed(1)+' sec · '+result.bpm+' BPM. Press Play to preview with the music.');}catch(e){updateStatus(e.message);}});
   render();
  }
  function dispose(){assets.forEach(a=>{if(a.kind==='video')a.media.pause();URL.revokeObjectURL(a.media.src);});assets.clear();segments=[];}
