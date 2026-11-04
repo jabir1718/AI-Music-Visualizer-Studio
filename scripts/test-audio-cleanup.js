@@ -17,4 +17,5 @@ assert(afterNoise<beforeNoise*.45,'noise-only section should be reduced');
 assert(afterVoice>beforeVoice*.45,'voice signal should remain audible');
 const wav=cleanup.encodeWav({sampleRate,channels:[cleaned],length:cleaned.length});
 assert.strictEqual(wav.type,'audio/wav');
+assert.strictEqual(wav.size,44+cleaned.length*2,'WAV header and PCM payload length must match');
 console.log('Spectral noise cleanup tests passed.');
