@@ -14,6 +14,7 @@ new Function('window','document','URL','setTimeout','clearTimeout',source)(root,
 const api=root.WaveForgeAutoVideo;
 const stored=new Map();
 const bridge={saveMediaAsset:async(id,file)=>{stored.set(id,{blob:file,name:file.name,type:file.type});return true;},getMediaAsset:async id=>stored.get(id),deleteMediaAsset:async()=>{},onChange:()=>{},getBpm:()=>120};
+api.mount({querySelector:()=>null},bridge);
 (async()=>{
  await api.addFiles([{name:'one.mp4',type:'video/mp4',size:1024},{name:'two.mp4',type:'video/mp4',size:1024}].map(x=>({...x})).map(x=>Object.assign(x,{arrayBuffer:async()=>new ArrayBuffer(0)})));
  const manual=api.getState();
