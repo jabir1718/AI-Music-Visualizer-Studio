@@ -115,8 +115,8 @@
   const active=segments.find(s=>time>=s.timelineStart&&time<s.timelineStart+(s.sourceEnd-s.sourceStart)/Math.max(.1,s.rate||1));
   if(!active)return{scale:1,x:0,y:0};const asset=assets.get(active.assetId);if(!isPhoto(asset))return{scale:1,x:0,y:0};
   const progress=clamp((time-active.timelineStart)/Math.max(.2,active.sourceEnd-active.sourceStart),0,1),motion=(PRESETS[style]||PRESETS.social).motion;
-  const scale=motion==='slow'?1.08+progress*.10:motion==='pulse'?1.04+Math.sin(progress*Math.PI)*.10:1.06+progress*.12;
-  return{scale,x:(progress-.5)*(motion==='pan'?.06:.018),y:(.5-progress)*(motion==='pan'?.04:.012)};
+  const scale=motion==='slow'?1.08+progress*.10:motion==='pulse'?1.04+Math.sin(progress*Math.PI)*.10:motion==='pan'?1.04+progress*.04:motion==='flash'?1.01+progress*.02:1.06+progress*.12;
+  return{scale,x:(progress-.5)*(motion==='pan'?.06:.018),y:(.5-progress)*(motion==='pan'?.04:.012),flash:motion==='flash'&&progress<.12?(1-progress/.12)*.22:0};
  }
  function getState(){return{style,intensity,assets:Array.from(assets.values()).map(({id,name,type,size,kind,virtualDuration})=>({id,name,type,size,kind,virtualDuration})),segments:segments.map(s=>({...s}))};}
  async function restore(state){
