@@ -49,7 +49,7 @@ assert(/WaveForgeMediaTools\.mount/.test(app),'Video extractor UI is not mounted
 assert(/onMain:loadAudio/.test(app)&&/addMixerLayer\(file,'Other'\)/.test(app),'Extracted audio import actions are not connected');
 assert(/MediaRecorder/.test(mediaTools)&&/createMediaElementSource/.test(mediaTools),'Video audio extraction must use real media capture');
 assert(/WaveForgeChromaKey\.mount/.test(app)&&/WaveForgeChromaKey\.process/.test(app),'Chroma key processor is not integrated');
-assert(app.includes('loadSettings();audio.volume=.85;initObjectEditor();initTypographyStudio();initMixerUI();initMediaTools();initFilterStudio();initChromaKey();initAISegmentation();'),'All saved editor state and audio controls must initialize before filter UI callbacks save settings');
+assert(app.includes('loadSettings();audio.volume=.85;initObjectEditor();initTypographyStudio();initMixerUI();initHistoryUI();initMediaTools();initFilterStudio();initChromaKey();initAISegmentation();'),'All saved editor state and audio controls must initialize before filter UI callbacks save settings');
 assert(/chromaKey:window\.WaveForgeChromaKey/.test(app),'Chroma key settings are not saved');
 assert(/chroma-key\.js/.test(index)&&/processPixels/.test(chroma),'Chroma key module or UI is missing');
 assert(/ai-segmentation\.js/.test(index)&&/WaveForgeSegmentation\.mount/.test(app)&&/WaveForgeSegmentation\.draw/.test(app),'AI person segmentation is not integrated');
