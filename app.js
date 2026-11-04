@@ -443,6 +443,6 @@ async function doExport(){
  finally{$('exportBtn').disabled=false;$('exportBtnSide').disabled=false;}
 }
 $('exportBtn').onclick=doExport;$('exportBtnSide').onclick=doExport;
-loadSettings();initFilterStudio();initChromaKey();audio.volume=.85;initObjectEditor();initMixerUI();initMediaTools();restoreSavedMedia();decorateButtonIcons();startDraw();
+loadSettings();audio.volume=.85;initObjectEditor();initMixerUI();initMediaTools();initFilterStudio();initChromaKey();restoreSavedMedia();decorateButtonIcons();startDraw();
 window.addEventListener('beforeunload',()=>{if(mediaUrl)URL.revokeObjectURL(mediaUrl);if(logoUrl)URL.revokeObjectURL(logoUrl);if(audio.src)URL.revokeObjectURL(audio.src);});
 })();
