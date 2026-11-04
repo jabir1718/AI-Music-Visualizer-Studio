@@ -24,7 +24,7 @@ function init(){
  const timeline=document.createElement('section');timeline.className='wf-timeline';
  timeline.innerHTML='<div class="wf-timeline-head"><div><span class="wf-kicker">EDIT TIMELINE</span><b>Media & music tracks</b></div><span class="wf-timeline-hint">Tap a tool below to edit</span></div><div class="wf-transport"><span class="wf-time-readout" id="wfTimeReadout">00:00 / 00:00</span><button type="button" data-transport="prev" aria-label="Back five seconds">|◀</button><button type="button" data-transport="play" aria-label="Play or pause">▶</button><button type="button" data-transport="next" aria-label="Forward five seconds">▶|</button><span class="wf-transport-spacer"></span><button type="button" data-transport="undo" aria-label="Undo">↶</button><button type="button" data-transport="redo" aria-label="Redo">↷</button><button type="button" data-transport="fullscreen" aria-label="Fullscreen">⛶</button></div><div class="wf-clip-lane"><button type="button" class="wf-add-clip" id="wfAddClip">＋<small>Add photo / video clips</small></button><div class="wf-clip-placeholder" id="wfDashboardClips"><span>PHOTO / VIDEO TRACK</span><b>Import media to build your timeline</b></div></div><div class="wf-audio-lane"><span class="wf-audio-icon">♫</span><div class="wf-audio-lane-main"><b id="wfAudioName">No music track</b><div class="wf-waveform" aria-hidden="true"></div></div><span class="wf-audio-lane-end">♫</span></div>';
  const toolSection=document.createElement('section');toolSection.className='wf-tools-section';
- toolSection.innerHTML='<div class="wf-section-title"><div><span class="wf-kicker">YOUR CREATIVE TOOLKIT</span><b>Studio tools</b></div><span>14 TOOLS</span></div><div class="wf-tool-grid" id="wfToolGrid"></div>';
+ toolSection.innerHTML='<div class="wf-section-title"><div><span class="wf-kicker">YOUR CREATIVE TOOLKIT</span><b>Studio tools</b></div><span>15 TOOLS</span></div><div class="wf-tool-grid" id="wfToolGrid"></div>';
  const bottom=document.createElement('nav');bottom.className='wf-bottom-dock';bottom.setAttribute('aria-label','Main navigation');
  bottom.innerHTML='<button type="button" data-dock="project"><span>▰</span><b>Project</b></button><button type="button" data-dock="timeline"><span>▤</span><b>Timeline</b></button><button type="button" class="wf-dock-play" data-dock="play" aria-label="Play"><span>▶</span></button><button type="button" data-dock="preview"><span>◉</span><b>Preview</b></button><button type="button" data-dock="settings"><span>⚙</span><b>Settings</b></button>';
  const modal=document.createElement('div');modal.className='wf-tool-modal';modal.id='wfToolModal';modal.hidden=true;
@@ -57,12 +57,13 @@ function init(){
   ['overlayTools','▱','Overlay','Independent image and text artwork layers.'],
   ['colorTools','◍','Colors','Visualizer and artwork color controls.'],
   ['riskPanel','▦','More Tools','Project checks and additional studio utilities.'],
-  ['visualPanel','▧','Filters','Choose visualizer looks and available visual filter controls.']
+  ['visualPanel','▧','Filters','Choose visualizer looks and available visual filter controls.'],
+  ['threeDStudio','⬡','3D Object Studio','Build and export a 3D object or text overlay.']
  ];
  const grid=toolSection.querySelector('#wfToolGrid');
  const descriptions=new Map(tools.map(t=>[t[0],t[3]]));
  function focusToolTarget(id,p){
-  const targets={filterStudio:['#filterStudio','.filter-studio'],colorTools:['#visualColor'],stickerTools:['#symbolLibrary','.symbol-library'],overlayTools:['#artworkLayerPanel'],transitionTools:['#autoVideoSegments'],speedTools:['#autoVideoSegments']};
+  const targets={threeDStudio:['#threeObjectStudio'],filterStudio:['#filterStudio','.filter-studio'],colorTools:['#visualColor'],stickerTools:['#symbolLibrary','.symbol-library'],overlayTools:['#artworkLayerPanel'],transitionTools:['#autoVideoSegments'],speedTools:['#autoVideoSegments']};
   const selectors=targets[id]||[];
   for(const selector of selectors){const target=p&&p.querySelector(selector);if(target){target.scrollIntoView({block:'start',behavior:'smooth'});return true;}}
   return false;
@@ -72,6 +73,7 @@ function init(){
   if(id==='transitionTools'||id==='speedTools')return panelMap.get('autoVideoPanel');
   if(id==='stickerTools'||id==='overlayTools')return panelMap.get('overlayPanel');
   if(id==='colorTools')return panelMap.get('visualPanel');
+  if(id==='threeDStudio')return panelMap.get('overlayPanel');
   return id==='wfExportPanel'?exportPanel:panelMap.get(id);
  }
  let exportPanel=null;
