@@ -39,10 +39,10 @@ function ensureCanvases(w,h){
 }
 function draw(ctx,source,x,y,dw,dh,w,h){
  if(!enabled)return false;
- if(!model){if(!loading)loadModel(onStatus).catch(()=>{});ctx.drawImage(source,x,y,dw,dh);return true;}
+ if(!model){if(!loading)loadModel(onStatus).catch(()=>{});return false;}
  const now=Date.now();
  if(!processing&&now-lastSent>100){processing=true;lastSent=now;Promise.resolve(model.send({image:source})).catch(error=>{processing=false;report('AI segmentation frame failed: '+error.message);});}
- if(!lastResults||!lastResults.segmentationMask||!lastResults.image){ctx.drawImage(source,x,y,dw,dh);return true;}
+ if(!lastResults||!lastResults.segmentationMask||!lastResults.image)return false;
  const c=ensureCanvases(w,h),sx=c.scale;
  c.fg.clearRect(0,0,c.width,c.height);c.mask.clearRect(0,0,c.width,c.height);
  c.fg.globalCompositeOperation='source-over';c.fg.drawImage(lastResults.image,x*sx,y*sx,dw*sx,dh*sx);
