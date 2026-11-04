@@ -8,6 +8,7 @@ const filters=fs.readFileSync('filter-studio.js','utf8');
 const index=fs.readFileSync('index.html','utf8');
 const mediaTools=fs.readFileSync('video-audio-extractor.js','utf8');
 const chroma=fs.readFileSync('chroma-key.js','utf8');
+const sounds=fs.readFileSync('sound-library.js','utf8');
 for(const id of ['objectSelect','objectTextValue','objectX','objectY','objectScale','objectRotation','objectOpacity','objectColor','objectVisible','objectReset','objectCenter']){
  assert(app.includes(id),'Object editor control missing: '+id);
 }
@@ -49,4 +50,6 @@ assert(/WaveForgeChromaKey\.mount/.test(app)&&/WaveForgeChromaKey\.process/.test
 assert(app.includes('loadSettings();audio.volume=.85;initObjectEditor();initMixerUI();initMediaTools();initFilterStudio();initChromaKey();'),'All saved editor state and audio controls must initialize before filter UI callbacks save settings');
 assert(/chromaKey:window\.WaveForgeChromaKey/.test(app),'Chroma key settings are not saved');
 assert(/chroma-key\.js/.test(index)&&/processPixels/.test(chroma),'Chroma key module or UI is missing');
+assert(/WaveForgeSoundLibrary\.mount/.test(app)&&/addMixerLayer\(file,item\.role\)/.test(app),'Open audio library is not connected to the mixer');
+assert(/sound-library\.js/.test(index)&&/Wikimedia Commons/.test(sounds),'Open sound library module is missing');
 console.log('Object editor, image import, filters and media-tool integration tests passed.');
