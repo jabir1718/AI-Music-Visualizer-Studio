@@ -26,11 +26,12 @@
    if(objectUrl)URL.revokeObjectURL(objectUrl);
   };
   const promise=(async()=>{
+   try{
    validateVideoFile(file);
    const mime=selectAudioMime();if(mime===null)throw new Error('This browser does not support audio-only MediaRecorder output.');
    const AudioCtx=root.AudioContext||root.webkitAudioContext;if(!AudioCtx)throw new Error('Web Audio is not supported on this device.');
    objectUrl=URL.createObjectURL(file);video=document.createElement('video');video.preload='auto';video.playsInline=true;video.src=objectUrl;
-   context=new AudioCtx();await context.resume();
+   context=new AudioCtx();await context.resume();if(cancelled)throw new Error('Audio extraction cancelled.');
    source=context.createMediaElementSource(video);destination=context.createMediaStreamDestination();source.connect(destination);
    if(!destination.stream.getAudioTracks().length)throw new Error('The browser could not create an audio stream from this video.');
    const options=mime?{mimeType:mime,audioBitsPerSecond:160000}:{audioBitsPerSecond:160000};
@@ -58,6 +59,7 @@
     try{recorder.start(1000);video.play().catch(error=>finishError(new Error('Video audio could not start. '+error.message)));}
     catch(error){finishError(error);}
    });
+   }catch(error){await cleanup();throw error;}
   })();
   return{promise,cancel(){cancelled=true;if(stopNow)stopNow();else cleanup();}};
  }
@@ -70,7 +72,6 @@
   let selected=null,job=null,output=null,downloadUrl=null;
   const status=t=>$('extractStatus').textContent=t;
   input.onchange=e=>{selected=e.target.files&&e.target.files[0]||null;output=null;$('extractVideoName').textContent=selected?selected.name:'No video selected';$('extractStart').disabled=!selected;$('extractUseMain').hidden=true;$('extractAddLayer').hidden=true;$('extractDownload').hidden=true;$('extractProgressBar').style.width='0%';status(selected?'Video selected · ready to extract':'Ready');};
-  panel.querySelector('.extract-file').onclick=()=>input.click();
   $('extractStart').onclick=async()=>{
    if(!selected)return;
    try{validateVideoFile(selected);}catch(e){status(e.message);return;}
