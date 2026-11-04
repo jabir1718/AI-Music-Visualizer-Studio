@@ -7,7 +7,7 @@ class MockVideo{
  pause(){this.paused=true;}
  play(){this.paused=false;return Promise.resolve();}
 }
-const root={document:{createElement:tag{if(tag!=='video')throw new Error('unexpected element');return new MockVideo();}},URL:{createObjectURL:file=>'blob:'+file.name,revokeObjectURL(){}},setTimeout:()=>1,clearTimeout(){}};
+const root={document:{createElement:(tag)=>{if(tag!=='video')throw new Error('unexpected element');return new MockVideo();}},URL:{createObjectURL:file=>'blob:'+file.name,revokeObjectURL(){}},setTimeout:()=>1,clearTimeout(){}};
 root.window=root;
 const source=require('fs').readFileSync(require('path').join(__dirname,'..','auto-video-editor.js'),'utf8');
 new Function('window','document','URL','setTimeout','clearTimeout',source)(root,root.document,root.URL,root.setTimeout,root.clearTimeout);
