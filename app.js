@@ -314,7 +314,7 @@ function updateSelectionOverlay(){
  const key=selectedObject||'title',state=getObjectState(key,audio.currentTime),p=state.position,o=state.settings;
  const dims={title:[82,9],subtitle:[82,7],lyric:[84,17],logo:[20,14]}[key]||[30,12];
  selectionBox.style.left=(p.x*100)+'%';selectionBox.style.top=(p.y*100)+'%';
- selectionBox.style.width=dims[0]+'%';selectionBox.style.height=dims[1]+'%';
+ selectionBox.style.width=(dims[0]*o.scale)+'%';selectionBox.style.height=(dims[1]*o.scale)+'%';
  selectionBox.style.transform='translate(-50%,-50%) rotate('+o.rotation+'deg)';
  selectionBox.hidden=!o.visible;
 }
