@@ -55,6 +55,7 @@
       <div class="control-grid"><label>Title<input id="titleInput" type="text" maxlength="60" placeholder="Your track title" value="YOUR TRACK"></label><label>Subtitle<input id="subtitleInput" type="text" maxlength="90" placeholder="Artist or tagline" value="Create something unforgettable"></label></div>
       <div class="control-grid"><label>Text color<input id="textColor" type="color" value="#ffffff"></label><label>Font style<select id="fontStyle"><option value="modern">Modern</option><option value="serif">Editorial serif</option><option value="mono">Mono</option></select></label></div>
       <label class="file-button">＋ Upload PNG logo<input type="file" id="logoInput" accept="image/png" hidden></label><button class="btn text-btn" id="clearLogo">Remove logo</button>
+      <div class="artwork-layer-panel" id="artworkLayerPanel"><div class="panel-head"><div><b>Independent artwork layers</b><p class="hint">Add up to 12 separate images. Each layer keeps its own position, size, opacity and rotation.</p></div></div><div class="control-grid"><label>Layer type<select id="artworkLayerTarget"><option value="artwork">Artwork</option><option value="text-decoration">Text decoration</option></select></label><button class="btn small primary" type="button" id="addArtworkLayerBtn">＋ Add image layer</button><input id="artworkLayerInput" type="file" accept="image/*" hidden></div><p class="hint" id="artworkLayerStatus">Stored locally on this device. Maximum 12 layers, 20 MB each.</p><div id="artworkLayerList" class="artwork-layer-list"></div></div>
     </section>
     <section class="panel" id="captionPanel">
       <div class="panel-head"><div><div class="eyebrow">04 / LYRICS & POETRY</div><h2>Auto lyrics studio</h2></div><span class="tag">TikTok-style text</span></div>
@@ -102,6 +103,6 @@
 <script src="audio-engine.js"></script><script src="bpm-engine.js"></script><script src="lyrics-engine.js"></script><script src="export.js"></script><script src="filter-studio.js"></script><script src="typography-studio.js"></script><script src="timeline-engine.js"></script><script src="timeline-view.js"></script><script src="history-engine.js"></script><script src="keyframe-engine.js"></script>
 <script src="chroma-key.js"></script><script src="ai-segmentation.js"></script><script src="audio-cleanup.js"></script><script src="voice-recorder.js"></script><script src="symbol-library.js"></script><script src="three-studio.js"></script>
 <script src="video-audio-extractor.js"></script>
-<script src="sound-library.js"></script>
+<script src="sound-library.js"></script><script src="artwork-layers.js"></script>
 <script src="app.js"></script><script src="project-file.js"></script><script src="image-search.js"></script>
 </body></html>
