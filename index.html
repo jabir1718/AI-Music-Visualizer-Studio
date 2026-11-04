@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090d17">
+<title>WaveForge — Music Visualizer Studio</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app-shell">
+<header class="topbar">
+  <a class="brand" href="#"><span class="brand-mark">W</span><span>WAVEFORGE<small> MUSIC VISUALIZER STUDIO</small></span></a>
+  <div class="top-actions"><span class="save-state" id="saveState">● Ready</span><button class="btn ghost" id="themeToggle">Light mode</button><button class="btn primary" id="exportBtn">Export video ↗</button></div>
+</header>
+<main class="workspace">
+  <aside class="sidebar">
+    <div class="side-label">PROJECT</div><button class="side-link active">▣ <span>Editor</span></button><button class="side-link" id="openProjectBtn">↗ <span>Open media</span></button>
+    <div class="side-label">WORKSPACE</div><button class="side-link" data-scroll="audioPanel">♫ <span>Audio track</span></button><button class="side-link" data-scroll="visualPanel">◉ <span>Visualizer</span></button><button class="side-link" data-scroll="overlayPanel">T <span>Text & logo</span></button><button class="side-link" data-scroll="captionPanel">▤ <span>Captions</span></button><button class="side-link" data-scroll="riskPanel">ⓘ <span>Copyright check</span></button>
+    <div class="sidebar-note"><span class="live-dot"></span> LOCAL WORKSPACE<small>Your media stays in this browser session.</small></div>
+  </aside>
+  <section class="editor">
+    <div class="section-heading"><div><div class="eyebrow">CREATIVE WORKSPACE / 01</div><h1>Your sound.<br><em>Your visual world.</em></h1></div><div class="project-chip">UNTITLED PROJECT <span>•</span> 9:16</div></div>
+    <div class="stage-wrap">
+      <div class="stage" id="stage">
+        <video id="backgroundVideo" class="media-bg hidden" muted loop playsinline></video><img id="backgroundImage" class="media-bg hidden" alt="Selected background">
+        <div class="stage-shade"></div><canvas id="visualizer" width="720" height="1280"></canvas>
+        <div class="stage-copy" id="stageCopy"><span class="stage-kicker">NOW PLAYING</span><strong id="previewTitle">YOUR TRACK</strong><span class="stage-sub" id="previewSubtitle">Create something unforgettable</span></div>
+        <div class="stage-logo" id="stageLogo"></div>
+        <div class="stage-caption" id="stageCaption"></div>
+        <div class="stage-watermark">WAVEFORGE</div>
+      </div>
+      <div class="stage-toolbar"><span><i class="live-dot"></i> LIVE PREVIEW</span><div class="ratio-control"><button class="ratio active" data-ratio="9:16">9:16</button><button class="ratio" data-ratio="16:9">16:9</button><button class="ratio" data-ratio="1:1">1:1</button></div><span id="resolutionLabel">1080 × 1920</span></div>
+    </div>
+    <section class="panel" id="audioPanel">
+      <div class="panel-head"><div><div class="eyebrow">01 / SOUND SOURCE</div><h2>Audio track</h2></div><button class="btn small" id="audioPickBtn">＋ Add MP3</button></div>
+      <label class="dropzone" id="audioDrop"><input type="file" id="audioInput" accept="audio/*" hidden><span class="drop-icon">♫</span><span><b>Drop your audio here</b><small>MP3, WAV, M4A, OGG · Local files only</small></span><span class="browse">Browse files</span></label>
+      <div class="track-row"><div class="track-art">♫</div><div class="track-info"><b id="trackName">No track selected</b><small id="trackMeta">Add an audio file to begin</small></div><button class="icon-btn" id="playBtn" aria-label="Play">▶</button><span class="time" id="timeLabel">00:00 / 00:00</span></div>
+      <input class="scrubber" id="seekBar" type="range" min="0" max="1000" value="0">
+      <div class="audio-controls"><label>Volume <input id="volume" type="range" min="0" max="1" step=".01" value=".85"></label><label>Fade in <input id="fadeIn" type="range" min="0" max="10" step=".5" value="0"><span id="fadeInValue">0s</span></label><label>Fade out <input id="fadeOut" type="range" min="0" max="10" step=".5" value="0"><span id="fadeOutValue">0s</span></label></div>
+      <audio id="audio" crossorigin="anonymous"></audio>
+    </section>
+    <section class="panel" id="visualPanel">
+      <div class="panel-head"><div><div class="eyebrow">02 / MOTION ENGINE</div><h2>Visualizer style</h2></div><span class="subtle">Beat reactive</span></div>
+      <div class="style-grid"><button class="style-card selected" data-style="bars"><span class="style-preview bars-preview">▂▅▇▃▆</span><b>Equalizer bars</b></button><button class="style-card" data-style="wave"><span class="style-preview wave-preview">〰</span><b>Waveform</b></button><button class="style-card" data-style="circle"><span class="style-preview circle-preview">◎</span><b>Circle</b></button><button class="style-card" data-style="neon"><span class="style-preview neon-preview">✳</span><b>Neon pulse</b></button></div>
+      <div class="control-grid"><label>Color theme<select id="visualColor"><option value="aurora">Aurora</option><option value="sunset">Sunset</option><option value="ice">Ice blue</option><option value="mono">Monochrome</option></select></label><label>Intensity <input id="intensity" type="range" min="1" max="100" value="65"></label><label>Beat sensitivity <input id="sensitivity" type="range" min="1" max="100" value="55"></label></div>
+      <p class="hint" id="beatStatus">Beat sync analyzes audio energy locally while playing. It is an estimate, not a studio-grade beat map.</p>
+    </section>
+    <section class="panel" id="overlayPanel">
+      <div class="panel-head"><div><div class="eyebrow">03 / BRAND & TYPE</div><h2>Text and logo</h2></div></div>
+      <div class="control-grid"><label>Title<input id="titleInput" type="text" maxlength="60" placeholder="Your track title" value="YOUR TRACK"></label><label>Subtitle<input id="subtitleInput" type="text" maxlength="90" placeholder="Artist or tagline" value="Create something unforgettable"></label></div>
+      <div class="control-grid"><label>Text color<input id="textColor" type="color" value="#ffffff"></label><label>Font style<select id="fontStyle"><option value="modern">Modern</option><option value="serif">Editorial serif</option><option value="mono">Mono</option></select></label></div>
+      <label class="file-button">＋ Upload PNG logo<input type="file" id="logoInput" accept="image/png" hidden></label><button class="btn text-btn" id="clearLogo">Remove logo</button>
+    </section>
+    <section class="panel" id="captionPanel">
+      <div class="panel-head"><div><div class="eyebrow">04 / WORDS ON BEAT</div><h2>Captions</h2></div><span class="tag">Caption tools</span></div>
+      <label>Caption text<textarea id="captionInput" rows="2" placeholder="Type a lyric or caption to show in the preview..."></textarea></label>
+      <div class="inline-actions"><label class="file-button">Import .SRT captions<input id="srtInput" type="file" accept=".srt,.vtt,text/vtt" hidden></label><span class="hint">Automatic AI transcription needs a speech-to-text model/service; this starter supports manual captions and subtitle import.</span></div>
+    </section>
+    <section class="panel" id="riskPanel">
+      <div class="panel-head"><div><div class="eyebrow">05 / RELEASE CHECK</div><h2>Copyright risk estimate</h2></div></div>
+      <p class="hint">This is a local checklist only. It cannot identify copyrighted audio or guarantee that a track is safe to publish.</p>
+      <label class="check-row"><input type="checkbox" id="ownAudio"> I created this audio or have permission to use it</label><label class="check-row"><input type="checkbox" id="licensedVisuals"> I own or have permission for all visual media</label><button class="btn small" id="riskCheck">Run checklist</button><div id="riskResult" class="risk-result">Not checked yet</div>
+    </section>
+  </section>
+  <aside class="inspector">
+    <div class="inspector-head"><div class="eyebrow">OUTPUT SETTINGS</div><h2>Export</h2></div>
+    <label>Canvas format<select id="exportRatio"><option value="9:16">TikTok / Reels · 9:16</option><option value="16:9">YouTube · 16:9</option><option value="1:1">Square · 1:1</option></select></label>
+    <label>Quality<select id="quality"><option value="1080">1080p · Full HD</option><option value="720">720p · HD</option></select></label>
+    <label>Frame rate<select id="fps"><option value="30">30 FPS</option><option value="24">24 FPS</option><option value="60">60 FPS (device permitting)</option></select></label>
+    <div class="export-note"><b>Export format</b><p id="formatNote">The browser will use MP4 when supported; otherwise it will offer WebM.</p></div>
+    <button class="btn primary full" id="exportBtnSide">Export video ↗</button><div id="exportStatus" class="export-status">Ready when you are.</div>
+    <div class="inspector-divider"></div><div class="eyebrow">PROJECT NOTES</div><ul class="notes"><li>Autosaves editor settings in this browser.</li><li>Media files are not uploaded to a server.</li><li>High resolutions depend on device memory and browser codecs.</li></ul>
+    <div class="version">WAVEFORGE STUDIO <span>VERSION 1.0 · FOUNDATION</span></div>
+  </aside>
+</main>
+</div>
+<script src="audio-engine.js"></script><script src="export.js"></script><script src="app.js"></script>
+</body></html>
