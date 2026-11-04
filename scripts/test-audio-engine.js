@@ -30,7 +30,8 @@ const mainAudio = { volume: .85, currentTime: 2, duration: 30, playbackRate: 1 }
   const engine = new Engine(mainAudio);
   await engine.connect();
   assert.ok(engine.mainSoloGain, 'main solo gain node must be initialized');
-  assert.ok(engine.gain.connections.includes(engine.mainSoloGain), 'master gain must route through solo gain');
+  assert.ok(engine.mainPanner.connections.includes(engine.mainSoloGain), 'main effects chain must route through solo gain');
+  assert.ok(engine.gain.connections.includes(engine.mainLow), 'master gain must feed the main EQ chain');
   assert.equal(mainAudio.volume, 1, 'element volume must not double-attenuate master gain');
   engine.setMainSoloMute(true);
   assert.equal(engine.mainSoloGain.gain.value, 0, 'solo must mute original background track');
