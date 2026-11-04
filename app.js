@@ -623,17 +623,42 @@ function loadLogoFile(file){
   img.src=logoUrl;
  });
 }
-function initSymbolLibrary(){if(window.WaveForgeSymbols)window.WaveForgeSymbols.mount($('overlayPanel'),{onLogo:loadLogoFile});}
+function initSymbolLibrary(){if(window.WaveForgeSymbols)window.WaveForgeSymbols.mount($('overlayPanel'),{onLogo:loadLogoFile,onImport:(file,target)=>window.WaveForgeAssetBridge.importFile(file,target)});}
 function initThreeStudio(){if(window.WaveForge3D)window.WaveForge3D.mount($('overlayPanel'),{onLogo:loadLogoFile,onChange:saveSettings});}
  $('logoInput').onchange=e=>loadLogoFile(e.target.files[0]).catch(error=>setStatus(error.message));
 $('clearLogo').onclick=()=>{$('stageLogo').innerHTML='';if(logoUrl)URL.revokeObjectURL(logoUrl);logoUrl=null;logoImage=null;deleteMediaAsset('logo');saveSettings();};
-$('mediaInput').onchange=e=>{
- const f=e.target.files[0];if(!f)return;if(!f.type.startsWith('image/')&&!f.type.startsWith('video/')){alert('Choose an image or video file.');return;}
- if(mediaUrl)URL.revokeObjectURL(mediaUrl);mediaUrl=URL.createObjectURL(f);saveMediaAsset('background',f);
- const img=$('backgroundImage'),vid=$('backgroundVideo');img.classList.add('hidden');vid.classList.add('hidden');vid.pause();vid.removeAttribute('src');img.removeAttribute('src');
- if(f.type.startsWith('image/')){mediaKind='image';img.onload=()=>{$('mediaStatus').textContent='Photo ready · '+f.name;};img.onerror=()=>{$('mediaStatus').textContent='Could not load this photo.';};img.src=mediaUrl;img.classList.remove('hidden');}
- else{mediaKind='video';vid.muted=true;vid.loop=true;vid.playsInline=true;vid.onloadeddata=()=>{$('mediaStatus').textContent='Video ready · '+f.name;vid.play().catch(()=>{});};vid.src=mediaUrl;vid.classList.remove('hidden');}
+function setBackgroundFile(f){
+ return new Promise((resolve,reject)=>{
+  if(!f||(!f.type.startsWith('image/')&&!f.type.startsWith('video/'))){reject(new Error('Choose a supported image or video file.'));return;}
+  if(mediaUrl)URL.revokeObjectURL(mediaUrl);
+  mediaUrl=URL.createObjectURL(f);saveMediaAsset('background',f);
+  const img=$('backgroundImage'),vid=$('backgroundVideo');
+  img.classList.add('hidden');vid.classList.add('hidden');vid.pause();vid.removeAttribute('src');img.removeAttribute('src');
+  if(f.type.startsWith('image/')){
+   mediaKind='image';img.onload=()=>{$('mediaStatus').textContent='Photo ready · '+f.name;resolve(true);};
+   img.onerror=()=>{const error=new Error('Could not load this photo.');$('mediaStatus').textContent=error.message;reject(error);};
+   img.src=mediaUrl;img.classList.remove('hidden');
+  }else{
+   mediaKind='video';vid.muted=true;vid.loop=true;vid.playsInline=true;
+   vid.onloadeddata=()=>{$('mediaStatus').textContent='Video ready · '+f.name;vid.play().catch(()=>{});resolve(true);};
+   vid.onerror=()=>reject(new Error('Could not load this video.'));
+   vid.src=mediaUrl;vid.classList.remove('hidden');
+  }
+ });
+}
+window.WaveForgeAssetBridge={
+ async importFile(file,target='artwork'){
+  if(target==='background')return setBackgroundFile(file);
+  await loadLogoFile(file);
+  if(target==='text-decoration'){positions.logo={x:.5,y:.34};objectSettings.logo.scale=.65;}
+  else if(target==='artwork'){positions.logo={x:.5,y:.55};objectSettings.logo.scale=.9;}
+  else{positions.logo={x:.82,y:.08};objectSettings.logo.scale=1;}
+  selectedObject='logo';
+  const select=$('objectSelect');if(select){select.value='logo';select.dispatchEvent(new Event('change'));}
+  updateSelectionOverlay();saveSettings();return true;
+ }
 };
+$('mediaInput').onchange=e=>{const f=e.target.files[0];if(f)setBackgroundFile(f).catch(error=>{setStatus(error.message);$('mediaStatus').textContent=error.message;});};
 $('clearMedia').onclick=()=>{if(mediaUrl)URL.revokeObjectURL(mediaUrl);deleteMediaAsset('background');mediaUrl=null;mediaKind='';$('backgroundImage').removeAttribute('src');$('backgroundVideo').pause();$('backgroundVideo').removeAttribute('src');$('backgroundImage').classList.add('hidden');$('backgroundVideo').classList.add('hidden');$('mediaStatus').textContent='No background selected.';};
 $('srtInput').onchange=async e=>{const f=e.target.files[0];if(f)importSubtitles(await f.text());};
 $('transcribeBtn').onclick=async()=>{
