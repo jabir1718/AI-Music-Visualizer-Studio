@@ -30,6 +30,7 @@ const optimer=studio.normalizeConfig({shape:'text',fontFamily:'optimer_regular'}
 assert.strictEqual(optimer.fontFamily,'optimer_regular');
 assert.strictEqual(studio.normalizeConfig({fontFamily:'not-a-font'}).fontFamily,'helvetiker_bold');
 assert(/threeFont/.test(source)&&/FONT_FAMILIES\.map/.test(source),'3D text font selector is missing');
+assert(/function syncControls\(\)/.test(source)&&/await setShape\(config\.shape\);syncControls\(\)/.test(source),'Saved 3D object controls must be restored into the UI');
 assert(/loadAsync\(FONT_URLS\[selected\]\)/.test(source),'Selected 3D font must be loaded from its own typeface file');
 assert(/TextGeometryClass/.test(source)&&/depth:config\.textDepth/.test(source),'3D text must use extruded TextGeometry depth');
 assert(/loadTextTools/.test(source),'3D font and text addons should load lazily');
