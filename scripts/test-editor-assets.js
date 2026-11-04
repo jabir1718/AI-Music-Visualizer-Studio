@@ -15,7 +15,7 @@ for(const id of ['objectSelect','objectTextValue','objectX','objectY','objectSca
 for(const object of ['title','subtitle','lyric','logo']){
  assert(app.includes(object+':{visible:true,scale:1,rotation:0,opacity:1,color:'));
 }
-assert(/objectSettings,objectKeyframes,manualBpm,tapBeatOffset,filterPreset:/.test(app),'Object settings are not persisted in editor settings');
+assert(/objectSettings,objectKeyframes,manualBpm,tapBeatOffset,beatSubdivision,filterPreset:/.test(app),'Object settings are not persisted in editor settings');
 assert(/d\.objectSettings/.test(app),'Object settings are not restored');
 assert(/titleState\.settings\.visible/.test(app)&&/subtitleState\.settings\.visible/.test(app),'Animated text visibility not applied to canvas');
 assert(/lyricState\.settings\.visible/.test(app)&&/logoState\.settings\.visible/.test(app),'Animated lyric/logo visibility not applied to canvas');
