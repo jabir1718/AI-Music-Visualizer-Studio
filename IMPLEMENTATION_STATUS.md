@@ -128,3 +128,18 @@ Last source audit: 2026-11-05 (after connecting image-search and OpenMoji import
 - Added the same four destinations to the on-demand OpenMoji picker. Selected SVG symbols can be imported as a background, logo, artwork overlay or text-decoration overlay.
 - Artwork and text-decoration currently use the existing independently transformable logo-image object; they are not yet a multi-image layer stack. A later layer-stack implementation is needed to keep multiple artwork assets independently editable at the same time.
 - Added scripts/test-asset-routing.js and included it in npm test. GitHub Actions run #204 passed JavaScript syntax validation, all npm tests and web-asset packaging; Android Gradle build was in progress at the time of this source update. APK artifact upload and physical-device testing must be confirmed separately.
+
+
+## New roadmap requests — 2026-11-05 (planned, not implemented)
+
+### 32. ChatGPT-powered editing assistant
+- User requested an in-app ChatGPT-style assistant that can receive natural-language prompts and help edit the active music/video project.
+- Scope is recorded in ROADMAP.md §32. No ChatGPT/API integration has been implemented or tested yet.
+- Technical integration should use the OpenAI Responses API and explicitly allowed editor functions through a protected backend. OpenAI API keys must never be shipped in the APK, browser JavaScript or public repository. ChatGPT subscription access does not automatically include API usage; API billing is separate.
+- Any proposed edit must be previewed as a structured plan and confirmed before changes are applied. Only actually implemented editor functions may be advertised as executable.
+
+### 33. AI Auto Video Editor
+- User requested social-media-style automatic video editing with music-beat cuts and multiple selectable styles.
+- Scope is recorded in ROADMAP.md §33. No complete multi-clip AI video auto-editor has been implemented or tested yet.
+- Existing BPM detection, beat grid and canvas recording/export are useful foundations, but the current product does not yet provide the complete editable multi-clip video timeline, scene-aware clip selection, automatic beat-cut arrangement, speech-pause editing or style-based montage generation.
+- The future implementation must create a non-destructive editable draft, preserve source media, allow manual refinement, and be tested on real Android devices for memory and export reliability.
