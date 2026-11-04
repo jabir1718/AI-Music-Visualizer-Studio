@@ -2,7 +2,7 @@
 'use strict';
 const BASE='https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@0.1.1675465747/';
 let enabled=false,model=null,loading=null,processing=false,lastResults=null,lastSent=0,status='AI model not loaded',onStatus=()=>{};
-let foreground=null,maskCanvas=null;
+let foreground=null,maskCanvas=null,lastSource=null;
 function setSettings(value){if(value&&typeof value.enabled==='boolean')enabled=value.enabled;return getSettings();}
 function getSettings(){return{enabled};}
 function report(message){status=message;onStatus(message);}
@@ -40,15 +40,15 @@ function ensureCanvases(w,h){
 function draw(ctx,source,x,y,dw,dh,w,h){
  if(!enabled)return false;
  if(!model){if(!loading)loadModel(onStatus).catch(()=>{});return false;}
- const now=Date.now();
- if(!processing&&now-lastSent>100){processing=true;lastSent=now;Promise.resolve(model.send({image:source})).catch(error=>{processing=false;report('AI segmentation frame failed: '+error.message);});}
+ const now=Date.now(),isVideo=String(source.tagName||'').toLowerCase()==='video';
+ if(!processing&&(isVideo?now-lastSent>100:lastSource!==source)){processing=true;lastSent=now;lastSource=source;Promise.resolve(model.send({image:source})).catch(error=>{processing=false;report('AI segmentation frame failed: '+error.message);});}
  if(!lastResults||!lastResults.segmentationMask||!lastResults.image)return false;
  const c=ensureCanvases(w,h),sx=c.scale;
  c.fg.clearRect(0,0,c.width,c.height);c.mask.clearRect(0,0,c.width,c.height);
  c.fg.globalCompositeOperation='source-over';c.fg.drawImage(lastResults.image,x*sx,y*sx,dw*sx,dh*sx);
  c.mask.globalCompositeOperation='source-over';c.mask.filter='blur(1px)';c.mask.drawImage(lastResults.segmentationMask,x*sx,y*sx,dw*sx,dh*sx);c.mask.filter='none';
  c.fg.globalCompositeOperation='destination-in';c.fg.drawImage(maskCanvas,0,0);c.fg.globalCompositeOperation='source-over';
- ctx.drawImage(foreground,0,0,w,h);return true;
+ if(root.WaveForgeFilters)root.WaveForgeFilters.draw(ctx,foreground,0,0,w,h);else ctx.drawImage(foreground,0,0,w,h);return true;
 }
 function mount(host,onChange){
  if(!host||root.document.getElementById('aiSegmentationPanel'))return;
