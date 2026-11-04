@@ -21,7 +21,7 @@ Last source audit: 2026-11-04 (after editable object layers, media persistence, 
 | 6 | YouTube video/effect workflow | Not started | No authorized YouTube provider integration or in-app clip workflow. |
 | 7 | Green-screen and background removal | Not started | No chroma-key/background-removal engine. |
 | 8 | PNG logo and artwork studio | Partial | PNG import and overlay exist. Full object transforms, masks, 3D depth, animation and beat sync remain. |
-| 9 | Universal media import and audio extraction | Partial | Local audio import and photo/video backgrounds exist. Video-to-audio extraction and broader codec validation remain. |
+| 9 | Universal media import and audio extraction | Partial | Added a local video-to-audio extractor using Web Audio capture and audio-only MediaRecorder output, with progress/cancel, download, use-as-main-track and add-as-layer actions. Browser codec support, real video files and Android device playback need verification. More codecs and direct extraction fallback remain. |
 | 10 | Voice changer and voice-style presets | Not started | No verified voice-character DSP/model suite. |
 | 11 | Finger gestures, shapes and layer transforms | Partial | Touch-drag positioning exists for selected text/logo targets. Resize/rotate handles, shape masks, locking and full layer transforms remain. |
 | 12 | Direct canvas editing and selection | Partial | Some canvas dragging exists. Tap-to-select for every object, selection bounds, contextual editing and multi-select remain. |
@@ -76,3 +76,5 @@ Last source audit: 2026-11-04 (after editable object layers, media persistence, 
 - Keep every unimplemented item visible in this tracker until implementation and tests support changing its status.
 
 - Added a dedicated background-music effect chain in `audio-engine.js`: independent bass/treble shelving EQ, stereo pan, echo feedback, convolution reverb and a controllable WaveShaper distortion node. Controls are in the Music Studio and do not alter imported mixer layers. Values persist in local settings and portable project files. Mocked Web Audio tests verify each effect node and setter; device sound quality still needs listening tests.
+
+- Added a local video-to-audio extraction tool in `video-audio-extractor.js`. It captures the video's audio through Web Audio and MediaRecorder, shows extraction progress, supports cancellation, and offers the resulting audio as the main track, a mixer layer or a download. It runs in real time and is limited to 500 MB / 60 minutes; audio-only WebM/Opus or Ogg availability depends on the device browser. CI tests cover codec selection, file validation and output naming; actual device extraction still needs testing.
