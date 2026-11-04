@@ -11,8 +11,8 @@ function init(){
  const stage=editor.querySelector('.stage-wrap');
  if(stage&&stage.nextSibling)editor.insertBefore(dock,stage.nextSibling);else editor.append(dock);
  const entries=[
-  ['audioPanel','🎵','Music'],['visualPanel','◉','Visuals'],['overlayPanel','✎','Text & Art'],
-  ['captionPanel','字幕','Lyrics'],['autoVideoPanel','✂','Auto Cut'],['offlineEditPanel','✦','Assistant'],['wfExportPanel','↗','Export'],['riskPanel','✓','More']
+  ['audioPanel','🎵','Music & Audio'],['visualPanel','◉','Visuals & 3D'],['overlayPanel','✎','Text & Art'],
+  ['captionPanel','字幕','Lyrics'],['autoVideoPanel','✂','Auto Cut'],['offlineEditPanel','✦','AI Assistant'],['wfExportPanel','↗','Export'],['riskPanel','☰','More Tools']
  ];
  const byId=new Map(panels.map(p=>[p.id,p]));
  const used=new Set();
@@ -23,7 +23,7 @@ function init(){
  entries.forEach(([id,icon,label])=>{
   let panel=id==='wfExportPanel'?null:byId.get(id);if(!panel)return;
   used.add(id);content.append(panel);
-  const b=document.createElement('button');b.type='button';b.className='wf-tool-tab';b.dataset.panel=id;b.innerHTML='<span class="wf-tab-icon" aria-hidden="true">'+icon+'</span><span>'+label+'</span>';b.addEventListener('click',()=>activate(id));nav.append(b);
+  const b=document.createElement('button');b.type='button';b.className='wf-tool-tab';b.dataset.panel=id;b.setAttribute('aria-label',label);b.title=label;b.innerHTML='<span class="wf-tab-icon" aria-hidden="true">'+icon+'</span><span>'+label+'</span>';b.addEventListener('click',()=>activate(id));nav.append(b);
  });
  if(inspector){
   const exportPanel=document.createElement('section');exportPanel.id='wfExportPanel';exportPanel.className='panel wf-export-panel';
