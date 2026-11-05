@@ -11,7 +11,7 @@ const FONT_URLS={
  droid_serif_bold:'https://cdn.jsdelivr.net/npm/three@0.187.0/examples/fonts/droid/droid_serif_bold.typeface.json'
 };
 const FONT_FAMILIES=Object.keys(FONT_URLS);
-const SHAPES=['box','sphere','torus','torus-knot','cone','cylinder','octahedron','dodecahedron','icosahedron','tetrahedron','text'];
+const SHAPES=['box','sphere','torus','ring','torus-knot','cone','cylinder','capsule','prism','crystal','gem','star','octahedron','dodecahedron','icosahedron','tetrahedron','text'];
 const DEFAULTS={shape:'torus-knot',color:'#57d8ff',scale:1,rotationX:0,rotationY:0,rotationZ:0,positionX:0,positionY:0,positionZ:0,text:'WAVEFORGE',textDepth:.16,fontFamily:'helvetiker_bold',metalness:.65,roughness:.25,light:1.35,autoRotate:true,overlayEnabled:false,overlayScale:.55,overlayX:.5,overlayY:.55};
 let THREE=null,loading=null,FontLoaderClass=null,TextGeometryClass=null,loadedFonts=new Map(),textToolsLoading=null,fontLoads=new Map(),activeConfig=normalizeConfig(),activeRenderer=null,activeScene=null,activeCamera=null,activeMesh=null;
 function normalizeConfig(input={}){
@@ -62,8 +62,14 @@ function geometry(T,shape){
   case'box':return new T.BoxGeometry(1.45,1.45,1.45,2,2,2);
   case'sphere':return new T.SphereGeometry(1,48,32);
   case'torus':return new T.TorusGeometry(.78,.28,24,72);
+  case'ring':return new T.TorusGeometry(.88,.12,28,96);
   case'cone':return new T.ConeGeometry(.9,1.8,56,2);
   case'cylinder':return new T.CylinderGeometry(.72,.72,1.55,56,2);
+  case'capsule':return new T.CapsuleGeometry(.55,.85,8,32);
+  case'prism':return new T.CylinderGeometry(0,1.05,1.8,6,1);
+  case'crystal':return new T.OctahedronGeometry(1.12,2);
+  case'gem':return new T.IcosahedronGeometry(1.08,1);
+  case'star':{const star=new T.Shape();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,r=i%2?.43:1,x=Math.cos(a)*r,y=Math.sin(a)*r;i?star.lineTo(x,y):star.moveTo(x,y);}star.closePath();const g=new T.ExtrudeGeometry(star,{depth:.28,bevelEnabled:true,bevelThickness:.06,bevelSize:.05,bevelSegments:3,curveSegments:12});g.computeBoundingBox();const center=g.boundingBox.getCenter(new T.Vector3());g.translate(-center.x,-center.y,-center.z);return g;}
   case'octahedron':return new T.OctahedronGeometry(1.15,1);
   case'dodecahedron':return new T.DodecahedronGeometry(1.05,1);
   case'icosahedron':return new T.IcosahedronGeometry(1.05,1);
