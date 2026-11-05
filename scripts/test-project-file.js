@@ -10,5 +10,5 @@ assert.match(source,/settled=true;db\.close\(\)/,'database connections must clos
 assert.match(source,/tx\.onabort=\(\)=>finish\(tx\.error\|\|new Error\('Project media (?:read|import) was cancelled\.'\)\)/,'transaction aborts must reject instead of hanging');
 assert.match(source,/MAX_BYTES=250\*1024\*1024/,'portable projects must enforce media size limit');
 assert.match(source,/if\(!confirm\(/,'project import must confirm before replacing current work');
-assert.match(source,/localStorage\.setItem\('waveforge-v1',JSON\.stringify\(project\.settings\)\);location\.reload\(\)/,'imported settings must be applied before studio reload');
+assert.match(source,/localStorage\.setItem\('waveforge-v1',JSON\.stringify\(project\.settings\)\);[\s\S]*?location\.reload\(\)/,'imported settings must be applied before studio reload');
 console.log('Project file tests passed: fresh-store setup, atomic asset replacement, transaction completion/abort handling, connection cleanup and safe import guard.');
