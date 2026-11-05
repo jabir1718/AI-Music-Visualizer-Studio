@@ -8,6 +8,7 @@ on:
       - 'index.html'
       - 'style.css'
       - 'professional-studio.css'
+      - 'dashboard.css'
       - 'studio-shell.js'
       - 'option-preview.js'
       - 'app.js'
