@@ -1,0 +1,18 @@
+'use strict';
+const assert=require('assert');
+const fs=require('fs');
+const html=fs.readFileSync('index.html','utf8');
+const shell=fs.readFileSync('studio-shell.js','utf8');
+const css=fs.readFileSync('dashboard.css','utf8');
+const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
+assert(html.includes('href="dashboard.css"'),'dashboard.css is linked');
+assert(html.indexOf('dashboard.css')>html.indexOf('professional-studio.css'),'dashboard.css loads last');
+assert(!/:scope/.test(shell),'studio-shell.js contains no :scope selector');
+assert(shell.includes('editor.children'),'panels are discovered from direct editor children');
+assert(shell.includes('TOOLBOXES[9]'),'settings and project route to valid tenth toolbox');
+assert(shell.includes('wf-subbox-grid'),'nested level-two toolbox is present');
+assert(shell.includes('waveforge:video-timeline-change'),'dashboard listens for live clip updates');
+for(const id of ['audioPanel','visualPanel','overlayPanel','captionPanel','autoVideoPanel','riskPanel'])assert(html.includes('id="'+id+'"'),'existing panel '+id+' remains in HTML');
+for(const file of ['index.html','style.css','professional-studio.css','dashboard.css','studio-shell.js'])assert(fs.existsSync(file),'source asset exists: '+file);
+assert(pkg.scripts.test.includes('test-dashboard.js'),'dashboard regression test is in npm test');
+console.log('Dashboard shell regression checks passed.');
