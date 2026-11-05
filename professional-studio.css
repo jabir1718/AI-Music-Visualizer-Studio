@@ -96,3 +96,76 @@ body.wf-dashboard-app .wf-mini-clip img{display:block;width:100%;height:100%;obj
 body.wf-dashboard-app .wf-mini-clip-glyph{display:grid;place-items:center;width:100%;height:100%;color:#70eaff;background:linear-gradient(140deg,#172a56,#10122c);font-size:20px}
 body.wf-dashboard-app .wf-mini-clip small{position:absolute;left:0;right:0;bottom:0;padding:3px 4px;background:#050817c9;color:#eaf3ff;font-size:8px;text-align:left}
 body.wf-dashboard-app .wf-mini-clip:focus-visible{outline:2px solid #61eaff;outline-offset:2px}
+
+
+/* Neon Motion mobile editing layout — 2026 refresh */
+:root{--nm-cyan:#31eaff;--nm-violet:#a855f7;--nm-pink:#ff4fd8;--nm-lime:#a3ff63;--nm-bg:#050713}
+body.wf-dashboard-app{background:radial-gradient(ellipse at 50% -20%,#1a1d49 0,#090c1b 48%,#03050c 100%);color:#f5f7ff}
+body.wf-dashboard-app .topbar{height:58px;background:linear-gradient(100deg,#080b19f5,#171033f5,#071321f5);border-bottom:1px solid #3a4e7b;box-shadow:0 5px 25px #0008}
+body.wf-dashboard-app .brand-mark{background:linear-gradient(135deg,var(--nm-cyan),#8a5bff 55%,var(--nm-pink));color:#07101b;box-shadow:0 0 18px #35dfff77}
+body.wf-dashboard-app .btn.primary{background:linear-gradient(110deg,#7b35e9,#c13ce8 55%,#167dd9);border-color:#ba6cff;color:#fff}
+body.wf-dashboard-app .workspace{display:block!important;height:calc(100dvh - 58px)!important;min-height:0;overflow:hidden}
+body.wf-dashboard-app .sidebar,body.wf-dashboard-app .inspector{display:none!important}
+body.wf-dashboard-app .editor{width:100%;max-width:1120px;height:calc(100dvh - 58px)!important;margin:0 auto;overflow:hidden!important;padding:8px 10px calc(70px + env(safe-area-inset-bottom))!important}
+body.wf-dashboard-app .wf-dashboard{display:flex!important;flex-direction:column;gap:8px;height:100%;min-height:0;overflow:hidden}
+body.wf-dashboard-app .wf-hero{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 10px;border-radius:17px;background:linear-gradient(145deg,#121a36f5,#080d1ef5 70%,#160d2b);border:1px solid #40588b;box-shadow:inset 0 1px #ffffff18,0 8px 24px #0007}
+body.wf-dashboard-app .wf-hero-top{width:100%;display:flex;justify-content:space-between;align-items:center}
+body.wf-dashboard-app .wf-hero-top strong{font-size:14px}
+body.wf-dashboard-app .wf-project-badge{font-size:8px}
+body.wf-dashboard-app .wf-hero .stage-wrap{width:auto;max-width:100%;margin:0 auto;display:flex;flex-direction:column;align-items:center}
+body.wf-dashboard-app .wf-hero .stage{width:auto!important;height:clamp(154px,29dvh,270px)!important;min-height:154px!important;max-height:270px!important;aspect-ratio:9/16!important;border-radius:13px;border:1px solid #3a9fce;box-shadow:0 0 0 1px #a855f744,0 0 25px #1bcfff55}
+body.wf-dashboard-app .wf-hero .stage-toolbar{width:min(100%,360px);gap:8px;padding:5px 2px;font-size:8px}
+body.wf-dashboard-app .wf-hero .media-tools{display:flex!important;flex-wrap:wrap;justify-content:center;gap:6px;width:100%}
+body.wf-dashboard-app .wf-hero .media-tools .hint{display:none}
+body.wf-dashboard-app .wf-hero .drag-hint{display:none}
+body.wf-dashboard-app .wf-project-info{width:100%;display:flex;justify-content:space-around;gap:7px;margin:0;padding:5px 0 0;border-top:1px solid #29395f}
+body.wf-dashboard-app .wf-project-info span{flex:1;text-align:center;background:linear-gradient(145deg,#131e3b,#090f22);border:1px solid #2b416e;border-radius:9px;padding:5px}
+body.wf-dashboard-app .wf-project-info b{font-size:12px}
+body.wf-dashboard-app .wf-project-info small{font-size:7px}
+body.wf-dashboard-app .wf-timeline{flex:0 0 auto;min-height:0;padding:8px 9px;display:grid;gap:7px;border-radius:16px;background:linear-gradient(145deg,#101a34,#080d1d);border:1px solid #354a78}
+body.wf-dashboard-app .wf-timeline-head{display:flex;align-items:center;justify-content:space-between;margin:0}
+body.wf-dashboard-app .wf-timeline-head b{font-size:11px}
+body.wf-dashboard-app .wf-transport{display:flex;align-items:center;gap:9px;padding:5px 7px;border:1px solid #7650bb;border-radius:12px;background:linear-gradient(90deg,#0a1023,#1b1034,#091528);box-shadow:0 0 12px #a855f733}
+body.wf-dashboard-app .wf-transport button{width:27px;height:27px;border-radius:50%;border:1px solid #3d6290;background:#142344;color:#fff}
+body.wf-dashboard-app .wf-transport button[data-transport=play]{width:34px;height:34px;background:linear-gradient(145deg,#ec48d4,#7439dc 60%,#167ed4);border-color:#f08bff;box-shadow:0 0 15px #d94eff88}
+body.wf-dashboard-app .wf-time-readout{font-size:11px;color:#63eaff;font-weight:800;font-variant-numeric:tabular-nums}
+body.wf-dashboard-app .wf-clip-lane{min-height:42px}
+body.wf-dashboard-app .wf-add-clip{flex-basis:58px;min-height:42px}
+body.wf-dashboard-app .wf-clip-placeholder{min-height:42px;border-color:#6550a4;background:linear-gradient(90deg,#151b43,#251044,#0b2340)}
+body.wf-dashboard-app .wf-audio-lane{min-height:37px;padding:5px 8px;border:1px solid #3d9cbb;border-radius:10px;background:linear-gradient(90deg,#0d2740,#101335,#24103a)}
+body.wf-dashboard-app .wf-waveform{height:24px;background:repeating-linear-gradient(90deg,#30eaff 0 2px,transparent 2px 5px);filter:drop-shadow(0 0 4px #24cfff)}
+body.wf-dashboard-app .wf-tools-section{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:8px 9px;border-radius:16px;background:linear-gradient(145deg,#101a34,#080d1d);border:1px solid #354a78}
+body.wf-dashboard-app .wf-section-title{position:sticky;top:0;z-index:2;padding:2px 0 7px;background:#101a34}
+body.wf-dashboard-app .wf-section-title b{font-size:12px}
+body.wf-dashboard-app .wf-tool-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:3px}
+body.wf-dashboard-app .wf-tool-card{min-height:clamp(51px,8dvh,69px);padding:6px 3px;border-radius:12px;background:linear-gradient(150deg,#1b2a50,#10152e 55%,#090e20);border:1px solid #3b568c;box-shadow:inset 0 1px #ffffff20,0 3px 0 #030610,0 0 10px #2b72ad22}
+body.wf-dashboard-app .wf-tool-card:nth-child(3n+1){border-color:#9652c9}
+body.wf-dashboard-app .wf-tool-card:nth-child(3n+2){border-color:#278fb9}
+body.wf-dashboard-app .wf-tool-card-icon{font-size:21px;color:#62eaff}
+body.wf-dashboard-app .wf-tool-card b{font-size:8px;line-height:1.15;text-align:center}
+body.wf-dashboard-app .wf-tool-card small{display:none}
+body.wf-dashboard-app .wf-bottom-dock{height:57px;left:8px;right:8px;bottom:calc(5px + env(safe-area-inset-bottom));border-radius:17px;background:linear-gradient(100deg,#090d22f7,#171033f7,#07172bf7);border:1px solid #477cb2;box-shadow:0 0 22px #8b35dc44,inset 0 1px #ffffff2b}
+body.wf-dashboard-app .wf-bottom-dock button span{color:#62eaff}
+body.wf-dashboard-app .wf-bottom-dock .wf-dock-play{width:49px;height:49px;border:2px solid #64eaff;background:radial-gradient(circle at 40% 30%,#ff8cff,#c13ae8 38%,#263dd0 70%,#081027 74%);box-shadow:0 0 12px #e53eff,0 0 23px #24dfff}
+body.wf-dashboard-app .wf-tool-modal{inset:58px 0 0}
+body.wf-dashboard-app .wf-modal-sheet{background:linear-gradient(145deg,#131d3b,#090f24 62%,#180d32);border-color:#4c6eaa}
+body.wf-dashboard-app .wf-modal-tabs button.active{background:linear-gradient(110deg,#782bd0,#155d9e);border-color:#60eaff}
+body.wf-dashboard-app .wf-modal-content>.panel{background:linear-gradient(145deg,#111b35,#080f22);border-color:#36517f}
+@media(min-width:700px){
+ body.wf-dashboard-app .editor{padding-left:18px!important;padding-right:18px!important}
+ body.wf-dashboard-app .wf-dashboard{display:grid!important;grid-template-columns:minmax(280px,.85fr) minmax(420px,1.15fr);grid-template-rows:auto minmax(0,1fr);align-content:stretch}
+ body.wf-dashboard-app .wf-hero{grid-column:1;grid-row:1/3;justify-content:center}
+ body.wf-dashboard-app .wf-hero .stage{height:min(52dvh,560px)!important}
+ body.wf-dashboard-app .wf-timeline{grid-column:2;grid-row:1}
+ body.wf-dashboard-app .wf-tools-section{grid-column:2;grid-row:2}
+ body.wf-dashboard-app .wf-tool-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media(max-width:390px){
+ body.wf-dashboard-app .editor{padding-left:6px!important;padding-right:6px!important}
+ body.wf-dashboard-app .wf-hero{padding:6px}
+ body.wf-dashboard-app .wf-hero .stage{height:clamp(145px,25dvh,220px)!important;min-height:145px!important}
+ body.wf-dashboard-app .wf-tool-grid{gap:5px}
+ body.wf-dashboard-app .wf-tool-card{min-height:48px}
+ body.wf-dashboard-app .wf-tool-card b{font-size:7px}
+}
+@media(prefers-reduced-motion:reduce){body.wf-dashboard-app .wf-tool-card{transition:none}}
