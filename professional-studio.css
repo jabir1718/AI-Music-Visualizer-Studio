@@ -169,3 +169,19 @@ body.wf-dashboard-app .wf-modal-content>.panel{background:linear-gradient(145deg
  body.wf-dashboard-app .wf-tool-card b{font-size:7px}
 }
 @media(prefers-reduced-motion:reduce){body.wf-dashboard-app .wf-tool-card{transition:none}}
+
+
+/* Main-screen multi-track timeline lanes */
+body.wf-dashboard-app .wf-timeline #visualTimelineEditor{display:block!important;margin:0;padding:7px 0 0;border:0;border-top:1px solid #2d416b;border-radius:0;background:transparent;box-shadow:none;min-width:0}
+body.wf-dashboard-app .wf-timeline #visualTimelineEditor .wf-timeline-head{display:none}
+body.wf-dashboard-app .wf-timeline #visualTimelineEditor .wf-timeline-scroll{max-height:132px;overflow:auto;border:1px solid #293d68;border-radius:9px;background:#070d1d}
+body.wf-dashboard-app .wf-timeline #visualTimelineEditor .wf-timeline-stage{min-height:78px}
+body.wf-dashboard-app .wf-timeline #visualTimelineEditor .wf-timeline-label{font-size:7px;color:#91b7e8}
+body.wf-dashboard-app .wf-timeline #visualTimelineEditor .wf-timeline-clip{border:1px solid #268db9;background:linear-gradient(100deg,#0c4760,#174b83,#352064);color:#e9f7ff;border-radius:6px;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.wf-dashboard-app .wf-timeline #visualTimelineEditor .wf-video-clip{background:linear-gradient(100deg,#5a246f,#254d9b,#087b91);border-color:#b65bdf}
+body.wf-dashboard-app .wf-timeline #visualTimelineEditor .wf-video-clip.selected{outline:2px solid #6beaff;outline-offset:1px;box-shadow:0 0 12px #45dfff88}
+body.wf-dashboard-app .wf-timeline #visualTimelineEditor .wf-timeline-clip.main{background:linear-gradient(90deg,#07566d,#147d91,#174c76);border-color:#37dfff}
+body.wf-dashboard-app .wf-timeline #visualTimelineEditor .wf-timeline-foot{font-size:7px;color:#91a9d2;padding-top:4px}
+body.wf-dashboard-app .wf-timeline #visualTimelineEditor .wf-timeline-zoom{font-size:7px}
+body.wf-dashboard-app .wf-timeline #visualTimelineEditor .wf-timeline-zoom input{width:80px}
+@media(max-width:700px){body.wf-dashboard-app .wf-timeline #visualTimelineEditor .wf-timeline-scroll{max-height:112px}}
