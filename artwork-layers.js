@@ -42,6 +42,7 @@
   const layer={id,name:file.name||'Artwork layer',type:file.type,url,image:img,x:.5,y:target==='text-decoration'?.34:.55,scale:target==='text-decoration'?.55:.8,opacity:1,rotation:0,visible:true,target};
   layers.push(layer);selected=id;persist();render();bridge.onChange();return true;
  }
+ async function removeSelected(){if(!selected)return false;const layer=layers.find(x=>x.id===selected);if(!layer)return false;layers=layers.filter(x=>x.id!==selected);if(layer.url)URL.revokeObjectURL(layer.url);await bridge.deleteMediaAsset(layer.id);selected=layers[0]?.id||null;persist();render();bridge.onChange();return true;}
  function draw(ctx,w,h){
   layers.forEach(layer=>{if(!layer.visible||!layer.image||!layer.image.complete||!layer.image.naturalWidth)return;
    const maxW=w*.72*layer.scale,maxH=h*.72*layer.scale,ratio=Math.min(maxW/layer.image.naturalWidth,maxH/layer.image.naturalHeight),dw=layer.image.naturalWidth*ratio,dh=layer.image.naturalHeight*ratio;
@@ -60,5 +61,5 @@
   selected=layers[0]?.id||null;render();return layers.length;
  }
  function mount(container,api){host=container;bridge=api;const input=$('#artworkLayerInput'),addBtn=$('#addArtworkLayerBtn');if(addBtn&&input)addBtn.addEventListener('click',()=>input.click());if(input)input.addEventListener('change',async()=>{const file=input.files&&input.files[0];input.value='';if(!file)return;try{await add(file,$('#artworkLayerTarget')?.value||'artwork');}catch(e){const status=$('#artworkLayerStatus');if(status)status.textContent=e.message;}});render();}
- window.WaveForgeArtworkLayers={mount,add,draw,restore,getCount:()=>layers.length,getState:()=>layers.map(({id,name,x,y,scale,opacity,rotation,visible,target})=>({id,name,x,y,scale,opacity,rotation,visible,target}))};
+ window.WaveForgeArtworkLayers={mount,add,draw,restore,getCount:()=>layers.length,removeSelected,getState:()=>layers.map(({id,name,x,y,scale,opacity,rotation,visible,target})=>({id,name,x,y,scale,opacity,rotation,visible,target}))};
 })();
