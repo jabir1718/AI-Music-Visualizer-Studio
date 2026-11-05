@@ -53,6 +53,23 @@ function mount(host,before,options={}){
    const tick=root.document.createElement('span');tick.className='wf-timeline-tick';tick.style.left=(t*pps)+'px';tick.textContent=formatTime(t);ruler.appendChild(tick);
   }
   rows.innerHTML='';
+  const videoSegments=typeof opts.getVideoSegments==='function'?opts.getVideoSegments():[];
+  if(videoSegments.length){
+   const videoRow=root.document.createElement('div');videoRow.className='wf-timeline-row wf-video-row';
+   const videoLabel=root.document.createElement('div');videoLabel.className='wf-timeline-label';videoLabel.textContent='▣ Video / Photo';
+   const videoLane=root.document.createElement('div');videoLane.className='wf-timeline-lane wf-video-lane';videoLane.style.width=width+'px';
+   videoSegments.forEach((segment,index)=>{
+    const clip=root.document.createElement('button');clip.type='button';clip.className='wf-timeline-clip wf-video-clip';
+    const layout=videoSegmentLayout(segment,pps);clip.style.left=layout.left+'px';clip.style.width=Math.max(28,layout.width)+'px';
+    clip.textContent=typeof opts.getVideoLabel==='function'?opts.getVideoLabel(segment,index):'Video '+(index+1);
+    clip.title=clip.textContent+' · Tap to select';
+    const selected=typeof opts.getSelectedVideoSegment==='function'?opts.getSelectedVideoSegment():null;
+    if(selected&&selected===segment.id)clip.classList.add('selected');
+    clip.addEventListener('click',event=>{event.stopPropagation();if(typeof opts.onVideoSelect==='function')opts.onVideoSelect(segment.id);render();});
+    videoLane.appendChild(clip);
+   });
+   videoRow.append(videoLabel,videoLane);rows.appendChild(videoRow);
+  }
   const main=root.document.createElement('div');main.className='wf-timeline-row';
   const mainLabel=root.document.createElement('div');mainLabel.className='wf-timeline-label';mainLabel.textContent='♫ '+(opts.getMainName&&opts.getMainName()||'Background music');
   const mainLane=root.document.createElement('div');mainLane.className='wf-timeline-lane';mainLane.style.width=width+'px';
