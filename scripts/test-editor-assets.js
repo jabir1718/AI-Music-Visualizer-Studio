@@ -29,6 +29,9 @@ assert(/wordSyncMark/.test(index)&&/wordSyncPanel/.test(index),'Word timing cont
 assert(/getMediaAsset\('logo'\)/.test(app)&&/saveMediaAsset\('logo',file\)/.test(app),'Logo media is not restored and persisted');
 assert(/getMediaAsset\('background'\)/.test(app)&&/saveMediaAsset\('background',f\)/.test(app),'Background media is not restored and persisted');
 assert(/await setBackgroundFile\(file\)/.test(app)&&!/new DataTransfer\(\)/.test(app.slice(app.indexOf('async function restoreSavedMedia'),app.indexOf('function captureUndoState'))),'Background restore must call the media loader directly instead of relying on synthetic file-input events');
+assert(/async function restoreAllSavedMedia\(\)[\s\S]*?await restoreSavedMedia\(\)[\s\S]*?await window\.WaveForgeAutoVideo\.restore\(saved\)[\s\S]*?await window\.WaveForgeArtworkLayers\.restore\(\)/.test(app),'Saved media modules must restore sequentially so their startup work cannot race');
+assert(/image\.onload=\(\)=>\{logoImage=image;resolve\(\);\}/.test(app),'Startup must wait for the saved logo image to decode before completing restoration');
+assert(/restoreAllSavedMedia\(\)\.catch\(error=>setStatus\('Project media restore failed: '\+error\.message\)\)/.test(app),'Startup media restoration failures must be surfaced in the project status');
 assert(/deleteMediaAsset\('logo'\)/.test(app)&&/deleteMediaAsset\('background'\)/.test(app),'Clearing media does not remove saved assets');
 assert(/image\/jpeg':'jpg'/.test(images)&&/image\/webp':'webp'/.test(images),'Image import must preserve supported file extensions');
 assert(/commons\.wikimedia\.org\/w\/api\.php/.test(images),'Wikimedia Commons search endpoint missing');
