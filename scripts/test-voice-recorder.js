@@ -24,7 +24,7 @@ assert.throws(()=>addMicrophonePermission('<application />'),/manifest root/);
 
 
 // Exercise the browser recorder lifecycle with a small DOM/MediaRecorder mock.
-const original={document:global.document,navigator:global.navigator,MediaRecorder:global.MediaRecorder,File:global.File};
+const original={document:global.document,navigator:Object.getOwnPropertyDescriptor(global,'navigator'),MediaRecorder:Object.getOwnPropertyDescriptor(global,'MediaRecorder'),File:Object.getOwnPropertyDescriptor(global,'File')};
 class FakeElement{
  constructor(id=''){this.id=id;this.disabled=false;this.hidden=false;this.textContent='';this.children=[];this.handlers={};this.attributes={};this.src='';}
  addEventListener(name,fn){this.handlers[name]=fn;}
@@ -41,9 +41,9 @@ class FakeMediaRecorder{
  stop(){this.state='inactive';if(this.onstop)this.onstop();}
 }
 global.document={createElement:()=>new FakeElement()};
-global.navigator={mediaDevices:{getUserMedia:async()=>({getTracks:()=>[{stop(){}}]})}};
-global.MediaRecorder=FakeMediaRecorder;
-global.File=original.File||class extends Blob{constructor(parts,name,opts={}){super(parts,opts);this.name=name;this.lastModified=opts.lastModified||0;}};
+Object.defineProperty(global,'navigator',{configurable:true,writable:true,value:{mediaDevices:{getUserMedia:async()=>({getTracks:()=>[{stop(){}}]})}}});
+Object.defineProperty(global,'MediaRecorder',{configurable:true,writable:true,value:FakeMediaRecorder});
+Object.defineProperty(global,'File',{configurable:true,writable:true,value:global.File||class extends Blob{constructor(parts,name,opts={}){super(parts,opts);this.name=name;this.lastModified=opts.lastModified||0;}}});
 const wait=()=>new Promise(resolve=>setImmediate(resolve));
 (async()=>{
  const host=new FakeElement(),added=[];
@@ -75,6 +75,6 @@ const wait=()=>new Promise(resolve=>setImmediate(resolve));
  assert.match(errorEl('wfRecordStatus').textContent,/reported an error/,'failed recorder must discard partial data');
  assert.equal(errorEl('wfRecordAdd').disabled,true,'failed take must not be offered as successful audio');
  errorApi.dispose();
- global.document=original.document;global.navigator=original.navigator;global.MediaRecorder=original.MediaRecorder;global.File=original.File;
+ if(original.document===undefined)delete global.document;else global.document=original.document;for(const key of ['navigator','MediaRecorder','File']){if(original[key])Object.defineProperty(global,key,original[key]);else delete global[key];}
  console.log('Voice recorder lifecycle tests passed.');
-})().catch(error=>{global.document=original.document;global.navigator=original.navigator;global.MediaRecorder=original.MediaRecorder;global.File=original.File;console.error(error);process.exitCode=1;});
+})().catch(error=>{if(original.document===undefined)delete global.document;else global.document=original.document;for(const key of ['navigator','MediaRecorder','File']){if(original[key])Object.defineProperty(global,key,original[key]);else delete global[key];}console.error(error);process.exitCode=1;});
