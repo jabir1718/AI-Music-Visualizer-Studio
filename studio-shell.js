@@ -18,7 +18,13 @@ function bindToolButton(button,handler){
 }
 function init(){
  const editor=document.querySelector('.editor'),stageWrap=editor&&editor.querySelector('.stage-wrap');
- if(!editor||!stageWrap||document.getElementById('wfDashboard'))return;
+ if(document.getElementById('wfDashboard'))return;
+ if(!editor||!stageWrap){
+  const reason=!editor?'missing .editor root':'missing .stage-wrap preview';
+  document.documentElement.setAttribute('data-wf-shell-error',reason);
+  console.error('[WaveForge] Dashboard mount skipped:',reason);
+  return;
+ }
  const topbar=document.querySelector('.topbar'),topActions=topbar&&topbar.querySelector('.top-actions');
  if(topActions&&!document.getElementById('wfMenuToggle')){
   const menu=document.createElement('button');menu.type='button';menu.id='wfMenuToggle';menu.className='btn ghost wf-header-icon';menu.textContent='☰';menu.setAttribute('aria-label','Toggle navigation');
