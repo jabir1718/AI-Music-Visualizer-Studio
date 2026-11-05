@@ -3,6 +3,8 @@
  function parsePrompt(prompt,current={}){
   const text=String(prompt||'').trim(),lower=text.toLowerCase(),actions=[],used=new Set();
   const add=(id,label,value)=>{if(!used.has(id)){used.add(id);actions.push({id,label,value});}};
+  const nightDrive=/(?:night[\\s-]*drive|raat\\s*(?:ka|ki)?\\s*safar)/i.test(lower);
+  if(nightDrive){add('autoVideoStyle','Video editing template','cinematic');add('visualColor','Color theme','cyberpunk');}
   const styleRules=[
    [/(?:cinematic|cinema|film look|filmi style)/,'cinematic'],
    [/(?:travel|safar|trip montage)/,'travel'],
@@ -16,7 +18,7 @@
    [/(?:beat snap|social|reels|tiktok|fast social)/,'social']
   ];
   for(const [pattern,value] of styleRules)if(pattern.test(lower)){add('autoVideoStyle','Video editing template',value);break;}
-  const transitionMatch=lower.match(/(?:transition\s*(?:to|as|:|ko)?\s*(cut|fade|flash|wipe|zoom)|\b(fade|flash|wipe|zoom)\s+(?:transition|lagao|apply|rakho))/i);if(transitionMatch)add('autoVideoTransition','Selected clip transition',transitionMatch[1]||transitionMatch[2]);
+  const transitionMatch=lower.match(/(?:\\btransition\\s*(?:(?:ko|as|to|:|lagao)?\\s*)(cut|fade|flash|wipe|zoom)\\b|\\b(cut|fade|flash|wipe|zoom)\\s*(?:transition|effect|lagao|laga\\s*do|apply(?:\\s+karo)?|rakho|kar\\s*do)?\\b)/i);if(transitionMatch)add('autoVideoTransition','Selected clip transition',transitionMatch[1]||transitionMatch[2]);
   const ramp=lower.match(/(?:speed\s*)?ramp\s*(?:to|:)?\s*(0?\.\d+|[12](?:\.\d+)?)\s*x?\s*(?:to|se|->)\s*(0?\.\d+|[12](?:\.\d+)?)\s*x?/i);if(ramp){add('autoVideoSpeedStart','Selected clip start speed',Math.max(.5,Math.min(2,Number(ramp[1]))));add('autoVideoSpeedEnd','Selected clip end speed',Math.max(.5,Math.min(2,Number(ramp[2]))));}else{const startSpeed=lower.match(/(?:start|shuru)\s*speed\s*(?:to|ko)?\s*(0?\.\d+|[12](?:\.\d+)?)\s*x?/i),endSpeed=lower.match(/(?:end|akhir)\s*speed\s*(?:to|ko)?\s*(0?\.\d+|[12](?:\.\d+)?)\s*x?/i);if(startSpeed)add('autoVideoSpeedStart','Selected clip start speed',Math.max(.5,Math.min(2,Number(startSpeed[1]))));if(endSpeed)add('autoVideoSpeedEnd','Selected clip end speed',Math.max(.5,Math.min(2,Number(endSpeed[1]))));}
   if(/(?:more cuts|cut faster|faster cuts|zyada cuts|tez cuts|cuts? tez|cuts? fast|speed barhao)/i.test(lower))add('autoVideoIntensity','Cut intensity',Math.min(5,(Number(current.autoVideoIntensity)||3)+1));
   else if(/(?:fewer cuts|cut slower|slower cuts|kam cuts|slow cuts|cuts? ahista|cuts? dheema|speed kam)/i.test(lower))add('autoVideoIntensity','Cut intensity',Math.max(1,(Number(current.autoVideoIntensity)||3)-1));
@@ -56,20 +58,21 @@
   if(/(?:lyrics?|words?|text)\s*(?:ko\s*)?(?:bigger|larger|increase|bara|bara karo|baray karo)/i.test(lower))add('lyricSize','Lyric size',Math.min(90,(Number(current.lyricSize)||48)+10));
   else if(/(?:lyrics?|words?|text)\s*(?:ko\s*)?(?:smaller|reduce|decrease|chota|chota karo|chotay karo)/i.test(lower))add('lyricSize','Lyric size',Math.max(20,(Number(current.lyricSize)||48)-10));
   const roman=/\b(?:karo|kar do|barhao|badhao|kam|zyada|tez|ahista|rakho|likho|safar|yaadein|tasveer|awaz|sukoon)\b/i.test(lower);
-  return{actions,unsupported:actions.length?[]:[text?(roman?'Yeh request abhi is offline helper ke supported commands mein nahi hai.':'I could not match that request to a supported local edit.'):'Edit request likhein. / Enter an edit request.']};
+  const suggestions=actions.length?[]:[text?'No automatic change was made. Try: “cinematic night drive”, “fade transition”, “title ko Night Drive rakho”, or “bass +3 dB”.':'Enter an edit request to preview supported changes.'];
+  return{actions,unsupported:actions.length?[]:[text?(roman?'Yeh request abhi supported commands se match nahi hui. Koi change apply nahi ki gayi.':'I could not match that request to a supported local edit. No changes were applied.'):'Edit request likhein. / Enter an edit request.'],suggestions};
  }
  function mount(host,options={}){
   if(!host||!root.document)return null;
   const $=id=>host.querySelector('#'+id),input=$('offlineEditPrompt'),preview=$('offlineEditPreview'),apply=$('offlineEditApply'),analyse=$('offlineEditAnalyse'),status=$('offlineEditStatus');
-  let pending=[];
+  let pending=[],pendingSuggestions=[];
   function current(){const read=id=>$(id)?$(id).value:'';const av=options.getAutoVideo&&options.getAutoVideo(),segment=av&&av.getSelectedSegment?av.getSelectedSegment():null;return{autoVideoIntensity:read('autoVideoIntensity'),mainBass:read('mainBass'),mainTreble:read('mainTreble'),lyricSize:read('lyricSize'),volume:read('volume'),autoVideoSpeedStart:segment&&segment.rateStart||1,autoVideoSpeedEnd:segment&&segment.rateEnd||1};}
   function show(){
    preview.innerHTML='';pending.forEach(action=>{const item=root.document.createElement('li');item.textContent=action.label+': '+action.value+(action.id==='autoVideoSpeedStart'||action.id==='autoVideoSpeedEnd'?'×':'');preview.appendChild(item);});
-   if(!pending.length){const item=root.document.createElement('li');item.textContent='No supported changes detected.';preview.appendChild(item);}
+   if(!pending.length){(pendingSuggestions.length?pendingSuggestions:['No supported changes detected.']).forEach(message=>{const item=root.document.createElement('li');item.textContent=message;preview.appendChild(item);});}
    apply.disabled=!pending.length;
   }
-  input.addEventListener('input',()=>{pending=[];show();status.textContent='Prompt changed. Preview again before applying.';});
-  analyse.addEventListener('click',()=>{const result=parsePrompt(input.value,current());pending=result.actions;show();status.textContent=result.unsupported[0]||'Preview ready. Only the listed supported edits will be applied; other parts are ignored.';});
+  input.addEventListener('input',()=>{pending=[];pendingSuggestions=[];show();status.textContent='Prompt changed. Preview again before applying.';});
+  analyse.addEventListener('click',()=>{const result=parsePrompt(input.value,current());pending=result.actions;pendingSuggestions=result.suggestions||[];show();status.textContent=result.unsupported[0]||'Preview ready. Only the listed supported edits will be applied; other parts are ignored.';});
   apply.addEventListener('click',()=>{
    if(!pending.length)return;let count=0;
    pending.forEach(action=>{
@@ -79,7 +82,7 @@
     control.value=String(action.value);control.dispatchEvent(new Event(control.tagName==='SELECT'?'change':'input',{bubbles:true}));
     if(action.id==='mainPitch'||action.id==='exportRatio')control.dispatchEvent(new Event('change',{bubbles:true}));count++;
    });
-   if(options.onApply)options.onApply();status.textContent=count+' supported edit(s) applied locally. Review the preview before export.';pending=[];show();
+   if(options.onApply)options.onApply();status.textContent=count+' supported edit(s) applied locally. Review the preview before export.';pending=[];pendingSuggestions=[];show();
   });
   return{parse:parsePrompt};
  }
