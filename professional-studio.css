@@ -144,3 +144,79 @@ body.wf-dashboard-app .music-category-detail .music-detail-desc{line-height:1.55
  body.wf-dashboard-app .music-category-detail .main-effects-grid label{grid-template-columns:1fr auto}
  body.wf-dashboard-app .music-category-detail .main-effects-grid input[type=range]{grid-column:1/-1}
 }
+
+
+/* WaveForge Studio v3 — mobile-first neon dashboard polish and resilient layout. */
+body.wf-dashboard-app .wf-dashboard{
+ display:flex!important;flex-direction:column!important;align-items:stretch!important;
+ height:100%;min-height:0;min-width:0;gap:9px;
+}
+body.wf-dashboard-app .editor{
+ display:flex!important;flex-direction:column!important;min-width:0;
+ overflow-y:auto!important;overflow-x:hidden!important;
+ overscroll-behavior-y:contain;scrollbar-width:thin;
+}
+body.wf-dashboard-app .wf-hero{
+ flex:0 0 auto;display:flex;flex-direction:column;gap:8px;
+ border-color:#8d49ff;background:
+ radial-gradient(ellipse at 8% 0%,#ff2ddc35,transparent 42%),
+ radial-gradient(ellipse at 100% 85%,#00d9ff30,transparent 40%),
+ linear-gradient(145deg,#100c32 0%,#070d22 52%,#11103a 100%);
+ box-shadow:inset 0 1px #ffffff2a,0 0 24px #9b35ff35,0 10px 28px #0008;
+}
+body.wf-dashboard-app .wf-hero .stage{
+ width:100%;height:clamp(170px,31dvh,330px)!important;min-height:150px!important;
+ border:1px solid #20dfff;box-shadow:0 0 0 1px #e33bff66,0 0 25px #19cfff55;
+}
+body.wf-dashboard-app .wf-timeline{
+ flex:0 0 auto;border-color:#b33cff;
+ background:linear-gradient(120deg,#140b35,#080d22 48%,#081a35);
+ box-shadow:inset 0 1px #ffffff20,0 0 18px #a22cff30,0 8px 22px #0007;
+}
+body.wf-dashboard-app .wf-transport,
+body.wf-dashboard-app .wf-audio-lane{
+ border-color:#6e55ff;background:linear-gradient(90deg,#190d42,#071b38 55%,#170c3d);
+}
+body.wf-dashboard-app .wf-tools-section{
+ flex:0 0 auto;min-height:0;overflow:visible;padding:9px;
+ border-color:#1acfff;background:linear-gradient(145deg,#101535,#080d21 60%,#170d35);
+ box-shadow:inset 0 1px #ffffff20,0 0 20px #19cfff25,0 8px 22px #0007;
+}
+body.wf-dashboard-app .wf-tool-grid{grid-template-columns:repeat(7,minmax(0,1fr));gap:7px}
+body.wf-dashboard-app .wf-tool-card{
+ min-height:clamp(62px,8.2dvh,82px);border-radius:14px;
+ background:linear-gradient(145deg,#25205a 0%,#111632 52%,#090d20 100%);
+ border-color:#7b55d9;box-shadow:inset 0 1px #ffffff35,0 0 13px #923cff35,0 4px 0 #050713;
+}
+body.wf-dashboard-app .wf-tool-card:nth-child(4n+1){border-color:#f044d5;box-shadow:inset 0 1px #ffffff35,0 0 15px #f044d544,0 4px 0 #050713}
+body.wf-dashboard-app .wf-tool-card:nth-child(4n+2){border-color:#20dfff;box-shadow:inset 0 1px #ffffff35,0 0 15px #20dfff44,0 4px 0 #050713}
+body.wf-dashboard-app .wf-tool-card:nth-child(4n+3){border-color:#8f65ff}
+body.wf-dashboard-app .wf-tool-card:nth-child(4n){border-color:#ffc45b;box-shadow:inset 0 1px #ffffff35,0 0 15px #ffc45b38,0 4px 0 #050713}
+body.wf-dashboard-app .wf-tool-card-icon{font-size:clamp(19px,3vw,27px);color:#73edff}
+body.wf-dashboard-app .wf-tool-card b{font-size:clamp(8px,1vw,11px);line-height:1.18}
+body.wf-dashboard-app .wf-showcase-strip{
+ flex:0 0 auto;border-color:#8d49ff;
+ background:linear-gradient(110deg,#190c3d,#09162f 55%,#160b36);
+}
+body.wf-dashboard-app .wf-showcase-strip button{
+ border-color:#3d77b5;background:linear-gradient(145deg,#172b55,#0a1028);
+ min-height:58px;
+}
+body.wf-dashboard-app .wf-bottom-dock{
+ background:linear-gradient(100deg,#170b3bfa,#071c3cf8,#170b3bfa);
+ border-color:#27dfff;box-shadow:0 0 22px #a32cff66,0 0 30px #13cfff33,inset 0 1px #ffffff44;
+}
+body.wf-dashboard-app .wf-bottom-dock button.active{color:#fff;text-shadow:0 0 12px #2deaff}
+body.wf-dashboard-app .wf-bottom-dock .wf-dock-play{
+ background:radial-gradient(circle at 35% 25%,#fff,#f15cff 22%,#8429ff 52%,#07132e 75%);
+ border-color:#43eaff;box-shadow:0 0 12px #f23cff,0 0 26px #18dfff;
+}
+@media(max-width:430px){
+ body.wf-dashboard-app .editor{padding:7px 6px calc(76px + env(safe-area-inset-bottom))}
+ body.wf-dashboard-app .wf-dashboard{gap:7px}
+ body.wf-dashboard-app .wf-hero .stage{height:clamp(150px,25dvh,220px)!important;min-height:140px!important}
+ body.wf-dashboard-app .wf-tool-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+ body.wf-dashboard-app .wf-tool-card{min-height:60px;padding:5px 2px}
+ body.wf-dashboard-app .wf-tool-card b{font-size:8px}
+ body.wf-dashboard-app .wf-showcase-strip{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
