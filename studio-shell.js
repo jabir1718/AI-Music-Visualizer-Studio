@@ -42,9 +42,12 @@ const TOOLBOXES=[
 {icon:'▤',label:'Import subtitles',desc:'Load an SRT or VTT file.',panel:'captionPanel',target:'#srtInput'},
 {icon:'◫',label:'Caption templates',desc:'Choose karaoke, neon, poetry and other styles.',panel:'captionPanel',target:'.template-grid'},
 {icon:'↑↓',label:'Caption size and position',desc:'Adjust lyric layout.',panel:'captionPanel',target:'#lyricSize'}]},
-{id:'autocut',icon:'✂',label:'Auto Cut',desc:'Build a beat-synced montage.',subs:[
+{id:'autocut',icon:'✂',label:'Cut / Trim / Speed',desc:'Precision clip editing and beat-synced montage.',subs:[
 {icon:'＋',label:'Import photos / videos',desc:'Add media clips to the montage.',panel:'autoVideoPanel',target:'#autoVideoAdd'},
 {icon:'◈',label:'Editing template',desc:'Choose one of 10 montage presets.',panel:'autoVideoPanel',target:'#autoVideoStyle'},
+{icon:'✂',label:'Split / cut at playhead',desc:'Select a segment and split it at the playhead.',panel:'autoVideoPanel',target:'#autoVideoSegments'},
+{icon:'⌗',label:'Trim start / end',desc:'Adjust the selected segment duration.',panel:'autoVideoPanel',target:'#autoVideoSegments'},
+{icon:'◴',label:'Speed ramps',desc:'Edit slow motion and speed changes on a selected segment.',panel:'autoVideoPanel',target:'#autoVideoSegments'},
 {icon:'✦',label:'Create beat-synced cut',desc:'Arrange clips to the music tempo.',panel:'autoVideoPanel',target:'#autoVideoCut'},
 {icon:'▤',label:'Edit segments',desc:'Reorder, split, trim, change speed and transitions.',panel:'autoVideoPanel',target:'#autoVideoSegments'}]},
 {id:'effects',icon:'✧',label:'Effects & Filters',desc:'Visual looks and clip effects.',subs:[
@@ -56,7 +59,17 @@ const TOOLBOXES=[
 {icon:'✓',label:'Copyright checklist',desc:'Review the audio and visual rights checklist.',panel:'riskPanel',target:'#riskCheck'},
 {icon:'▤',label:'Project information',desc:'Project details and local save status.',panel:'riskPanel',target:null},
 {icon:'⚙',label:'Output settings',desc:'Choose canvas, quality and frame rate.',panel:'wfExportPanel',target:null},
-{icon:'↗',label:'Export video',desc:'Render the current project.',panel:'wfExportPanel',target:'#exportBtnSide'}]}
+{icon:'↗',label:'Export video',desc:'Render the current project.',panel:'wfExportPanel',target:'#exportBtnSide'}]},
+{id:'joker',icon:'◉',label:'Joker Voice',desc:'Voice FX, pitch, recording and cleanup.',subs:[
+{icon:'◈',label:'Voice changer presets',desc:'Open the available voice character and effect presets.',panel:'audioPanel',target:'#musicCategoryNav',category:'Voice FX'},
+{icon:'↑↓',label:'Pitch & formant',desc:'Adjust pitch and formant on a separate voice layer.',panel:'audioPanel',target:'#musicCategoryNav',category:'Voice'},
+{icon:'●',label:'Record Joker voice take',desc:'Record a separate voice layer, then apply supported effects.',panel:'audioPanel',target:'#musicCategoryNav',category:'Voice'},
+{icon:'⌁',label:'Noise cleanup',desc:'Clean a voice take with the local noise cleanup tool.',panel:'audioPanel',target:'#musicCategoryNav',category:'Cleanup'}]},
+{id:'dj',icon:'♫',label:'DJ Mixer',desc:'Beat grid, effects and multitrack controls.',subs:[
+{icon:'◴',label:'BPM / Tap Tempo',desc:'Detect or tap the song tempo and align beat divisions.',panel:'audioPanel',target:'.bpm-tool'},
+{icon:'▤',label:'Mixer tracks',desc:'Balance, mute and solo separate imported tracks.',panel:'audioPanel',target:'#mixerList'},
+{icon:'◐',label:'EQ / FX sweep',desc:'Control bass, treble, pan, echo, reverb and distortion.',panel:'audioPanel',target:'.main-effects-panel'},
+{icon:'♫',label:'Sound effects library',desc:'Browse available sound effects and add them as mixer layers.',panel:'audioPanel',target:'#musicCategoryNav',category:'Sound effect'}]}
 ];
 function init(){
 const editor=document.querySelector('.editor'),stageWrap=editor&&editor.querySelector('.stage-wrap');
