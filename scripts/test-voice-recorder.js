@@ -48,8 +48,8 @@ Object.defineProperty(global,'removeEventListener',{configurable:true,writable:t
 Object.defineProperty(global,'File',{configurable:true,writable:true,value:global.File||class extends Blob{constructor(parts,name,opts={}){super(parts,opts);this.name=name;this.lastModified=opts.lastModified||0;}}});
 const wait=()=>new Promise(resolve=>setImmediate(resolve));
 (async()=>{
- const host=new FakeElement(),added=[];
- const api=recorder.mount(host,'Voice',file=>{if(!added.length)throw new Error('mixer busy');added.push(file);});
+ const host=new FakeElement(),added=[];let failAddOnce=true;
+ const api=recorder.mount(host,'Voice',file=>{if(failAddOnce){failAddOnce=false;throw new Error('mixer busy');}added.push(file);});
  const panel=host.children[0],el=id=>panel.querySelector('#'+id);
  await el('wfRecordStart').onclick();
  const media=FakeMediaRecorder.latest;
