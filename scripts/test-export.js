@@ -20,6 +20,7 @@ global.window={MediaRecorder:FakeRecorder};
 global.MediaRecorder=FakeRecorder;
 global.document={createElement:()=>({click(){downloaded++;}})};
 global.URL={createObjectURL:()=> 'blob:export',revokeObjectURL(){}};
+global.Blob=class FakeBlob{constructor(chunks,options){this.size=chunks.reduce((total,chunk)=>total+(chunk.size||0),0);this.type=options?.type||'';}};
 global.setInterval=fn=>{intervalFn=fn;return 1;};
 global.setTimeout=fn=>{fn();return 1;};
 global.clearInterval=()=>{intervalFn=null;};
