@@ -108,18 +108,29 @@
 <script src="video-audio-extractor.js"></script>
 <script src="sound-library.js"></script><script src="artwork-layers.js"></script><script src="auto-video-editor.js"></script><script src="offline-edit-assistant.js"></script>
 <script src="app.js"></script><script src="project-file.js"></script><script src="image-search.js"></script>
-<script src="studio-shell.js?v=waveforge-v2"></script>
+<script src="studio-shell.js?v=waveforge-v3"></script>
 <script>
 (function(){
- function ensureStudioShell(){
-  if(document.getElementById('wfDashboard'))return;
-  var fallback=document.createElement('script');
-  fallback.src='studio-shell.js?v=waveforge-v2-retry';
-  fallback.onload=function(){if(!document.getElementById('wfDashboard'))document.documentElement.setAttribute('data-wf-shell-error','mount-failed');};
-  fallback.onerror=function(){document.documentElement.setAttribute('data-wf-shell-error','script-load-failed');};
-  document.body.appendChild(fallback);
+ function bootWaveForgeStudio(){
+  if(typeof window.mountStudioShell==='function'){
+   window.mountStudioShell();
+   if(!document.getElementById('wfDashboard'))document.documentElement.setAttribute('data-wf-shell-error','mount-failed');
+   return;
+  }
+  if(document.querySelector('.editor')&&!document.getElementById('wfDashboard')){
+   var fallback=document.createElement('script');
+   fallback.src='studio-shell.js?v=waveforge-v3-retry';
+   fallback.onload=function(){
+    if(typeof window.mountStudioShell==='function')window.mountStudioShell();
+    if(!document.getElementById('wfDashboard'))document.documentElement.setAttribute('data-wf-shell-error','mount-failed');
+   };
+   fallback.onerror=function(){document.documentElement.setAttribute('data-wf-shell-error','script-load-failed');};
+   document.body.appendChild(fallback);
+  }
  }
- window.addEventListener('load',ensureStudioShell,{once:true});
+ bootWaveForgeStudio();
+ document.addEventListener('DOMContentLoaded',bootWaveForgeStudio,{once:true});
+ window.addEventListener('load',bootWaveForgeStudio,{once:true});
 })();
 </script>
 <script src="option-preview.js"></script>
