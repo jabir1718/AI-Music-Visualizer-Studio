@@ -1,0 +1,14 @@
+'use strict';
+const assert=require('assert');
+const fs=require('fs');
+const source=fs.readFileSync(require('path').join(__dirname,'..','app.js'),'utf8');
+const expected=['aurora','sunset','ice','mono','cyberpunk','emerald','ruby','golden','ocean','lavender','vaporwave','fire'];
+const paletteLine=source.match(/const palette=\{([^\n]+)\};/);
+assert.ok(paletteLine,'visualizer palette table should exist');
+expected.forEach(name=>assert.ok(new RegExp('(?:^|[,\\{])'+name+':').test(paletteLine[1]),'missing palette: '+name));
+assert.ok(source.includes('function applyVisualizerTheme()'),'selected palette must have a render-state bridge');
+assert.ok(source.includes('activePalette=palette[key]||palette.aurora'),'unknown themes must fall back safely');
+assert.ok(source.includes('const colors=activePalette;'),'canvas draw loop must consume the active palette state');
+assert.ok(source.includes("if(id==='visualColor')applyVisualizerTheme()"),'palette selection input must update the canvas render state');
+assert.ok(source.includes("$('visualColor').addEventListener('change',applyVisualizerTheme)"),'native select change must also update the canvas render state');
+console.log('Visualizer theme bridge tests passed: 12 palettes are connected to the live canvas draw state.');
