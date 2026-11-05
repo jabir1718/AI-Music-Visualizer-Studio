@@ -1,56 +1,62 @@
 (function(){
 'use strict';
 const TOOLBOXES=[
-{id:'media',icon:'▣',label:'Media',desc:'Bring in video, photo, music or voice.',subs:[
-{icon:'▤',label:'Video / photo background',desc:'Behind the visualizer',panel:'visualPanel',target:null},
-{icon:'♫',label:'Add music (MP3)',desc:'Your song file',panel:'audioPanel',target:'#audioInput'},
-{icon:'🎙',label:'Record voice',desc:'Mic input',panel:'audioPanel',target:'#audioPickBtn'},
-{icon:'⇄',label:'Audio from video',desc:'Extract the sound',panel:'autoVideoPanel',target:'#autoVideoAdd'}]},
-{id:'layer',icon:'▱',label:'Layers',desc:'Photo or PNG on top. Zoom and place.',subs:[
-{icon:'＋',label:'Add photo on top',desc:'Artwork image layer',panel:'overlayPanel',target:'#addArtworkLayerBtn'},
-{icon:'◱',label:'Add PNG logo',desc:'Transparent PNG',panel:'overlayPanel',target:'#logoInput'},
-{icon:'◍',label:'Zoom / size / rotate',desc:'Per layer controls',panel:'overlayPanel',target:'#artworkLayerList'},
-{icon:'T',label:'Title and subtitle',desc:'Text on the video',panel:'overlayPanel',target:'#titleInput'}]},
-{id:'visualizer',icon:'◉',label:'Visualizer',desc:'Style, shape, colours, beat.',subs:[
-{icon:'▂▅',label:'Visualizer style',desc:'Pick a look',panel:'visualPanel',target:'.style-grid'},
-{icon:'▣',label:'Photo inside visualizer',desc:'Background artwork',panel:'visualPanel',target:null},
-{icon:'◍',label:'Colour theme',desc:'Aurora, sunset, ice',panel:'visualPanel',target:'#visualColor'},
-{icon:'✳',label:'Intensity and beat',desc:'Reaction strength',panel:'visualPanel',target:'#intensity'}]},
-{id:'voice',icon:'🎙',label:'Voice',desc:'Pitch, changer and effects.',subs:[
-{icon:'↑↓',label:'Voice pitch',desc:'Pitch control',panel:'audioPanel',target:null},
-{icon:'◈',label:'Voice changer',desc:'Voice effects',panel:'audioPanel',target:null},
-{icon:'♫',label:'Voice volume',desc:'Separate from music',panel:'audioPanel',target:'#volume'},
-{icon:'✦',label:'Echo and reverb',desc:'Audio effects',panel:'audioPanel',target:null}]},
-{id:'music',icon:'♫',label:'Music',desc:'Bass, BPM, EQ, fades.',subs:[
-{icon:'▁▅',label:'Bass and EQ',desc:'Audio controls',panel:'audioPanel',target:null},
-{icon:'◴',label:'BPM and beat grid',desc:'Tap or auto-detect',panel:'audioPanel',target:null},
-{icon:'◐',label:'Volume and fades',desc:'Main track',panel:'audioPanel',target:'#volume'},
-{icon:'▤',label:'Mixer layers',desc:'Available audio layers',panel:'audioPanel',target:null}]},
-{id:'text',icon:'T',label:'Text & Art',desc:'Titles, logos, artwork.',subs:[
-{icon:'T',label:'Title',desc:'Main heading',panel:'overlayPanel',target:'#titleInput'},
-{icon:'t',label:'Subtitle',desc:'Second line',panel:'overlayPanel',target:'#subtitleInput'},
-{icon:'◱',label:'Logo',desc:'PNG import',panel:'overlayPanel',target:'#logoInput'},
-{icon:'▦',label:'Artwork layers',desc:'Image stack',panel:'overlayPanel',target:'#artworkLayerList'}]},
-{id:'lyrics',icon:'♬',label:'Lyrics',desc:'Generate, import, style.',subs:[
-{icon:'✦',label:'Auto lyrics',desc:'On-device transcription',panel:'captionPanel',target:'#transcribeBtn'},
-{icon:'▤',label:'Import SRT / VTT',desc:'Subtitle file',panel:'captionPanel',target:'#srtInput'},
-{icon:'◫',label:'Text template',desc:'Caption styles',panel:'captionPanel',target:'.template-grid'},
-{icon:'↑↓',label:'Size and position',desc:'Placement',panel:'captionPanel',target:'#lyricSize'}]},
-{id:'autocut',icon:'✂',label:'Auto Cut',desc:'Beat-synced montage.',subs:[
-{icon:'＋',label:'Import clips',desc:'Photos and videos',panel:'autoVideoPanel',target:'#autoVideoAdd'},
-{icon:'◈',label:'Editing style',desc:'Available presets',panel:'autoVideoPanel',target:'#autoVideoStyle'},
-{icon:'✦',label:'Create Auto Cut',desc:'Follows the beat',panel:'autoVideoPanel',target:'#autoVideoCut'},
-{icon:'▤',label:'Segments',desc:'Select and edit clips',panel:'autoVideoPanel',target:'#autoVideoSegments'}]},
-{id:'effects',icon:'✧',label:'Effects',desc:'Filters and transitions.',subs:[
-{icon:'◉',label:'Visual filters',desc:'Filter controls',panel:'visualPanel',target:'.style-grid'},
-{icon:'⇄',label:'Transitions',desc:'Between clips',panel:'autoVideoPanel',target:'#autoVideoSegments'},
-{icon:'◴',label:'Speed ramps',desc:'Slow or fast',panel:'autoVideoPanel',target:'#autoVideoSegments'},
-{icon:'▦',label:'More tools',desc:'Additional controls',panel:'riskPanel',target:null}]},
-{id:'project',icon:'▰',label:'Project',desc:'Save, open, check rights.',subs:[
-{icon:'✓',label:'Copyright checklist',desc:'Rights reminder',panel:'riskPanel',target:'#riskCheck'},
-{icon:'▤',label:'Project info',desc:'Current project',panel:'riskPanel',target:null},
-{icon:'⚙',label:'Output settings',desc:'Ratio, quality, FPS',panel:'wfExportPanel',target:null},
-{icon:'↗',label:'Export video',desc:'Render now',panel:'wfExportPanel',target:'#exportBtnSide'}]}
+{id:'media',icon:'▣',label:'Media',desc:'Import and place your source files.',subs:[
+{icon:'▤',label:'Photo / video background',desc:'Place an image or video behind the visualizer.',panel:'visualPanel',target:'.media-tools'},
+{icon:'♫',label:'Import MP3 / audio',desc:'Add the main song track.',panel:'audioPanel',target:'#audioDrop'},
+{icon:'🎙',label:'Record a voice take',desc:'Record voice, ad-libs or humming as a separate layer.',panel:'audioPanel',target:'#musicCategoryNav',category:'Voice'},
+{icon:'⇄',label:'Extract audio from video',desc:'Import a video source for audio extraction.',panel:'autoVideoPanel',target:'#autoVideoAdd'}]},
+{id:'layers',icon:'▱',label:'Photo & PNG layers',desc:'Add and transform artwork over the video.',subs:[
+{icon:'＋',label:'Add photo / PNG layer',desc:'Add an independent image layer.',panel:'overlayPanel',target:'#addArtworkLayerBtn'},
+{icon:'⌖',label:'Zoom and position',desc:'Adjust X, Y, size, rotation and opacity for each layer.',panel:'overlayPanel',target:'#artworkLayerList'},
+{icon:'◱',label:'Logo overlay',desc:'Import a transparent PNG logo.',panel:'overlayPanel',target:'#logoInput'},
+{icon:'▤',label:'Layer stack',desc:'Select, hide or remove artwork layers.',panel:'overlayPanel',target:'#artworkLayerList'}]},
+{id:'visualizer',icon:'◉',label:'Visualizer',desc:'Choose the audio-reactive look and background.',subs:[
+{icon:'▂▅',label:'Visualizer styles',desc:'Bars, waveform, circle and neon pulse.',panel:'visualPanel',target:'.style-grid'},
+{icon:'▣',label:'Photo inside visualizer',desc:'Set a photo or video as the visualizer background.',panel:'visualPanel',target:'.media-tools'},
+{icon:'◍',label:'Colour and intensity',desc:'Choose palette, intensity and beat sensitivity.',panel:'visualPanel',target:'#visualColor'},
+{icon:'✦',label:'3D visual objects',desc:'Add and configure a 3D object layer.',panel:'visualPanel',target:'#threeStudioPanel'},
+{icon:'◌',label:'Background removal',desc:'AI person cutout and chroma-key controls.',panel:'visualPanel',target:'#aiSegmentationPanel'}]},
+{id:'voice',icon:'🎙',label:'Voice Studio',desc:'Separate voice tools and independent voice layers.',subs:[
+{icon:'↑↓',label:'Voice pitch',desc:'Pitch control for an imported voice layer; enable pitch-preserving mode to separate pitch from speed.',panel:'audioPanel',target:'#musicCategoryDetail',category:'Voice'},
+{icon:'◈',label:'Voice changer',desc:'Natural, telephone, radio, monster, chipmunk, robot and alien presets.',panel:'audioPanel',target:'#musicCategoryDetail',category:'Voice FX'},
+{icon:'●',label:'Record voice',desc:'Record a new independent voice track.',panel:'audioPanel',target:'#musicCategoryDetail',category:'Voice'},
+{icon:'♫',label:'Ad-libs and humming',desc:'Record or import separate takes.',panel:'audioPanel',target:'#musicCategoryDetail',category:'Ad-lib'},
+{icon:'♬',label:'Harmony layers',desc:'Import a separate backing-vocal layer.',panel:'audioPanel',target:'#musicCategoryDetail',category:'Harmony'},
+{icon:'⌁',label:'Noise cleanup',desc:'Clean an imported voice track using a noise sample.',panel:'audioPanel',target:'#musicCategoryDetail',category:'Cleanup'},
+{icon:'✂',label:'Vocal / instrument separation',desc:'Not connected yet: automatic stem separation from a mixed MP3 is not implemented.',panel:'audioPanel',target:'#musicCategoryDetail',category:'Separation'}]},
+{id:'music',icon:'♫',label:'Music & DJ',desc:'Tempo, EQ, mixer and track effects.',subs:[
+{icon:'◴',label:'BPM and beat grid',desc:'Detect tempo, tap tempo and align beat subdivisions.',panel:'audioPanel',target:'.bpm-tool'},
+{icon:'▁▅',label:'Bass and treble EQ',desc:'Adjust the original song independently.',panel:'audioPanel',target:'.main-effects-panel'},
+{icon:'◐',label:'Music effects',desc:'Pan, echo, reverb, distortion and compression.',panel:'audioPanel',target:'.main-effects-panel'},
+{icon:'▤',label:'Track mixer',desc:'Import separate voice and instrument stems; mute, solo and balance them.',panel:'audioPanel',target:'#mixerList'},
+{icon:'✂',label:'Trim, split and loop',desc:'Edit imported layer timing and clips.',panel:'audioPanel',target:'#mixerList'},
+{icon:'♫',label:'Instrument tracks',desc:'Choose bass, drums, piano, guitar or instrumental source.',panel:'audioPanel',target:'#musicCategoryDetail',category:'Instruments'}]},
+{id:'text',icon:'T',label:'Text & Art',desc:'Titles, logos and typography.',subs:[
+{icon:'T',label:'Title and subtitle',desc:'Edit the main title and second line.',panel:'overlayPanel',target:'#titleInput'},
+{icon:'◱',label:'Logo',desc:'Add a PNG logo to the canvas.',panel:'overlayPanel',target:'#logoInput'},
+{icon:'▦',label:'Artwork layers',desc:'Add and adjust separate images.',panel:'overlayPanel',target:'#artworkLayerList'},
+{icon:'✎',label:'Typography styles',desc:'Choose font, colour and text treatment.',panel:'overlayPanel',target:'#fontStyle'}]},
+{id:'lyrics',icon:'♬',label:'Lyrics & Captions',desc:'Timed lyrics and caption styles.',subs:[
+{icon:'✦',label:'Generate lyrics',desc:'Run local speech transcription on the imported song.',panel:'captionPanel',target:'#transcribeBtn'},
+{icon:'▤',label:'Import subtitles',desc:'Load an SRT or VTT file.',panel:'captionPanel',target:'#srtInput'},
+{icon:'◫',label:'Caption templates',desc:'Choose karaoke, neon, poetry and other styles.',panel:'captionPanel',target:'.template-grid'},
+{icon:'↑↓',label:'Caption size and position',desc:'Adjust lyric layout.',panel:'captionPanel',target:'#lyricSize'}]},
+{id:'autocut',icon:'✂',label:'Auto Cut',desc:'Build a beat-synced montage.',subs:[
+{icon:'＋',label:'Import photos / videos',desc:'Add media clips to the montage.',panel:'autoVideoPanel',target:'#autoVideoAdd'},
+{icon:'◈',label:'Editing template',desc:'Choose one of 10 montage presets.',panel:'autoVideoPanel',target:'#autoVideoStyle'},
+{icon:'✦',label:'Create beat-synced cut',desc:'Arrange clips to the music tempo.',panel:'autoVideoPanel',target:'#autoVideoCut'},
+{icon:'▤',label:'Edit segments',desc:'Reorder, split, trim, change speed and transitions.',panel:'autoVideoPanel',target:'#autoVideoSegments'}]},
+{id:'effects',icon:'✧',label:'Effects & Filters',desc:'Visual looks and clip effects.',subs:[
+{icon:'◉',label:'Visual filters',desc:'Choose a filter preset.',panel:'visualPanel',target:'#filterStudioPanel'},
+{icon:'⇄',label:'Clip transitions',desc:'Set transitions between montage segments.',panel:'autoVideoPanel',target:'#autoVideoSegments'},
+{icon:'◴',label:'Speed ramps',desc:'Adjust clip speed ramps.',panel:'autoVideoPanel',target:'#autoVideoSegments'},
+{icon:'▦',label:'Chroma key',desc:'Remove a selected solid background colour.',panel:'visualPanel',target:'#chromaKeyPanel'}]},
+{id:'project',icon:'▰',label:'Project & Export',desc:'Save, review and export the project.',subs:[
+{icon:'✓',label:'Copyright checklist',desc:'Review the audio and visual rights checklist.',panel:'riskPanel',target:'#riskCheck'},
+{icon:'▤',label:'Project information',desc:'Project details and local save status.',panel:'riskPanel',target:null},
+{icon:'⚙',label:'Output settings',desc:'Choose canvas, quality and frame rate.',panel:'wfExportPanel',target:null},
+{icon:'↗',label:'Export video',desc:'Render the current project.',panel:'wfExportPanel',target:'#exportBtnSide'}]}
 ];
 function init(){
 const editor=document.querySelector('.editor'),stageWrap=editor&&editor.querySelector('.stage-wrap');
@@ -84,7 +90,7 @@ const grid=toolSection.querySelector('#wfToolGrid');
 TOOLBOXES.forEach(tb=>{const b=document.createElement('button');b.type='button';b.className='wf-tool-card tb-'+tb.id;b.innerHTML='<span class="wf-tool-card-icon">'+tb.icon+'</span><b>'+tb.label+'</b><small>'+tb.desc+'</small>';b.addEventListener('click',()=>openToolbox(tb));grid.append(b);});
 panels.forEach(p=>{p.hidden=true;p.classList.add('wf-modal-panel');});if(exportPanel)exportPanel.hidden=true;
 function openToolbox(tb){if(!tb)return;modal.hidden=false;document.body.classList.add('wf-modal-open');modal.querySelector('#wfModalTitle').textContent=tb.label;modal.querySelector('#wfModalPreviewTitle').textContent=tb.label+' toolbox';modal.querySelector('#wfModalPreviewText').textContent=tb.desc;modal.querySelector('#wfBackBtn').hidden=true;const host=modal.querySelector('#wfModalContent');host.replaceChildren();const wrap=document.createElement('div');wrap.className='wf-subbox-grid';tb.subs.forEach(sub=>{const s=document.createElement('button');s.type='button';s.className='wf-subbox';s.innerHTML='<span class="wf-subbox-icon">'+sub.icon+'</span><div><b>'+sub.label+'</b><small>'+sub.desc+'</small></div><span class="wf-subbox-go">›</span>';s.addEventListener('click',()=>openLeaf(tb,sub));wrap.append(s);});host.append(wrap);modal.querySelector('.wf-modal-sheet').scrollTop=0;}
-function openLeaf(tb,sub){const panel=panelMap.get(sub.panel);if(!panel)return;modal.querySelector('#wfModalTitle').textContent=sub.label;modal.querySelector('#wfModalPreviewTitle').textContent=sub.label;modal.querySelector('#wfModalPreviewText').textContent=sub.desc;modal.querySelector('#wfBackBtn').hidden=false;const host=modal.querySelector('#wfModalContent');host.replaceChildren();host.append(panel);panel.hidden=false;modal.querySelector('.wf-modal-sheet').scrollTop=0;if(sub.target){const target=panel.querySelector(sub.target);if(target){target.classList.add('wf-highlight');setTimeout(()=>target.classList.remove('wf-highlight'),1200);requestAnimationFrame(()=>target.scrollIntoView({block:'center',behavior:'smooth'}));}}}
+function openLeaf(tb,sub){const panel=panelMap.get(sub.panel);if(!panel)return;modal.querySelector('#wfModalTitle').textContent=sub.label;modal.querySelector('#wfModalPreviewTitle').textContent=sub.label;modal.querySelector('#wfModalPreviewText').textContent=sub.desc;modal.querySelector('#wfBackBtn').hidden=false;const host=modal.querySelector('#wfModalContent');host.replaceChildren();host.append(panel);panel.hidden=false;if(sub.category){const category=panel.querySelector('.music-category[data-category=\"'+sub.category+'\"]');if(category)category.click();}modal.querySelector('.wf-modal-sheet').scrollTop=0;if(sub.target){const target=panel.querySelector(sub.target);if(target){target.classList.add('wf-highlight');setTimeout(()=>target.classList.remove('wf-highlight'),1500);requestAnimationFrame(()=>target.scrollIntoView({block:'center',behavior:'smooth'}));}}}
 modal.querySelector('#wfBackBtn').addEventListener('click',()=>{const current=modal.querySelector('#wfModalTitle').textContent;const tb=TOOLBOXES.find(t=>t.subs.some(s=>s.label===current))||TOOLBOXES[0];openToolbox(tb);});
 function renderDashboardClips(state){const lane=timeline.querySelector('#wfDashboardClips');if(!lane)return;lane.replaceChildren();const assets=state&&Array.isArray(state.assets)?state.assets:[],segments=state&&Array.isArray(state.segments)?state.segments:[];if(!segments.length){const label=document.createElement('span');label.textContent='PHOTO / VIDEO TRACK';const empty=document.createElement('b');empty.textContent=assets.length?'Press Create beat-synced Auto Cut to arrange your clips':'Import media to build your timeline';lane.append(label,empty);return;}const heading=document.createElement('span');heading.textContent='PHOTO / VIDEO TRACK · '+segments.length+' CLIPS';lane.append(heading);segments.forEach((segment,index)=>{const asset=assets.find(item=>item.id===segment.assetId);if(!asset)return;const card=document.createElement('button');card.type='button';card.className='wf-mini-clip';card.title=asset.name;if(asset.previewUrl){const img=document.createElement('img');img.src=asset.previewUrl;img.alt='';card.append(img);}else{const glyph=document.createElement('span');glyph.className='wf-mini-clip-glyph';glyph.textContent='▶';card.append(glyph);}const caption=document.createElement('small');caption.textContent=(index+1)+' · '+(asset.kind==='image'?'PHOTO':'VIDEO');card.append(caption);card.addEventListener('click',()=>{openLeaf(TOOLBOXES[7],TOOLBOXES[7].subs[3]);if(window.WaveForgeAutoVideo)window.WaveForgeAutoVideo.selectSegment(segment.id);});lane.append(card);});}
 document.addEventListener('waveforge:video-timeline-change',e=>renderDashboardClips(e.detail));
