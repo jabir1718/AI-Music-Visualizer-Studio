@@ -18,10 +18,12 @@
     catch(error){stream.getTracks().forEach(track=>track.stop());throw new Error('This device cannot start the selected video encoder. '+error.message);}
     return new Promise((resolve,reject)=>{
       const chunks=[];let timer=null,settled=false;
-      const cleanup=()=>{if(timer!==null){clearInterval(timer);timer=null;}stream.getTracks().forEach(track=>{try{track.stop();}catch(e){}});};
+      const onPause=()=>{if(!audio.ended&&audio.currentTime<start+duration-.25)fail(new Error('Audio playback was paused before export finished. Resume playback and export again.'));};
+      const cleanup=()=>{if(timer!==null){clearInterval(timer);timer=null;}audio.removeEventListener('pause',onPause);audio.removeEventListener('ended',onEnded);stream.getTracks().forEach(track=>{try{track.stop();}catch(e){}});};
       const fail=error=>{if(settled)return;settled=true;cleanup();try{if(recorder.state!=='inactive')recorder.stop();}catch(e){}reject(error);};
       recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
       recorder.onerror=()=>fail(new Error('Recording failed. Try a shorter project or lower resolution.'));
+      const onEnded=()=>{if(timer!==null){clearInterval(timer);timer=null;}if(recorder.state!=='inactive')recorder.stop();};
       recorder.onstop=()=>{
         if(settled)return;settled=true;cleanup();
         if(!chunks.length){reject(new Error('The recorder produced an empty video. Try another browser or lower settings.'));return;}
@@ -37,7 +39,7 @@
           if(onProgress)onProgress(progress);
           if(audio.ended||audio.paused&&progress>=99){try{if(recorder.state!=='inactive')recorder.stop();}catch(error){fail(error);}}
         },200);
-        audio.addEventListener('ended',()=>{if(timer!==null){clearInterval(timer);timer=null;}if(recorder.state!=='inactive')recorder.stop();},{once:true});
+        audio.addEventListener('pause',onPause);audio.addEventListener('ended',onEnded,{once:true});
       }catch(error){fail(error);}
     });
   }
