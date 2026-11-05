@@ -38,6 +38,17 @@ const romanVideoValues=Object.fromEntries(romanVideo.actions.map(x=>[x.id,x.valu
 assert.strictEqual(romanVideoValues.autoVideoTransition,'wipe');
 assert.strictEqual(romanVideoValues.autoVideoSpeedStart,.8);
 assert.strictEqual(romanVideoValues.autoVideoSpeedEnd,1.4);
+const nightDrive=assistant.parsePrompt('cinematic night drive');
+const nightValues=Object.fromEntries(nightDrive.actions.map(x=>[x.id,x.value]));
+assert.strictEqual(nightValues.autoVideoStyle,'cinematic','night drive should suggest a cinematic montage');
+assert.strictEqual(nightValues.visualColor,'cyberpunk','night drive should select a matching neon palette');
+const fadePhrase=assistant.parsePrompt('fade transition');
+assert.strictEqual(fadePhrase.actions.find(x=>x.id==='autoVideoTransition').value,'fade','plain fade transition phrase should be recognized');
+const romanFade=assistant.parsePrompt('fade transition lagao');
+assert.strictEqual(romanFade.actions.find(x=>x.id==='autoVideoTransition').value,'fade','Roman Urdu fade command should be recognized');
+const fallback=assistant.parsePrompt('make the city glow like a dream');
+assert.strictEqual(fallback.actions.length,0,'unknown creative requests must not be guessed');
+assert.ok(fallback.suggestions&&fallback.suggestions.length,'unknown requests should show a safe fallback preview hint');
 const unsupported=assistant.parsePrompt('make a 3D dragon walk through the city');
 assert.strictEqual(unsupported.actions.length,0,'unsupported AI requests must not be guessed or executed');
 assert.ok(unsupported.unsupported.length);
