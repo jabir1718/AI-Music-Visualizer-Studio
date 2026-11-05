@@ -129,7 +129,7 @@ function init(){
   const b=e.target.closest('[data-dock]');if(!b)return;
   const a=b.dataset.dock;
   if(a==='play')document.getElementById('playBtn')?.click();
-  if(a==='project')openTool('riskPanel','Project','Project checks and local project information.',panelMap.get('riskPanel'));
+  if(a==='project'){openTool('wfExportPanel','Project','Save, restore and manage your WaveForge project.',exportPanel);requestAnimationFrame(()=>{const projectFile=exportPanel&&exportPanel.querySelector('#projectFilePanel');if(projectFile)projectFile.scrollIntoView({block:'start',behavior:'smooth'});});}
   if(a==='timeline')openTool('autoVideoPanel','Timeline','Edit and arrange your video segments.',panelMap.get('autoVideoPanel'));
   if(a==='settings')openTool('wfExportPanel','Settings','Project output and export settings.',exportPanel);
   if(a==='preview'){stageWrap.classList.toggle('wf-preview-focus');b.classList.toggle('active',stageWrap.classList.contains('wf-preview-focus'));}
