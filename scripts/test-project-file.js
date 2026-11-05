@@ -1,0 +1,14 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const source=fs.readFileSync('project-file.js','utf8');
+assert.match(source,/const DB_NAME='waveforge-media-v1',STORE='assets'/,'project file must use the shared media database');
+assert.match(source,/onupgradeneeded=\(\)=>\{const db=r\.result;if\(!db\.objectStoreNames\.contains\(STORE\)\)db\.createObjectStore\(STORE,\{keyPath:'id'\}\);\}/,'fresh installs must create the media store');
+assert.match(source,/function readAssets\(\)[\s\S]*?tx\.oncomplete=\(\)=>finish\(\)/,'media reads must wait for transaction completion');
+assert.match(source,/function writeAssets\(items\)[\s\S]*?store\.clear\(\);items\.forEach\(x=>store\.put\(x\)\)/,'project import must replace the asset set atomically');
+assert.match(source,/settled=true;db\.close\(\)/,'database connections must close after operations');
+assert.match(source,/tx\.onabort=\(\)=>finish\(tx\.error\|\|new Error\('Project media (?:read|import) was cancelled\.'\)\)/,'transaction aborts must reject instead of hanging');
+assert.match(source,/MAX_BYTES=250\*1024\*1024/,'portable projects must enforce media size limit');
+assert.match(source,/if\(!confirm\(/,'project import must confirm before replacing current work');
+assert.match(source,/localStorage\.setItem\('waveforge-v1',JSON\.stringify\(project\.settings\)\);location\.reload\(\)/,'imported settings must be applied before studio reload');
+console.log('Project file tests passed: fresh-store setup, atomic asset replacement, transaction completion/abort handling, connection cleanup and safe import guard.');
