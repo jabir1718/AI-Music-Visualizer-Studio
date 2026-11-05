@@ -3,7 +3,7 @@ const assert=require('assert');
 const listeners={};
 let intervalFn=null,stoppedTracks=0,downloaded=0;
 class FakeRecorder{
- static isTypeSupported(){return true;}
+ static isTypeSupported(mime){return mime.startsWith('video/webm');}
  constructor(stream,options){this.stream=stream;this.mimeType=options?.mimeType||'video/webm';this.state='inactive';FakeRecorder.latest=this;}
  start(){this.state='recording';this.ondataavailable&&this.ondataavailable({data:{size:4}});}
  stop(){if(this.state==='inactive')return;this.state='inactive';this.onstop&&this.onstop();}
