@@ -1,5 +1,21 @@
-(function(){
+(function(root){
 'use strict';
+function activatePanel(modal,body,host,panel){
+ if(!modal||!body||!host||!panel)return false;
+ modal.hidden=false;
+ if(body.classList)body.classList.add('wf-modal-open');
+ if(typeof host.replaceChildren==='function')host.replaceChildren();
+ else host.innerHTML='';
+ if(typeof host.append==='function')host.append(panel);
+ else if(typeof host.appendChild==='function')host.appendChild(panel);
+ panel.hidden=false;
+ return true;
+}
+function bindToolButton(button,handler){
+ if(!button||typeof button.addEventListener!=='function'||typeof handler!=='function')return false;
+ button.addEventListener('click',handler);
+ return true;
+}
 function init(){
  const editor=document.querySelector('.editor'),stageWrap=editor&&editor.querySelector('.stage-wrap');
  if(!editor||!stageWrap||document.getElementById('wfDashboard'))return;
@@ -87,21 +103,20 @@ function init(){
   const p=panelFor(id);if(!p)return;
   const b=document.createElement('button');b.type='button';b.className='wf-tool-card';b.dataset.tool=id;
   b.innerHTML='<span class="wf-tool-card-icon">'+icon+'</span><b>'+label+'</b><small>'+desc+'</small>';
-  b.addEventListener('click',()=>openTool(id,label,desc,p));grid.append(b);
+  bindToolButton(b,()=>openTool(id,label,desc,p));grid.append(b);
  });
  const available=Array.from(new Set(tools.map(t=>panelFor(t[0])).filter(Boolean)));
  panels.forEach(p=>{p.hidden=true;p.classList.add('wf-modal-panel');});
  if(exportPanel)exportPanel.hidden=true;
  function openTool(id,label,desc,p){
   if(!p)return;
-  modal.hidden=false;document.body.classList.add('wf-modal-open');
   modal.querySelector('#wfModalTitle').textContent=label;
   modal.querySelector('#wfModalPreviewTitle').textContent=label;
   modal.querySelector('#wfModalPreviewText').textContent=desc;
   const tabs=modal.querySelector('#wfModalTabs');tabs.replaceChildren();
   const related=tools.filter(t=>panelFor(t[0])===p);
   related.forEach(t=>{const tab=document.createElement('button');tab.type='button';tab.textContent=t[2];tab.className=t[0]===id?'active':'';tab.addEventListener('click',()=>{modal.querySelector('#wfModalTitle').textContent=t[2];modal.querySelector('#wfModalPreviewTitle').textContent=t[2];modal.querySelector('#wfModalPreviewText').textContent=t[3];tabs.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===tab));focusToolTarget(t[0],p);});tabs.append(tab);});
-  const host=modal.querySelector('#wfModalContent');host.replaceChildren();host.append(p);p.hidden=false;
+  const host=modal.querySelector('#wfModalContent');if(!activatePanel(modal,document.body,host,p))return;
   modal.querySelector('.wf-modal-sheet').scrollTop=0;
   requestAnimationFrame(()=>focusToolTarget(id,p));
  }
@@ -181,5 +196,6 @@ function init(){
  editor.classList.add('wf-reference-dashboard');
  document.body.classList.add('wf-dashboard-app');
 }
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
-})();
+if(typeof module!=='undefined'&&module.exports)module.exports={activatePanel,bindToolButton};
+if(root&&root.document){if(root.document.readyState==='loading')root.document.addEventListener('DOMContentLoaded',init,{once:true});else init();}
+})(typeof window!=='undefined'?window:globalThis);
