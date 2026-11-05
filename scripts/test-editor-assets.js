@@ -34,6 +34,8 @@ assert(/commons\.wikimedia\.org\/w\/api\.php/.test(images),'Wikimedia Commons se
 assert(/safeName\(item\.title,blob\.type\)/.test(images),'Imported image filename does not use MIME type');
 assert(/sourceUrl/.test(images),'Image source/licence page link missing');
 assert(/MAX_BYTES=250\*1024\*1024/.test(project),'Portable project media limit missing');
+assert(/r\.onupgradeneeded=\(\)=>\{const db=r\.result;if\(!db\.objectStoreNames\.contains\(STORE\)\)db\.createObjectStore\(STORE,\{keyPath:'id'\}\);\}/.test(project),'Portable project import must create the media object store on a fresh install');
+assert(/Project media database is missing its asset store/.test(project),'Portable project import must fail clearly if the media store is unavailable');
 assert(/filterPreset:window\.WaveForgeFilters/.test(app)&&/filterIntensity:window\.WaveForgeFilters/.test(app),'Filter settings are not saved');
 assert(/WaveForgeFilters\.set/.test(app)&&/WaveForgeFilters\.draw/.test(app),'Filters are not restored and applied');
 assert(/filter-studio\.js/.test(index),'Filter studio script is not loaded');
