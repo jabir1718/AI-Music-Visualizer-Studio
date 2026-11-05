@@ -202,6 +202,7 @@ function init(){
  editor.classList.add('wf-reference-dashboard');
  document.body.classList.add('wf-dashboard-app');
 }
-if(typeof module!=='undefined'&&module.exports)module.exports={activatePanel,bindToolButton};
+if(root){root.mountStudioShell=init;root.WaveForgeStudioShell={mount:init};}
+if(typeof module!=='undefined'&&module.exports)module.exports={activatePanel,bindToolButton,init};
 if(root&&root.document){if(root.document.readyState==='loading')root.document.addEventListener('DOMContentLoaded',init,{once:true});else init();}
 })(typeof window!=='undefined'?window:globalThis);
