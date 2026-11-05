@@ -215,7 +215,19 @@ function initMixerUI(){
   $('mainPitchValue').textContent=(semitones>0?'+':'')+semitones+' semitones';
   saveSettings();
  };
- document.querySelectorAll('.music-category').forEach(btn=>btn.onclick=()=>selectMusicCategory(btn.dataset.category));
+ document.querySelectorAll('.music-category').forEach((btn,index,buttons)=>{
+  btn.setAttribute('role','tab');btn.setAttribute('aria-controls','musicCategoryDetail');btn.setAttribute('aria-selected',String(btn.dataset.category==='Voice'));btn.tabIndex=btn.dataset.category==='Voice'?0:-1;
+  btn.onclick=()=>selectMusicCategory(btn.dataset.category);
+  btn.onkeydown=event=>{
+   let next=index;
+   if(event.key==='ArrowRight')next=(index+1)%buttons.length;
+   else if(event.key==='ArrowLeft')next=(index-1+buttons.length)%buttons.length;
+   else if(event.key==='Home')next=0;
+   else if(event.key==='End')next=buttons.length-1;
+   else return;
+   event.preventDefault();buttons[next].focus();selectMusicCategory(buttons[next].dataset.category);
+  };
+ });
  selectMusicCategory('Voice');
  $('tapTempoBtn').onclick=()=>{const clock=playing?'audio':'wall',now=clock==='audio'?audio.currentTime:performance.now()/1000;if(clock!==tapClock||tapTimes.length&&now-tapTimes[tapTimes.length-1]>2){tapTimes=[];tapClock=clock;}tapTimes.push(now);if(tapTimes.length>9)tapTimes.shift();$('tapTempoBtn').textContent='Tap tempo · '+tapTimes.length;if(tapTimes.length>=3){try{const result=WaveForgeBPM.fromTaps(tapTimes);manualBpm=result.bpm;tapBeatOffset=clock==='audio'?tapTimes[0]:null;lastGridBeat=-1;updateBeatGridInputs();$('bpmStatus').textContent='Tap tempo: '+result.bpm+' BPM · '+Math.round(result.confidence*100)+'% consistency'+(tapBeatOffset!==null?' · visualizer grid aligned':' · tap while playing to align the grid');saveSettings();}catch(err){$('bpmStatus').textContent=err.message;}}else $('bpmStatus').textContent='Tap '+(3-tapTimes.length)+' more times…';};
  $('clearTapTempoBtn').onclick=()=>{tapTimes=[];tapClock='';manualBpm=null;tapBeatOffset=null;beatSubdivision=1;lastGridBeat=-1;updateBeatGridInputs();$('tapTempoBtn').textContent='Tap tempo · 0';$('bpmStatus').textContent='Manual tempo cleared.';saveSettings();};
@@ -238,7 +250,7 @@ function selectMusicCategory(category){
   mixerListHost.parentNode.insertBefore(mainFxPanel,mixerListHost);
  }
  mixerCategory=category;
- document.querySelectorAll('.music-category').forEach(btn=>btn.classList.toggle('active',btn.dataset.category===category));
+ document.querySelectorAll('.music-category').forEach(btn=>{const selected=btn.dataset.category===category;btn.classList.toggle('active',selected);btn.setAttribute('aria-selected',String(selected));btn.tabIndex=selected?0:-1;});
  const detail=$('musicCategoryDetail'),role=$('mixerRole'),add=$('mixerAddBtn'),file=$('mixerFile');if(add)add.textContent='Add to track';
  const config={
   'Voice':{role:'Voice',title:'Main vocals',desc:'Import an isolated vocal stem to adjust its volume, pitch, speed and timing without changing the background track.',available:true},
