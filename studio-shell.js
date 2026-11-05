@@ -73,7 +73,7 @@ const bottom=document.createElement('nav');bottom.className='wf-bottom-dock';bot
 bottom.innerHTML='<button type="button" data-dock="project"><span>▰</span><b>Project</b></button><button type="button" data-dock="timeline"><span>▤</span><b>Timeline</b></button><button type="button" class="wf-dock-play" data-dock="play" aria-label="Play"><span>▶</span></button><button type="button" data-dock="preview"><span>◉</span><b>Preview</b></button><button type="button" data-dock="settings"><span>⚙</span><b>Settings</b></button>';
 const modal=document.createElement('div');modal.className='wf-tool-modal';modal.id='wfToolModal';modal.hidden=true;
 modal.innerHTML='<div class="wf-modal-backdrop" data-close="1"></div><section class="wf-modal-sheet" role="dialog" aria-modal="true" aria-labelledby="wfModalTitle"><header class="wf-modal-head"><div><span class="wf-kicker">WAVEFORGE STUDIO</span><h2 id="wfModalTitle">Toolbox</h2></div><button type="button" class="wf-modal-close" data-close="1" aria-label="Close">×</button></header><button type="button" class="wf-back-btn" id="wfBackBtn" hidden>‹ Back to boxes</button><div class="wf-modal-preview"><span class="wf-modal-orb">✦</span><div><small>INSIDE THIS BOX</small><b id="wfModalPreviewTitle">Choose a control</b><span id="wfModalPreviewText">Pick the sub-tool you need.</span></div></div><div class="wf-modal-content" id="wfModalContent"></div></section>';
-editor.insertBefore(dashboard,stageWrap);dashboard.append(hero,timeline,toolSection);editor.append(bottom,modal);
+editor.prepend(dashboard);dashboard.append(hero,timeline,toolSection);editor.append(bottom,modal);
 let exportPanel=null;
 if(inspector){exportPanel=document.createElement('section');exportPanel.id='wfExportPanel';exportPanel.className='panel';while(inspector.firstChild)exportPanel.append(inspector.firstChild);panels.push(exportPanel);panelMap.set('wfExportPanel',exportPanel);inspector.remove();}
 const audioPanel=panelMap.get('audioPanel');
@@ -100,5 +100,16 @@ const play=document.getElementById('playBtn');if(play)new MutationObserver(()=>{
 const duration=document.getElementById('trackMeta');if(duration)new MutationObserver(()=>{const m=duration.textContent.match(/(\d{1,2}:\d{2})/);if(m)timeline.querySelector('#wfDuration').textContent=m[1];}).observe(duration,{childList:true,characterData:true,subtree:true});
 editor.classList.add('wf-reference-dashboard');document.body.classList.add('wf-dashboard-app');
 }
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+function boot(){
+try{init();}
+catch(error){
+const bar=document.createElement('div');
+bar.id='wfShellError';
+bar.setAttribute('role','alert');
+bar.style.cssText='position:fixed;z-index:999999;left:10px;right:10px;bottom:10px;padding:12px 14px;background:#5b1020;color:#fff;border:1px solid #ff405f;border-radius:10px;font:12px/1.45 monospace;white-space:pre-wrap;box-shadow:0 8px 28px #0009';
+bar.textContent='Shell error: '+(error&&error.stack?error.stack:String(error));
+(document.body||document.documentElement).append(bar);
+}
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
