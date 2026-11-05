@@ -493,7 +493,7 @@ async function deleteMediaAsset(id){
  try{const db=await openMediaDB();if(!db)return;await new Promise((resolve,reject)=>{const tx=db.transaction('assets','readwrite');tx.objectStore('assets').delete(id);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});}catch(e){}
 }
 async function restoreSavedMedia(){
- const logo=await getMediaAsset('logo');if(logo&&logo.blob&&!logoImage){const file=new File([logo.blob],logo.name||'Restored logo.png',{type:logo.type||'image/png',lastModified:logo.lastModified||Date.now()});logoUrl=URL.createObjectURL(file);const image=new Image();image.onload=()=>{logoImage=image;};image.src=logoUrl;}
+ const logo=await getMediaAsset('logo');if(logo&&logo.blob&&!logoImage){const file=new File([logo.blob],logo.name||'Restored logo.png',{type:logo.type||'image/png',lastModified:logo.lastModified||Date.now()});logoUrl=URL.createObjectURL(file);const image=new Image();await new Promise((resolve,reject)=>{image.onload=()=>{logoImage=image;resolve();};image.onerror=()=>reject(new Error('Saved logo could not be decoded.'));image.src=logoUrl;}).catch(error=>setStatus('Logo restore failed: '+error.message));}
  const background=await getMediaAsset('background');if(background&&background.blob&&!mediaUrl){const file=new File([background.blob],background.name||'Restored background',{type:background.type||background.blob.type,lastModified:background.lastModified||Date.now()});try{await setBackgroundFile(file);}catch(error){setStatus('Background restore failed: '+error.message);}}
  const main=await getMediaAsset('main');
  if(main&&main.blob&&!audioFile){const file=new File([main.blob],main.name||'Restored track', {type:main.type||'audio/mpeg',lastModified:main.lastModified||Date.now()});loadAudio(file);}
@@ -740,6 +740,11 @@ async function doExport(){
  finally{$('exportBtn').disabled=false;$('exportBtnSide').disabled=false;}
 }
 $('exportBtn').onclick=doExport;$('exportBtnSide').onclick=doExport;
-loadSettings();audio.volume=.85;initObjectEditor();initTypographyStudio();initMixerUI();initHistoryUI();initMediaTools();initFilterStudio();initChromaKey();initAISegmentation();initSymbolLibrary();initThreeStudio();initArtworkLayers();initAutoVideoEditor();initOfflineEditAssistant();restoreSavedMedia();if(window.WaveForgeAutoVideo){try{const savedAuto=JSON.parse(localStorage.getItem('waveforge-v1')||'{}').autoVideo;window.WaveForgeAutoVideo.restore(savedAuto).then(count=>{if(count)setStatus('Restored '+count+' video source(s)');}).catch(()=>{});}catch(e){}}if(window.WaveForgeArtworkLayers)window.WaveForgeArtworkLayers.restore().then(count=>{if(count)setStatus('Restored '+count+' independent artwork layer(s)');}).catch(()=>{});decorateButtonIcons();startDraw();
+async function restoreAllSavedMedia(){
+ await restoreSavedMedia();
+ try{if(window.WaveForgeAutoVideo){const saved=JSON.parse(localStorage.getItem('waveforge-v1')||'{}').autoVideo;const count=await window.WaveForgeAutoVideo.restore(saved);if(count)setStatus('Restored '+count+' video source(s)');}}catch(error){setStatus('Auto Cut media restore failed: '+error.message);}
+ try{if(window.WaveForgeArtworkLayers){const count=await window.WaveForgeArtworkLayers.restore();if(count)setStatus('Restored '+count+' independent artwork layer(s)');}}catch(error){setStatus('Artwork layer restore failed: '+error.message);}
+}
+loadSettings();audio.volume=.85;initObjectEditor();initTypographyStudio();initMixerUI();initHistoryUI();initMediaTools();initFilterStudio();initChromaKey();initAISegmentation();initSymbolLibrary();initThreeStudio();initArtworkLayers();initAutoVideoEditor();initOfflineEditAssistant();restoreAllSavedMedia().catch(error=>setStatus('Project media restore failed: '+error.message));decorateButtonIcons();startDraw();
 window.addEventListener('beforeunload',()=>{if(history)history.flush();if(mediaUrl)URL.revokeObjectURL(mediaUrl);if(logoUrl)URL.revokeObjectURL(logoUrl);if(audio.src)URL.revokeObjectURL(audio.src);});
 })();
