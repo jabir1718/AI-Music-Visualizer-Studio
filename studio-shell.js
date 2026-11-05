@@ -11,7 +11,7 @@ function init(){
   menu.addEventListener('click',()=>{const collapsed=document.querySelector('.app-shell').classList.toggle('wf-sidebar-collapsed');menu.setAttribute('aria-expanded',String(!collapsed));});
   settings.addEventListener('click',()=>document.querySelector('.wf-bottom-dock [data-dock="settings"]')?.click());
  }
- const panels=Array.from(editor.querySelectorAll(':scope > .panel'));
+ const panels=Array.from(editor.children).filter(child=>child.classList&&child.classList.contains('panel'));
  const inspector=document.querySelector('.inspector');
  const panelMap=new Map(panels.map(p=>[p.id,p]));
  const dashboard=document.createElement('div');dashboard.id='wfDashboard';dashboard.className='wf-dashboard';
@@ -31,7 +31,7 @@ function init(){
  modal.innerHTML='<div class="wf-modal-backdrop" data-close="1"></div><section class="wf-modal-sheet" role="dialog" aria-modal="true" aria-labelledby="wfModalTitle"><header class="wf-modal-head"><div><span class="wf-kicker">WAVEFORGE STUDIO</span><h2 id="wfModalTitle">Tool</h2></div><button type="button" class="wf-modal-close" data-close="1" aria-label="Close">×</button></header><div class="wf-modal-preview"><span class="wf-modal-orb">✦</span><div><small>QUICK PREVIEW</small><b id="wfModalPreviewTitle">Selected tool</b><span id="wfModalPreviewText">Your controls are ready.</span></div></div><div class="wf-modal-tabs" id="wfModalTabs"></div><div class="wf-modal-content" id="wfModalContent"></div></section>';
  editor.insertBefore(dashboard,stageWrap);
  dashboard.append(hero,timeline,toolSection);
- const legacyHeading=editor.querySelector(':scope > .section-heading');if(legacyHeading)legacyHeading.remove();
+ const legacyHeading=Array.from(editor.children).find(child=>child.classList&&child.classList.contains('section-heading'));if(legacyHeading)legacyHeading.remove();
  const showcase=document.createElement('section');showcase.className='wf-showcase-strip';
  showcase.innerHTML='<button type="button" data-showcase="templates"><span>▣</span><b>Templates</b></button><button type="button" data-showcase="visualizers"><span>◎</span><b>Visualizer styles</b></button><button type="button" data-showcase="effects"><span>✦</span><b>Effects preview</b></button><button type="button" data-showcase="save"><span>⇩</span><b>Save project</b></button><button type="button" data-showcase="share"><span>↗</span><b>Share app</b></button><button type="button" data-showcase="reset"><span>⟲</span><b>Reset preview</b></button>';
  dashboard.append(showcase);
