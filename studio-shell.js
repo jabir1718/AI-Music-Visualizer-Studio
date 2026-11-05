@@ -31,6 +31,7 @@ function init(){
  modal.innerHTML='<div class="wf-modal-backdrop" data-close="1"></div><section class="wf-modal-sheet" role="dialog" aria-modal="true" aria-labelledby="wfModalTitle"><header class="wf-modal-head"><div><span class="wf-kicker">WAVEFORGE STUDIO</span><h2 id="wfModalTitle">Tool</h2></div><button type="button" class="wf-modal-close" data-close="1" aria-label="Close">×</button></header><div class="wf-modal-preview"><span class="wf-modal-orb">✦</span><div><small>QUICK PREVIEW</small><b id="wfModalPreviewTitle">Selected tool</b><span id="wfModalPreviewText">Your controls are ready.</span></div></div><div class="wf-modal-tabs" id="wfModalTabs"></div><div class="wf-modal-content" id="wfModalContent"></div></section>';
  editor.insertBefore(dashboard,stageWrap);
  dashboard.append(hero,timeline,toolSection);
+ const fullTimeline=editor.querySelector('#visualTimelineEditor');if(fullTimeline)timeline.append(fullTimeline);
  editor.append(bottom,modal);
  const audioPanel=panelMap.get('audioPanel');
  if(audioPanel){
