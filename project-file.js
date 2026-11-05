@@ -2,7 +2,7 @@
 'use strict';
 const DB_NAME='waveforge-media-v1',STORE='assets',MAX_BYTES=250*1024*1024;
 const $=id=>document.getElementById(id);
-function dbOpen(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB_NAME,1);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
+function dbOpen(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB_NAME,1);r.onupgradeneeded=()=>{const db=r.result;if(!db.objectStoreNames.contains(STORE))db.createObjectStore(STORE,{keyPath:'id'});};r.onsuccess=()=>{const db=r.result;if(!db.objectStoreNames.contains(STORE)){db.close();reject(new Error('Project media database is missing its asset store.'));return;}resolve(db);};r.onerror=()=>reject(r.error||new Error('Could not open project media database.'));r.onblocked=()=>reject(new Error('Project media database is busy in another tab. Close other WaveForge tabs and try again.'));});}
 function readAssets(){return dbOpen().then(db=>new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readonly'),r=tx.objectStore(STORE).getAll();r.onsuccess=()=>resolve(r.result||[]);r.onerror=()=>reject(r.error);}));}
 function writeAssets(items){return dbOpen().then(db=>new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite'),store=tx.objectStore(STORE);store.clear();items.forEach(x=>store.put(x));tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error('Project media import was cancelled'));}));}
 function toBase64(blob){return blob.arrayBuffer().then(buffer=>{const bytes=new Uint8Array(buffer);let binary='';const step=0x8000;for(let i=0;i<bytes.length;i+=step)binary+=String.fromCharCode(...bytes.subarray(i,Math.min(i+step,bytes.length)));return btoa(binary);});}
