@@ -15,7 +15,7 @@ function decorateButtonIcons(root=document){root.querySelectorAll('button').forE
 const audio=$('audio'),canvas=$('visualizer'),ctx=canvas.getContext('2d');
 let history=null,historyRestoring=false,timelineView=null;
 let engine=null,raf=0,playing=false,style='bars',logoUrl=null,logoImage=null,mediaUrl=null,mediaKind='',audioFile=null,savedTrackName='',lyrics=[],template='trend',beatPulse=0,dragTarget=null,dragOffset={x:0,y:0},manualBpm=null,beatSubdivision=1,tapTimes=[],tapClock='',tapBeatOffset=null,lastGridBeat=-1;
-const palette={aurora:['#9b8cff','#65e5c0','#e8f5ff'],sunset:['#ff8c75','#ffca7a','#f8a8cf'],ice:['#62d8ff','#9fbaff','#e4f7ff'],mono:['#fff','#b9c4d5','#eef3fb']};
+const palette={aurora:['#71f7d2','#7d8cff','#efffff'],cyber:['#00f5ff','#a855f7','#ff3bd4'],toxic:['#b7ff35','#28f59a','#efff9c'],purple:['#c084fc','#7c3aed','#f0abfc'],synthwave:['#ff4fd8','#8b5cf6','#38bdf8'],ice:['#55d9ff','#8bbcff','#e8fbff'],crimson:['#ff315a','#ff7a59','#ffd0a8'],gold:['#ffd166','#ff9f1c','#fff0a6'],ocean:['#00c2ff','#087ea4','#9cf5ff'],rose:['#ff5fa2','#ff9ecb','#ffe0ef'],emerald:['#00e6a8','#00a878','#b5ffe8'],mono:['#ffffff','#aeb8cc','#e8edf7']};
 const positions={title:{x:.5,y:.23},subtitle:{x:.5,y:.29},lyric:{x:.5,y:.80},logo:{x:.82,y:.08}};
 const objectDefaults={title:{visible:true,scale:1,rotation:0,opacity:1,color:''},subtitle:{visible:true,scale:1,rotation:0,opacity:1,color:''},lyric:{visible:true,scale:1,rotation:0,opacity:1,color:''},logo:{visible:true,scale:1,rotation:0,opacity:1,color:''}};
 let objectSettings=JSON.parse(JSON.stringify(objectDefaults)),selectedObject='title',wordSync=null,selectionBox=null,transformGesture=null;
