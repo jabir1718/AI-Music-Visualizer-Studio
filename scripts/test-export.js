@@ -21,6 +21,7 @@ global.MediaRecorder=FakeRecorder;
 global.document={createElement:()=>({click(){downloaded++;}})};
 global.URL={createObjectURL:()=> 'blob:export',revokeObjectURL(){}};
 global.setInterval=fn=>{intervalFn=fn;return 1;};
+global.setTimeout=fn=>{fn();return 1;};
 global.clearInterval=()=>{intervalFn=null;};
 const canvas={captureStream:()=>({getTracks:()=>[{stop(){stoppedTracks++;}}],getAudioTracks:()=>[],addTrack(){}})};
 const engineStream={getAudioTracks:()=>[]};
