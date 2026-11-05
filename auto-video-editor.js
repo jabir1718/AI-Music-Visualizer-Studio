@@ -51,17 +51,21 @@
   if(root.document)root.document.dispatchEvent(new root.CustomEvent('waveforge:video-timeline-change',{detail:{assets:Array.from(assets.values()).map(a=>({id:a.id,name:a.name,kind:a.kind,previewUrl:a.kind==='image'?a.media.src:''})),segments:segments.map(s=>({...s}))}}));
  }
  function createVideo(file){
-  const video=document.createElement('video');video.muted=true;video.playsInline=true;video.preload='metadata';video.setAttribute('playsinline','');video.src=URL.createObjectURL(file);
-  return new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('Video metadata took too long. Try a shorter MP4/H.264 video.')),15000);
-   video.onloadedmetadata=()=>{clearTimeout(timer);if(!Number.isFinite(video.duration)||video.duration<=0||video.duration>MAX_DURATION){URL.revokeObjectURL(video.src);reject(new Error('Each video must be 1–180 seconds long.'));return;}resolve(video);};
-   video.onerror=()=>{clearTimeout(timer);URL.revokeObjectURL(video.src);reject(new Error('This video codec is not supported. Try MP4/H.264.'));};video.load();
+  const video=document.createElement('video');video.muted=true;video.playsInline=true;video.preload='metadata';video.setAttribute('playsinline','');
+  const url=URL.createObjectURL(file);
+  return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{URL.revokeObjectURL(url);reject(new Error('Video metadata took too long. Try a shorter MP4/H.264 video.'));},15000);
+   video.onloadedmetadata=()=>{clearTimeout(timer);if(!Number.isFinite(video.duration)||video.duration<=0||video.duration>MAX_DURATION){URL.revokeObjectURL(url);reject(new Error('Each video must be 1–180 seconds long.'));return;}resolve(video);};
+   video.onerror=()=>{clearTimeout(timer);URL.revokeObjectURL(url);reject(new Error('This video codec is not supported. Try MP4/H.264.'));};
+   video.src=url;video.load();
   });
  }
  function createImage(file){
-  const img=document.createElement('img');img.decoding='async';img.src=URL.createObjectURL(file);
-  return new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('Photo took too long to load. Try a smaller JPG or PNG.')),15000);
-   img.onload=()=>{clearTimeout(timer);if(!img.naturalWidth||!img.naturalHeight){URL.revokeObjectURL(img.src);reject(new Error('This photo could not be decoded.'));return;}resolve(img);};
-   img.onerror=()=>{clearTimeout(timer);URL.revokeObjectURL(img.src);reject(new Error('This photo format is not supported. Try JPG, PNG or WebP.'));};
+  const img=document.createElement('img');img.decoding='async';
+  const url=URL.createObjectURL(file);
+  return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{URL.revokeObjectURL(url);reject(new Error('Photo took too long to load. Try a smaller JPG or PNG.'));},15000);
+   img.onload=()=>{clearTimeout(timer);if(!img.naturalWidth||!img.naturalHeight){URL.revokeObjectURL(url);reject(new Error('This photo could not be decoded.'));return;}resolve(img);};
+   img.onerror=()=>{clearTimeout(timer);URL.revokeObjectURL(url);reject(new Error('This photo format is not supported. Try JPG, PNG or WebP.'));};
+   img.src=url;
   });
  }
  async function addFiles(fileList){
