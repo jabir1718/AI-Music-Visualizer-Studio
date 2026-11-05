@@ -494,7 +494,7 @@ async function deleteMediaAsset(id){
 }
 async function restoreSavedMedia(){
  const logo=await getMediaAsset('logo');if(logo&&logo.blob&&!logoImage){const file=new File([logo.blob],logo.name||'Restored logo.png',{type:logo.type||'image/png',lastModified:logo.lastModified||Date.now()});logoUrl=URL.createObjectURL(file);const image=new Image();image.onload=()=>{logoImage=image;};image.src=logoUrl;}
- const background=await getMediaAsset('background');if(background&&background.blob&&!mediaUrl){const file=new File([background.blob],background.name||'Restored background',{type:background.type||background.blob.type,lastModified:background.lastModified||Date.now()});const input=$('mediaInput'),transfer=new DataTransfer();transfer.items.add(file);input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));}
+ const background=await getMediaAsset('background');if(background&&background.blob&&!mediaUrl){const file=new File([background.blob],background.name||'Restored background',{type:background.type||background.blob.type,lastModified:background.lastModified||Date.now()});try{await setBackgroundFile(file);}catch(error){setStatus('Background restore failed: '+error.message);}}
  const main=await getMediaAsset('main');
  if(main&&main.blob&&!audioFile){const file=new File([main.blob],main.name||'Restored track', {type:main.type||'audio/mpeg',lastModified:main.lastModified||Date.now()});loadAudio(file);}
  const layers=Array.isArray(savedProjectData.layers)?savedProjectData.layers:[];
