@@ -3,7 +3,7 @@
  function parsePrompt(prompt,current={}){
   const text=String(prompt||'').trim(),lower=text.toLowerCase(),actions=[],used=new Set();
   const add=(id,label,value)=>{if(!used.has(id)){used.add(id);actions.push({id,label,value});}};
-  const nightDrive=/(?:night[\\s-]*drive|raat\\s*(?:ka|ki)?\\s*safar)/i.test(lower);
+  const nightDrive=/(?:night[\s-]*drive|raat\s*(?:ka|ki)?\s*safar)/i.test(lower);
   if(nightDrive){add('autoVideoStyle','Video editing template','cinematic');add('visualColor','Color theme','cyberpunk');}
   const styleRules=[
    [/(?:cinematic|cinema|film look|filmi style)/,'cinematic'],
@@ -18,7 +18,7 @@
    [/(?:beat snap|social|reels|tiktok|fast social)/,'social']
   ];
   for(const [pattern,value] of styleRules)if(pattern.test(lower)){add('autoVideoStyle','Video editing template',value);break;}
-  const transitionMatch=lower.match(/(?:\\btransition\\s*(?:(?:ko|as|to|:|lagao)?\\s*)(cut|fade|flash|wipe|zoom)\\b|\\b(cut|fade|flash|wipe|zoom)\\s*(?:transition|effect|lagao|laga\\s*do|apply(?:\\s+karo)?|rakho|kar\\s*do)?\\b)/i);if(transitionMatch)add('autoVideoTransition','Selected clip transition',transitionMatch[1]||transitionMatch[2]);
+  const transitionMatch=/(?:\btransition\s*(?:(?:ko|as|to|:|lagao)?\s*)(cut|fade|flash|wipe|zoom)\b|\b(cut|fade|flash|wipe|zoom)\s*(?:transition|effect|lagao|laga\s*do|apply(?:\s+karo)?|rakho|kar\s*do)?\b)/i.exec(lower);if(transitionMatch)add('autoVideoTransition','Selected clip transition',transitionMatch[1]||transitionMatch[2]);
   const ramp=lower.match(/(?:speed\s*)?ramp\s*(?:to|:)?\s*(0?\.\d+|[12](?:\.\d+)?)\s*x?\s*(?:to|se|->)\s*(0?\.\d+|[12](?:\.\d+)?)\s*x?/i);if(ramp){add('autoVideoSpeedStart','Selected clip start speed',Math.max(.5,Math.min(2,Number(ramp[1]))));add('autoVideoSpeedEnd','Selected clip end speed',Math.max(.5,Math.min(2,Number(ramp[2]))));}else{const startSpeed=lower.match(/(?:start|shuru)\s*speed\s*(?:to|ko)?\s*(0?\.\d+|[12](?:\.\d+)?)\s*x?/i),endSpeed=lower.match(/(?:end|akhir)\s*speed\s*(?:to|ko)?\s*(0?\.\d+|[12](?:\.\d+)?)\s*x?/i);if(startSpeed)add('autoVideoSpeedStart','Selected clip start speed',Math.max(.5,Math.min(2,Number(startSpeed[1]))));if(endSpeed)add('autoVideoSpeedEnd','Selected clip end speed',Math.max(.5,Math.min(2,Number(endSpeed[1]))));}
   if(/(?:more cuts|cut faster|faster cuts|zyada cuts|tez cuts|cuts? tez|cuts? fast|speed barhao)/i.test(lower))add('autoVideoIntensity','Cut intensity',Math.min(5,(Number(current.autoVideoIntensity)||3)+1));
   else if(/(?:fewer cuts|cut slower|slower cuts|kam cuts|slow cuts|cuts? ahista|cuts? dheema|speed kam)/i.test(lower))add('autoVideoIntensity','Cut intensity',Math.max(1,(Number(current.autoVideoIntensity)||3)-1));
