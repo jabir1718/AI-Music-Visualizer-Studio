@@ -1,0 +1,11 @@
+'use strict';
+const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
+const source = fs.readFileSync(path.join(__dirname, '..', 'studio-shell.js'), 'utf8');
+assert(!source.includes(':scope'), 'Studio shell must avoid :scope selectors for Android WebView compatibility');
+assert(source.includes("Array.from(editor.children).filter(child=>child.classList&&child.classList.contains('panel'))"), 'Studio panels must be collected from direct editor children');
+assert(source.includes("Array.from(editor.children).find(child=>child.classList&&child.classList.contains('section-heading'))"), 'Legacy heading must be found among direct editor children');
+assert(source.includes("editor.classList.add('wf-reference-dashboard')"), 'Dashboard mount must activate the reference dashboard layout');
+assert(source.includes("document.body.classList.add('wf-dashboard-app')"), 'Dashboard mount must activate the dashboard theme');
+console.log('Studio shell Android WebView compatibility tests passed.');
