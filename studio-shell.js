@@ -11,7 +11,7 @@ function init(){
   menu.addEventListener('click',()=>{const collapsed=document.querySelector('.app-shell').classList.toggle('wf-sidebar-collapsed');menu.setAttribute('aria-expanded',String(!collapsed));});
   settings.addEventListener('click',()=>document.querySelector('.wf-bottom-dock [data-dock="settings"]')?.click());
  }
- const panels=Array.from(editor.querySelectorAll(':scope > .panel'));
+ const panels=Array.from(editor.children).filter(node=>node.classList&&node.classList.contains('panel'));
  const inspector=document.querySelector('.inspector');
  const panelMap=new Map(panels.map(p=>[p.id,p]));
  const dashboard=document.createElement('div');dashboard.id='wfDashboard';dashboard.className='wf-dashboard';
