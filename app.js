@@ -12,7 +12,10 @@ function decorateActionButton(btn){
 }
 function decorateButtonIcons(root=document){root.querySelectorAll('button').forEach(decorateActionButton);}
 
-const audio=$('audio'),canvas=$('visualizer'),ctx=canvas.getContext('2d');
+const audio=$('audio'),canvas=$('visualizer');
+if(!audio||!canvas){console.error('[WaveForge] App startup aborted: required audio or visualizer canvas element is missing.');return;}
+const ctx=canvas.getContext('2d');
+if(!ctx){console.error('[WaveForge] App startup aborted: 2D canvas context is unavailable.');return;}
 let history=null,historyRestoring=false,timelineView=null;
 let engine=null,raf=0,playing=false,style='bars',logoUrl=null,logoImage=null,mediaUrl=null,mediaKind='',audioFile=null,savedTrackName='',lyrics=[],template='trend',beatPulse=0,dragTarget=null,dragOffset={x:0,y:0},manualBpm=null,beatSubdivision=1,tapTimes=[],tapClock='',tapBeatOffset=null,lastGridBeat=-1;
 const palette={aurora:['#a78bfa','#34d399','#e0f2fe'],sunset:['#fb7185','#fbbf24','#f9a8d4'],ice:['#38bdf8','#818cf8','#e0f2fe'],mono:['#ffffff','#a1a1aa','#e4e4e7'],cyberpunk:['#f0abfc','#22d3ee','#a3e635'],emerald:['#34d399','#a3e635','#d1fae5'],ruby:['#fb7185','#f43f5e','#fecdd3'],golden:['#fbbf24','#f97316','#fef3c7'],ocean:['#06b6d4','#2563eb','#bae6fd'],lavender:['#c4b5fd','#e879f9','#f5d0fe'],vaporwave:['#f472b6','#818cf8','#67e8f9'],fire:['#f97316','#ef4444','#fde047']};
