@@ -25,7 +25,7 @@ function mount(host,role,onLayer){
  panel.innerHTML='<div class="eyebrow">RECORD A NEW TRACK</div><h3>Record your own '+String(role||'voice')+' take</h3><p>Use the microphone to create a separate audio layer. Use headphones to keep the playing song out of the microphone. This does not generate an AI voice or change your original background music.</p><div class="voice-recorder-actions"><button type="button" class="btn small primary" id="wfRecordStart">● Start recording</button><button type="button" class="btn small" id="wfRecordStop" disabled>Stop</button><button type="button" class="btn small" id="wfRecordDiscard" disabled>Discard take</button></div><p class="voice-recorder-status hint" id="wfRecordStatus" aria-live="polite">Microphone permission is required. Maximum recording: 3 minutes / 30 MB.</p><audio id="wfRecordPreview" controls hidden></audio><button type="button" class="btn small" id="wfRecordAdd" disabled>Add recording as a separate layer</button><small class="voice-recorder-note">Recording stays in this project until you add it as a layer. If microphone access is denied or unsupported, use Import audio instead.</small>';
  host.appendChild(panel);
  const $=id=>panel.querySelector('#'+id);
- let stream=null,recorder=null,chunks=[],file=null,previewUrl=null,startedAt=0,elapsedTimer=null,disposed=false,totalBytes=0;
+ let stream=null,recorder=null,chunks=[],file=null,previewUrl=null,startedAt=0,elapsedTimer=null,disposed=false,totalBytes=0,recordingFailed=false;
  function report(message){if(!disposed)$('wfRecordStatus').textContent=message;}
  function stopTracks(){if(stream){stream.getTracks().forEach(track=>{try{track.stop();}catch(e){}});stream=null;}}
  function releasePreview(){if(previewUrl){root.URL.revokeObjectURL(previewUrl);previewUrl=null;}$('wfRecordPreview').removeAttribute('src');$('wfRecordPreview').hidden=true;}
@@ -36,6 +36,7 @@ function mount(host,role,onLayer){
  function finishRecording(){
   clearTimer();stopTracks();$('wfRecordStart').disabled=false;$('wfRecordStop').disabled=true;
   if(disposed)return;
+  if(recordingFailed){report('The microphone recorder reported an error. This take was discarded; please try again or import an audio file.');resetTake();recordingFailed=false;return;}
   if(!chunks.length){report('No audio data was captured. Check microphone permission and try again.');resetTake();return;}
   const type=(recorder&&recorder.mimeType)||chunks.find(x=>x.type)?.type||'audio/webm';
   const blob=new Blob(chunks,{type});
@@ -56,13 +57,13 @@ function mount(host,role,onLayer){
    if(disposed){stopTracks();return;}
    const mimeType=chooseMimeType();
    recorder=mimeType?new root.MediaRecorder(stream,{mimeType}):new root.MediaRecorder(stream);
-   chunks=[];totalBytes=0;startedAt=Date.now();
+   chunks=[];totalBytes=0;recordingFailed=false;startedAt=Date.now();
    recorder.ondataavailable=event=>{
     if(!event.data||!event.data.size)return;
     totalBytes+=event.data.size;chunks.push(event.data);
     if(totalBytes>MAX_BYTES){report('Recording reached the 30 MB safety limit. Finishing this take…');if(recorder&&recorder.state==='recording')recorder.stop();}
    };
-   recorder.onerror=event=>{report('Recording error: '+(event.error&&event.error.message||'microphone capture failed'));if(recorder&&recorder.state==='recording')recorder.stop();};
+   recorder.onerror=event=>{recordingFailed=true;report('Recording error: '+(event.error&&event.error.message||'microphone capture failed'));if(recorder&&recorder.state==='recording')recorder.stop();};
    recorder.onstop=finishRecording;
    recorder.start(500);$('wfRecordStop').disabled=false;$('wfRecordDiscard').disabled=false;
    report('Recording '+String(role||'voice').toLowerCase()+'… 00:00 / 03:00');
@@ -85,7 +86,9 @@ function mount(host,role,onLayer){
  };
  $('wfRecordAdd').onclick=()=>{
   if(!file||typeof onLayer!=='function')return;
-  const chosen=file;onLayer(chosen);report('Recording added as a separate '+String(role||'voice').toLowerCase()+' layer.');$('wfRecordAdd').disabled=true;
+  const chosen=file;
+  try{onLayer(chosen);report('Recording added as a separate '+String(role||'voice').toLowerCase()+' layer.');$('wfRecordAdd').disabled=true;}
+  catch(error){report('Could not add this recording: '+(error&&error.message||'mixer rejected the audio file')+'. The take is still available to retry.');}
  };
  const api={dispose(){
   disposed=true;root.removeEventListener('beforeunload',api.dispose);clearTimer();
