@@ -76,6 +76,8 @@ jobs:
 
       - name: Prepare web assets
         run: npm run build:web
+      - name: Verify dashboard assets in Android web bundle
+        run: test -f www/dashboard.css && test -f www/studio-shell.js && grep -q 'dashboard.css' www/index.html && grep -q 'wfDashboard' www/studio-shell.js
 
       - name: Generate Android project
         run: npx cap add android
