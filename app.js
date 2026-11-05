@@ -16,6 +16,8 @@ const audio=$('audio'),canvas=$('visualizer'),ctx=canvas.getContext('2d');
 let history=null,historyRestoring=false,timelineView=null;
 let engine=null,raf=0,playing=false,style='bars',logoUrl=null,logoImage=null,mediaUrl=null,mediaKind='',audioFile=null,savedTrackName='',lyrics=[],template='trend',beatPulse=0,dragTarget=null,dragOffset={x:0,y:0},manualBpm=null,beatSubdivision=1,tapTimes=[],tapClock='',tapBeatOffset=null,lastGridBeat=-1;
 const palette={aurora:['#a78bfa','#34d399','#e0f2fe'],sunset:['#fb7185','#fbbf24','#f9a8d4'],ice:['#38bdf8','#818cf8','#e0f2fe'],mono:['#ffffff','#a1a1aa','#e4e4e7'],cyberpunk:['#f0abfc','#22d3ee','#a3e635'],emerald:['#34d399','#a3e635','#d1fae5'],ruby:['#fb7185','#f43f5e','#fecdd3'],golden:['#fbbf24','#f97316','#fef3c7'],ocean:['#06b6d4','#2563eb','#bae6fd'],lavender:['#c4b5fd','#e879f9','#f5d0fe'],vaporwave:['#f472b6','#818cf8','#67e8f9'],fire:['#f97316','#ef4444','#fde047']};
+let activePalette=palette.aurora;
+function applyVisualizerTheme(){const key=$('visualColor').value;activePalette=palette[key]||palette.aurora;canvas.dataset.visualTheme=key in palette?key:'aurora';}
 const positions={title:{x:.5,y:.23},subtitle:{x:.5,y:.29},lyric:{x:.5,y:.80},logo:{x:.82,y:.08}};
 const objectDefaults={title:{visible:true,scale:1,rotation:0,opacity:1,color:''},subtitle:{visible:true,scale:1,rotation:0,opacity:1,color:''},lyric:{visible:true,scale:1,rotation:0,opacity:1,color:''},logo:{visible:true,scale:1,rotation:0,opacity:1,color:''}};
 let objectSettings=JSON.parse(JSON.stringify(objectDefaults)),selectedObject='title',wordSync=null,selectionBox=null,transformGesture=null;
@@ -70,7 +72,7 @@ function draw(){
  if(window.WaveForgeAutoVideo){const effect=window.WaveForgeAutoVideo.getVisualEffect(audio.currentTime||0);if(effect.type==='fade'&&effect.opacity>0){ctx.fillStyle='rgba(0,0,0,'+effect.opacity+')';ctx.fillRect(0,0,w,h);}else if(effect.type==='flash'&&effect.opacity>0){ctx.fillStyle='rgba(255,255,255,'+effect.opacity+')';ctx.fillRect(0,0,w,h);}else if(effect.type==='wipe'&&effect.progress<1){ctx.fillStyle='#05070d';ctx.fillRect(0,0,w*(1-effect.progress),h);}}
  if(mediaMotion.flash>0){ctx.fillStyle='rgba(255,255,255,'+mediaMotion.flash+')';ctx.fillRect(0,0,w,h);}
  const shade=ctx.createLinearGradient(0,0,0,h);shade.addColorStop(0,'#080d2420');shade.addColorStop(1,'#080d24bb');ctx.fillStyle=shade;ctx.fillRect(0,0,w,h);
- const colors=palette[$('visualColor').value]||palette.aurora;
+ const colors=activePalette;
  const data=engine?engine.getFrequency():new Uint8Array(128),wave=engine?engine.getWaveform():new Uint8Array(128).fill(128);
  if(engine&&playing){const beat=engine.detectBeat(Number($('sensitivity').value));if(beat.hit)beatPulse=1;$('beatStatus').textContent=beat.hit?'Beat detected · audio energy pulse':'Listening for beat energy…';}if(playing&&manualBpm&&tapBeatOffset!==null){const gridBeat=WaveForgeBPM.gridIndexAt(audio.currentTime,manualBpm,tapBeatOffset,beatSubdivision);if(gridBeat<0)lastGridBeat=-1;else{if(gridBeat<lastGridBeat)lastGridBeat=gridBeat-1;if(gridBeat>lastGridBeat){beatPulse=1;lastGridBeat=gridBeat;}}}
  beatPulse*=.92;const intensity=Number($('intensity').value)/100,base=Math.min(w,h)*.16;
@@ -647,7 +649,8 @@ $('seekBar').oninput=e=>{if(audio.duration)audio.currentTime=Number(e.target.val
 $('volume').oninput=e=>{if(engine)engine.setVolume(Number(e.target.value));else audio.volume=Number(e.target.value);};
 $('fadeIn').oninput=e=>$('fadeInValue').textContent=e.target.value+'s';$('fadeOut').oninput=e=>$('fadeOutValue').textContent=e.target.value+'s';
 document.querySelectorAll('.style-card').forEach(b=>b.onclick=()=>{style=b.dataset.style;document.querySelectorAll('.style-card').forEach(x=>x.classList.toggle('selected',x===b));saveSettings();});
-['titleInput','subtitleInput','textColor','fontStyle','visualColor','intensity','sensitivity'].forEach(id=>$(id).addEventListener('input',()=>{updateText();saveSettings();}));
+['titleInput','subtitleInput','textColor','fontStyle','visualColor','intensity','sensitivity'].forEach(id=>$(id).addEventListener('input',()=>{updateText();if(id==='visualColor')applyVisualizerTheme();saveSettings();}));
+$('visualColor').addEventListener('change',applyVisualizerTheme);
 $('captionInput').addEventListener('input',manualLyrics);
 $('wordSyncMark').onclick=markSyncWord;$('wordSyncUndo').onclick=undoSyncWord;$('wordSyncFinish').onclick=finishWordSync;$('wordSyncCancel').onclick=cancelWordSync;
 document.querySelectorAll('.template-card').forEach(b=>b.onclick=()=>{selectTemplate(b.dataset.template);saveSettings();});
@@ -745,6 +748,6 @@ async function restoreAllSavedMedia(){
  try{if(window.WaveForgeAutoVideo){const saved=JSON.parse(localStorage.getItem('waveforge-v1')||'{}').autoVideo;const count=await window.WaveForgeAutoVideo.restore(saved);if(count)setStatus('Restored '+count+' video source(s)');}}catch(error){setStatus('Auto Cut media restore failed: '+error.message);}
  try{if(window.WaveForgeArtworkLayers){const count=await window.WaveForgeArtworkLayers.restore();if(count)setStatus('Restored '+count+' independent artwork layer(s)');}}catch(error){setStatus('Artwork layer restore failed: '+error.message);}
 }
-loadSettings();audio.volume=.85;initObjectEditor();initTypographyStudio();initMixerUI();initHistoryUI();initMediaTools();initFilterStudio();initChromaKey();initAISegmentation();initSymbolLibrary();initThreeStudio();initArtworkLayers();initAutoVideoEditor();initOfflineEditAssistant();restoreAllSavedMedia().catch(error=>setStatus('Project media restore failed: '+error.message));decorateButtonIcons();startDraw();
+loadSettings();audio.volume=.85;initObjectEditor();initTypographyStudio();initMixerUI();initHistoryUI();initMediaTools();initFilterStudio();initChromaKey();initAISegmentation();initSymbolLibrary();initThreeStudio();initArtworkLayers();initAutoVideoEditor();initOfflineEditAssistant();restoreAllSavedMedia().catch(error=>setStatus('Project media restore failed: '+error.message));decorateButtonIcons();applyVisualizerTheme();startDraw();
 window.addEventListener('beforeunload',()=>{if(history)history.flush();if(mediaUrl)URL.revokeObjectURL(mediaUrl);if(logoUrl)URL.revokeObjectURL(logoUrl);if(audio.src)URL.revokeObjectURL(audio.src);});
 })();
